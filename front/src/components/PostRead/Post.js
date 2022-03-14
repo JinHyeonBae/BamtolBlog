@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Contents from './Contents';
-import { dummyData } from './dummydata';
+import { dummyDataForContents } from './dummydata';
 
 const Post = () => {
-  const [PostData, ] = useState(dummyData);
+  const [PostData, ] = useState(dummyDataForContents);
 
   return (
     <div className='Contents'>

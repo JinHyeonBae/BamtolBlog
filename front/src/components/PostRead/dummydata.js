@@ -1,6 +1,6 @@
 import shortid from 'shortid';
 
-export const dummyData = {
+export const dummyDataForContents = {
   postId: shortid.generate(),
   title: "자습서: React 시작하기",
   subtitle: "이 자습서는 React에 대한 어떤 지식도 가정하지 않습니다.",
@@ -135,3 +135,43 @@ export const dummyData = {
     }
   ]
 }
+
+export const dummyDataForTOC = [
+  {
+    id: shortid.generate(),
+    text: "자습서를 시작하기 전에",
+    children: [
+      {
+        id: shortid.generate(),
+        text: "무엇을 만들게 될까요?"
+      },
+      {
+        id: shortid.generate(),
+        text: "필요한 선수 지식"
+      }
+    ]
+  },
+  {
+    id: shortid.generate(),
+    text: "자습서를 위한 설정",
+    children: [
+      {
+        id: shortid.generate(),
+        text: "선택 1: 브라우저에 코드 작성하기"
+      },
+      {
+        id: shortid.generate(),
+        text: "선택 2: 자신의 컴퓨터에서 코드 작성하기"
+      },
+      {
+        id: shortid.generate(),
+        text: "도움이 필요할 때!"
+      }
+    ]
+  },
+  {
+    id: shortid.generate(),
+    text: "개요",
+    children: []
+  }
+];
