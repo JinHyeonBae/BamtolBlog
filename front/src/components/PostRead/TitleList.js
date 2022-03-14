@@ -1,12 +1,12 @@
 import React from 'react';
 import { HashLink } from 'react-router-hash-link';
 
-const TitleList = ({title, hash}) => {
-  console.log(title, decodeURIComponent(hash), decodeURIComponent(hash)==title);
+const TitleList = ({title, hash, activeId}) => {
+  const active = (decodeURIComponent(hash) === title || activeId === title);
   return (
     <HashLink smooth to={`/post#${title}`}>
-      {decodeURIComponent(hash)===title && <span className='bookmark'></span>}
-      <h5>{title}</h5>
+      {active && <span className='bookmark'></span>}
+      <p className={active ? "active" : ""}>{title}</p>
     </HashLink>
   )
 }
