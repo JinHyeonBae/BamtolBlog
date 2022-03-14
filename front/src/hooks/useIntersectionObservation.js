@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import { changeActiveIdAction } from '../_actions';
 
-const useIntersectionObservation = (setActiveId) => {
+const useIntersectionObservation = () => {
+  const dispatch = useDispatch();
   const contentRef = useRef({});
 
   useEffect(() => {
@@ -12,7 +15,7 @@ const useIntersectionObservation = (setActiveId) => {
       const visibleContent = Object.values(contentRef.current).filter(
         (content) => content.isIntersecting
       );
-      setActiveId(visibleContent[0].target.id);
+      dispatch(changeActiveIdAction(visibleContent[0].target.id));
     };
     const observer = new IntersectionObserver(callback, option);
 
@@ -21,7 +24,7 @@ const useIntersectionObservation = (setActiveId) => {
     contents.forEach((content) => observer.observe(content));
 
     return () => observer.disconnect();
-  }, [setActiveId]);
+  }, []);
 };
 
 export default useIntersectionObservation;

@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
 import TitleList from './TitleList';
 import useIntersectionObservation from './useIntersectionObservation';
 
@@ -44,11 +43,7 @@ const dummyData = [
 ];
 
 const IndexChart = () => {
-  const location = useLocation();
-  const hash = location.hash.slice(1);
-
-  const [activeId, setActiveId] = useState("");
-  useIntersectionObservation(setActiveId);
+  useIntersectionObservation();
 
   return (
     <div className='IndexChart'>
@@ -62,18 +57,18 @@ const IndexChart = () => {
           if(title.childTitles.length) {
             return (
               <li key={title.id} className='title'>
-                <TitleList title={title.title} hash={hash} activeId={activeId}/>
+                <TitleList title={title.title} />
                 <ul>
                   {title.childTitles.map((childTitle) => 
                     <li key={childTitle.id} className='title'>
-                      <TitleList title={childTitle.title} hash={hash} activeId={activeId}/>
+                      <TitleList title={childTitle.title}/>
                     </li>
                   )}
                 </ul>
               </li>
             )
           }
-          return(<li key={title.id} className='title'><TitleList title={title.title} hash={hash} activeId={activeId} /></li>)
+          return(<li key={title.id} className='title'><TitleList title={title.title} /></li>)
         })}
         </ul>
       </div>
