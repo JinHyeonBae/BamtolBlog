@@ -15,7 +15,7 @@ const useIntersectionObservation = () => {
       const visibleContent = Object.values(contentRef.current).filter(
         (content) => content.isIntersecting
       );
-      dispatch(changeActiveIdAction(visibleContent[0].target.id));
+      if(visibleContent.length) dispatch(changeActiveIdAction(visibleContent[0].target.id));
     };
     const observer = new IntersectionObserver(callback, option);
 
