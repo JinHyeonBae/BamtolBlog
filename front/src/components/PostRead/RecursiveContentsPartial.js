@@ -1,25 +1,17 @@
 import React, { Fragment } from 'react';
 import ContentsPartial from './ContentsPartial';
 
-const RecursiveContentsPartial = ({contentsTree}) => {
-  const createContentsPartial = (child) =>{
-    return(
-      child.children && (
-        <>
-        <ContentsPartial type={child.type} text={child.text} />
-          {child.children?.map(child =>
-            <Fragment key={child.id}> {createContentsPartial(child)} </Fragment>
-          )}  
-        </>
-      )
-    )
-  };
+const RecursiveContentsPartial = ({contentsObjects}) => {
   return (
-    <div>
-      {contentsTree?.map(child => 
-        <Fragment key={child.id}>{createContentsPartial(child)}</Fragment>
+    <>
+      {contentsObjects?.map(child => (
+        <Fragment key={child.id}>
+          <ContentsPartial type={child.type} text={child.text} />
+          <RecursiveContentsPartial contentsObjects={child?.children} />
+        </Fragment>
+        )
       )}
-    </div>
+    </>
   )
 }
 

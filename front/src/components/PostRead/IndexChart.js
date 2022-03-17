@@ -13,7 +13,7 @@ const IndexChart = () => {
           자습서
           <span className="svgImg">V</span>
         </div>
-        <RecursiveTitle objects={ dummyDataForTOC } />
+        <RecursiveTitle titleObjects={ dummyDataForTOC } />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import RecursiveContentsPartial from './RecursiveContentsPartial';
 const Contents = ({contents}) => {
 
   return (
-    <RecursiveContentsPartial contentsTree={contents} />
+    <RecursiveContentsPartial contentsObjects={contents} />
   );
 }
 
