@@ -88,6 +88,24 @@ export const dummyDataForContents = {
               type: "paragraph",
               text: "HTML과 JavaScript에 어느 정도 익숙하다고 가정하지만 다른 프로그래밍 언어를 사용하더라도 자습서를 따라갈 수 있습니다. 또한 함수, 객체, 배열, 가능하다면 클래스 같은 프로그래밍 개념에 익숙하다고 가정합니다.",
               children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "dual",
+              text: "",
+              children: [],
+              left: {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "React는 몇 가지 종류의 컴포넌트를 가지지만 우리는 React.Component의 하위 클래스를 사용해보겠습니다.",
+                  children: [],
+              },
+              right: {
+                  id: shortid.generate(),
+                  type: "code",
+                  text: "import react from 'React';",
+                  children: [],
+              }
             }
           ]
         },

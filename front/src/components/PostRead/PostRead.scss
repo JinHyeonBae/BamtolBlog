@@ -23,6 +23,24 @@
     background-color: #ffffaf;
     padding: 20px;
   }
+  .code {
+    background-color: #ffeec8;
+    padding: 10px;
+    font-size: 1em;
+  }
+  .dual {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    .left {
+      width: 50%;
+      float: left;
+    }
+    .right {
+      width: 50%;
+      float: right;
+    }
+  }
 }
 
 .IndexChart {

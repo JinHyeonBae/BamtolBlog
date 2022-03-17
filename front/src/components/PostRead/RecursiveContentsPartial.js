@@ -6,7 +6,7 @@ const RecursiveContentsPartial = ({contentsObjects}) => {
     <>
       {contentsObjects?.map(child => (
         <Fragment key={child.id}>
-          <ContentsPartial type={child.type} text={child.text} />
+          <ContentsPartial type={child.type} text={child.text} left={child?.left} right={child?.right} />
           <RecursiveContentsPartial contentsObjects={child?.children} />
         </Fragment>
         )

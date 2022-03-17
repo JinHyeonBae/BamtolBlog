@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ContentsPartial = ({type, text}) => {
+const ContentsPartial = ({type, text, left, right}) => {
   switch(type){
     case "header_1":
       return <h1 className='header_1' id={text}>{text}</h1>;
@@ -14,6 +14,19 @@ const ContentsPartial = ({type, text}) => {
       return <div className='tip'>{text}</div>;
     case "unordered_list":
       return <p> - {text}</p>;
+    case "code":
+      return <div className='code'>{text}</div>;
+    case "dual":
+      return (
+        <div className='dual'>
+          <div className='left'>
+            <ContentsPartial type={left.type} text={left.text} />
+          </div>
+          <div className='right'>
+            <ContentsPartial type={right.type} text={right.text} />
+          </div>
+        </div>
+      )
     default: return;
   }
 }
