@@ -6,6 +6,7 @@ import {
   Route
 } from "react-router-dom";
 import PostRead from './components/PostRead';
+import PostWrite from './components/PostWrite';
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<>Home: Bot Line Blog</>} />
           <Route path="/post" element={<PostRead />} />
+          <Route path="/write" element={<PostWrite />} />
         </Routes>
       </Router>
     </div>
