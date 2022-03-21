@@ -27,17 +27,26 @@
     background-color: #ffeec8;
     padding: 10px;
     font-size: 1em;
+    white-space: pre-wrap;
   }
   .dual {
     display: flex;
     flex-direction: row;
     width: 100%;
-    .left {
+    margin-top: 10px;
+    .left,
+    .right {
       width: 50%;
+      padding: 10px;
+      > div {
+        position: sticky;
+        top: 100px;
+      }
+    }
+    .left {
       float: left;
     }
     .right {
-      width: 50%;
       float: right;
     }
   }

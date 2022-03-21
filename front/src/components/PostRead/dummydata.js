@@ -94,19 +94,434 @@ export const dummyDataForContents = {
               type: "dual",
               text: "",
               children: [],
-              left: {
+              left: [
+                {
                   id: shortid.generate(),
                   type: "paragraph",
                   text: "React는 몇 가지 종류의 컴포넌트를 가지지만 우리는 React.Component의 하위 클래스를 사용해보겠습니다.",
                   children: [],
-              },
-              right: {
+                },
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "XML과 유사한 재밌는 태그를 사용할 것입니다. 우리는 컴포넌트를 사용하여 React에게 화면에 표현하고 싶은 것이 무엇인지 알려줍니다. 데이터가 변경될 때 React는 컴포넌트를 효율적으로 업데이트하고 다시 렌더링합니다.",
+                  children: [],
+                },
+              ],
+              right: [
+                {
                   id: shortid.generate(),
                   type: "code",
-                  text: "import react from 'React';",
+                  text: 
+`import React from 'react';
+
+const App = () => {
+  return (
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+  )
+};
+
+export default App;
+`,
+                }
+              ]
+            },
+            {
+              id: shortid.generate(),
+              type: "dual",
+              text: "",
+              children: [],
+              left: [
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "React는 몇 가지 종류의 컴포넌트를 가지지만 우리는 React.Component의 하위 클래스를 사용해보겠습니다.",
                   children: [],
-              }
-            }
+                },
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "XML과 유사한 재밌는 태그를 사용할 것입니다. 우리는 컴포넌트를 사용하여 React에게 화면에 표현하고 싶은 것이 무엇인지 알려줍니다. 데이터가 변경될 때 React는 컴포넌트를 효율적으로 업데이트하고 다시 렌더링합니다.",
+                  children: [],
+                },
+              ],
+              right: [
+                {
+                  id: shortid.generate(),
+                  type: "code",
+                  text: 
+`import React from 'react';
+
+const App = () => {
+  return (
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+  )
+};
+
+export default App;
+`,
+                }
+              ]
+            },
+            {
+              id: shortid.generate(),
+              type: "dual",
+              text: "",
+              children: [],
+              left: [
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "React는 몇 가지 종류의 컴포넌트를 가지지만 우리는 React.Component의 하위 클래스를 사용해보겠습니다.",
+                  children: [],
+                },
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "XML과 유사한 재밌는 태그를 사용할 것입니다. 우리는 컴포넌트를 사용하여 React에게 화면에 표현하고 싶은 것이 무엇인지 알려줍니다. 데이터가 변경될 때 React는 컴포넌트를 효율적으로 업데이트하고 다시 렌더링합니다.",
+                  children: [],
+                },
+              ],
+              right: [
+                {
+                  id: shortid.generate(),
+                  type: "code",
+                  text: 
+`import React from 'react';
+
+const App = () => {
+  return (
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+  )
+};
+
+export default App;
+`,
+                }
+              ]
+            },
+            {
+              id: shortid.generate(),
+              type: "dual",
+              text: "",
+              children: [],
+              left: [
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "React는 몇 가지 종류의 컴포넌트를 가지지만 우리는 React.Component의 하위 클래스를 사용해보겠습니다.",
+                  children: [],
+                },
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "XML과 유사한 재밌는 태그를 사용할 것입니다. 우리는 컴포넌트를 사용하여 React에게 화면에 표현하고 싶은 것이 무엇인지 알려줍니다. 데이터가 변경될 때 React는 컴포넌트를 효율적으로 업데이트하고 다시 렌더링합니다.",
+                  children: [],
+                },
+              ],
+              right: [
+                {
+                  id: shortid.generate(),
+                  type: "code",
+                  text: 
+`import React from 'react';
+
+const App = () => {
+  return (
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+  )
+};
+
+export default App;
+`,
+                }
+              ]
+            },
+            {
+              id: shortid.generate(),
+              type: "dual",
+              text: "",
+              children: [],
+              left: [
+                {
+                  id: shortid.generate(),
+                  type: "code",
+                  text: 
+`import React from 'react';
+
+const App = () => {
+  return (
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+    <div> Hello React! </div>
+  )
+};
+
+export default App;
+`,
+                }
+              ],
+              right: [
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "React는 몇 가지 종류의 컴포넌트를 가지지만 우리는 React.Component의 하위 클래스를 사용해보겠습니다.",
+                  children: [],
+                },
+                {
+                  id: shortid.generate(),
+                  type: "paragraph",
+                  text: "XML과 유사한 재밌는 태그를 사용할 것입니다. 우리는 컴포넌트를 사용하여 React에게 화면에 표현하고 싶은 것이 무엇인지 알려줍니다. 데이터가 변경될 때 React는 컴포넌트를 효율적으로 업데이트하고 다시 렌더링합니다.",
+                  children: [],
+                },
+              ],
+            },
           ]
         },
 
@@ -146,7 +561,97 @@ export const dummyDataForContents = {
               type: "paragraph",
               text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
               children: []
-            }
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
+            {
+              id: shortid.generate(),
+              type: "paragraph",
+              text: "이 방식은 완전히 선택사항이며 이 자습서에 필요한 것은 아닙니다!",
+              children: []
+            },
           ]
         }
       ]

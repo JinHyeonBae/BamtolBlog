@@ -1,4 +1,5 @@
 import React from 'react';
+import RecursiveContentsPartial from './RecursiveContentsPartial';
 
 const ContentsPartial = ({type, text, left, right}) => {
   switch(type){
@@ -15,15 +16,15 @@ const ContentsPartial = ({type, text, left, right}) => {
     case "unordered_list":
       return <p> - {text}</p>;
     case "code":
-      return <div className='code'>{text}</div>;
+      return <pre className='code'>{text}</pre>
     case "dual":
       return (
         <div className='dual'>
           <div className='left'>
-            <ContentsPartial type={left.type} text={left.text} />
+            <div><RecursiveContentsPartial contentsObjects={left} /></div>
           </div>
           <div className='right'>
-            <ContentsPartial type={right.type} text={right.text} />
+            <div><RecursiveContentsPartial contentsObjects={right} /></div>
           </div>
         </div>
       )
