@@ -5,6 +5,10 @@
 
 .PostModify {
   background-color: rgb(206, 245, 245);
+  width: 100%;
+  .blockObject {
+    height: 20px;
+  }
 }
 
 .PostPreview {
