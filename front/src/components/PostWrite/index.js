@@ -9,14 +9,13 @@ const PostWrite = () => {
   const dispatch = useDispatch();
   const {showPreview, postContents} = useSelector((state)=>state.post);
 
-
   const onSubmitHandler = (e) => {
     e.preventDefault();
     dispatch(savePostContentsAction(postContents));
   }
 
   return (<>
-    <div className='PostRead'>
+    <div className='PostWrite'>
       <div>
         <button onClick={onSubmitHandler}>저장</button>
       </div>
