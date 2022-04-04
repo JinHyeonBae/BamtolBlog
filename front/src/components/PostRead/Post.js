@@ -1,21 +1,18 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { LOAD_POST_CONTENTS, LOAD_TEMPPOST_CONTENTS } from '../../_actions/types';
+import { loadPostContents, loadTempPostContents } from '../../_slices/postSlice';
+import { selectPostData } from '../../_slices/postSlice';
 import Contents from './Contents';
 
 const Post = ({ temporary = false }) => {
   const dispatch = useDispatch();
-  const { PostData } = useSelector((state)=>state.post);
+  const PostData = useSelector(selectPostData);
 
   useEffect(()=>{
     if(temporary){
-      dispatch({
-        type: LOAD_TEMPPOST_CONTENTS
-      })
+      dispatch(loadTempPostContents());
     } else {
-      dispatch({
-        type: LOAD_POST_CONTENTS
-      })
+      dispatch(loadPostContents());
     }
   },[])
 

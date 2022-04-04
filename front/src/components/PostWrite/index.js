@@ -1,17 +1,18 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { savePostContentsAction } from '../../_actions';
 import PostModify from './PostModify';
 import PostPreview from './PostPreview';
+import { savePostContents, selectShowPreview, selectModifyingPostData } from '../../_slices/postSlice';
 import './PostWrite.scss';
 
 const PostWrite = () => {
   const dispatch = useDispatch();
-  const {showPreview, postContents} = useSelector((state)=>state.post);
+  const showPreview = useSelector(selectShowPreview);
+  const postContents = useSelector(selectModifyingPostData);
 
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    dispatch(savePostContentsAction(postContents));
+    dispatch(savePostContents(postContents));
   }
 
   return (<>

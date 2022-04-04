@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { CHANGE_VIEWMODE } from '../../_actions/types';
-import { savePostContentsAction } from '../../_actions';
+import { changeViewModeToPreview, savePostContents } from '../../_slices/postSlice';
 import shortid from 'shortid';
 
 const PostModify = () => {
@@ -10,24 +9,11 @@ const PostModify = () => {
 
   const changeViewMode = useCallback(()=>{
     //await
-    dispatch(savePostContentsAction(postContents, true));
-    dispatch({
-      type: CHANGE_VIEWMODE,
-      data: true
-    })
+    dispatch(savePostContents(postContents));
+    dispatch(changeViewModeToPreview(true));
   }, [])
 
-  // const onChangeBlockObject = () => {
-  //   console.log(postContents);
-  // }
-
   const makeNewBlockObject = () => {
-    // const target = document.getElementsByClassName('postContentsBody')[0];
-    // let div = document.createElement('div');
-    // div.setAttribute('className', 'blockObject');
-    // div.setAttribute('contentEditable', 'true');
-    // div.addEventListener('ValueChange', onChangeBlockObject);
-    // target.append(div);
     const newBlockObject = {
       id: shortid.generate(),
       type: "paragraph",

@@ -1,16 +1,13 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { CHANGE_VIEWMODE } from '../../_actions/types';
+import { changeViewModeToPreview } from '../../_slices/postSlice';
 import Post from './../PostRead/Post';
 
 const PostPreview = () => {
   const dispatch = useDispatch();
 
   const changeViewMode = useCallback(()=>{
-    dispatch({
-      type: CHANGE_VIEWMODE,
-      data: false
-    })
+    dispatch(changeViewModeToPreview(false))
   }, [])
 
   return (

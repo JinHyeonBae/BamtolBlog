@@ -1,18 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { LOAD_POST_TOC } from '../../_actions/types';
-import { changeActiveIdAction } from '../../_actions';
+import { loadPostTOC, setActiveId, selectPostTOC } from '../../_slices/postSlice';
 import RecursiveTitle from './RecursiveTitle';
 
 const IndexChart = () => {
   const dispatch = useDispatch();
   const contentRef = useRef({});
-  const { TOCData } = useSelector((state)=>state.post);
+  const TOCData = useSelector(selectPostTOC);
 
   useEffect(()=>{
-    dispatch({
-      type: LOAD_POST_TOC
-    });
+    dispatch(loadPostTOC());
   },[])
   
   useEffect(()=>{
@@ -28,7 +25,7 @@ const IndexChart = () => {
       const visibleContent = Object.values(contentRef.current).filter(
         (content) => content.isIntersecting
       );
-      if(visibleContent.length) dispatch(changeActiveIdAction(visibleContent[0].target.id));
+      if(visibleContent.length) dispatch(setActiveId(visibleContent[0].target.id));
     };
 
     const observer = new IntersectionObserver(callback, option);

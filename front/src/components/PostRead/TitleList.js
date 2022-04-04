@@ -1,9 +1,10 @@
 import React from 'react';
 import { HashLink } from 'react-router-hash-link';
 import { useSelector } from 'react-redux';
+import { selectActiveId } from '../../_slices/postSlice';
 
 const TitleList = ({ title }) => {
-  const { activeId } = useSelector((state)=> state.post);
+  const activeId = useSelector(selectActiveId);
   const active = activeId === title;
 
   return (

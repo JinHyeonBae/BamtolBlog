@@ -4,21 +4,11 @@ import './index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
-import { applyMiddleware, createStore } from 'redux';
-import Reducer from './_reducers';
-// Saga 또는 redux-thunk, promise 조합 사용.
-// import promiseMiddleware from 'redux-promise';  
-// import ReduxThunk from 'redux-thunk'; 
-
-// const createStoreWithMiddleware = applyMiddleware(promiseMiddleware, ReduxThunk)(createStore);
-const createStoreWithMiddleware = applyMiddleware()(createStore);
+import { store } from './store';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={createStoreWithMiddleware(Reducer,
-        window.__REDUX_DEVTOOLS_EXTENSION__ &&
-        window.__REDUX_DEVTOOLS_EXTENSION__()
-      )} >
+    <Provider store={store} >
     <App />
     </Provider>
   </React.StrictMode>,
