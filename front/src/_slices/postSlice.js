@@ -17,10 +17,20 @@ export const loadPostTOC = createAsyncThunk(
     return response.data.dummyDataForTOC;
   }
 )
+export const savePost = createAsyncThunk(
+  "post/savePost",
+  async (savePostData) =>{
+    const response = await axios.post(`http://localhost:8000/api/savePostData`, savePostData);
+    console.log(response.data);
+    return response.data;
+  }
+)
 
 const initialState = {
   loadPostStatus: 'idle',
   loadPostTOC: 'idle',
+  savePostData: 'idle',
+  currPostId: '',
   activeId : '',
   showPreview: false,
   modifyingPostContents: {
@@ -82,6 +92,17 @@ export const postSlice = createSlice({
       state.loadPostTOCStatus = 'failed';
       state.error = action.payload;
     })
+    builder.addCase(savePost.pending, (state)=> {
+      state.savePostData = 'loading';
+    })
+    builder.addCase(savePost.fulfilled, (state, {payload})=> {
+      state.savePostData = 'success';
+      state.currPostId = payload.postId;
+    })
+    builder.addCase(savePost.rejected, (state, action)=> {
+      state.savePostData = 'failed';
+      state.error = action.payload;
+    })
   }
 })
 
@@ -103,3 +124,5 @@ export const selectShowPreview = (state) => state.post.showPreview;
 export const selectModifyingPostData = (state) => state.post.modifyingPostContents;
 export const selectAuthorNickname = (state) => state.post.PostData.author.nickname;
 export const selectPostId = (state) => state.post.PostData.postId;
+export const selectCurrPostId = (state) => state.post.currPostId;
+export const selectSavePostDataState = (state) => state.post.savePostData;
