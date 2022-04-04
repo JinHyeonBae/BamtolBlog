@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadPostTOC, setActiveId, selectPostTOC } from '../../_slices/postSlice';
 import RecursiveTitle from './RecursiveTitle';
@@ -6,10 +7,11 @@ import RecursiveTitle from './RecursiveTitle';
 const IndexChart = () => {
   const dispatch = useDispatch();
   const contentRef = useRef({});
+  const {userNickname, postsId} = useParams();
   const TOCData = useSelector(selectPostTOC);
 
   useEffect(()=>{
-    dispatch(loadPostTOC());
+    dispatch(loadPostTOC({userNickname: userNickname, postId: postsId, token:'tokentoken'}));
   },[])
   
   useEffect(()=>{

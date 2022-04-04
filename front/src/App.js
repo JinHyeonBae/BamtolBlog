@@ -14,7 +14,7 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={<>Home: Bot Line Blog</>} />
-          <Route path="/post" element={<PostRead />} />
+          <Route path="/:userNickname/posts/:postsId" element={<PostRead />} />
           <Route path="/write" element={<PostWrite />} />
         </Routes>
       </Router>
