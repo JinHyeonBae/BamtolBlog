@@ -1,45 +1,19 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useParams } from 'react-router';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import PostModify from './PostModify';
 import PostPreview from './PostPreview';
-import { savePost, selectShowPreview, selectModifyingPostData, selectCurrPostId, selectSavePostDataState } from '../../_slices/postSlice';
+import PostSave from './PostSave';
 import './PostWrite.scss';
+import { useSelector } from 'react-redux';
+import { selectPostViewMode } from './../../_slices/postSlice';
 
 const PostWrite = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { userNickname } = useParams();
-  const showPreview = useSelector(selectShowPreview);
-  const postContents = useSelector(selectModifyingPostData);
-  const savePostDataState = useSelector(selectSavePostDataState);
-  const currPostId = useSelector(selectCurrPostId);
-
-  const onSubmitHandler = (e) => {
-    e.preventDefault();
-    const body = {
-      postContents: postContents,
-      token: 'tokentoken'
-    }
-    dispatch(savePost(body));
-  }
-  
-  useEffect(()=>{
-    if(savePostDataState === 'success') {
-      navigate(`/${userNickname}/posts/${currPostId}`);
-    }
-  },[savePostDataState])
+  const viewMode = useSelector(selectPostViewMode);
 
   return (<>
     <div className='PostWrite'>
-      <div>
-        <button onClick={onSubmitHandler}>저장</button>
-      </div>
-      { showPreview
-        ? <PostPreview />
-        : <PostModify />
-      }
+      {viewMode == 'modify' && <PostModify/> }
+      {viewMode == 'preview' && <PostPreview /> }
+      {viewMode == 'save' && <PostSave /> }
     </div>
   </>)
 }

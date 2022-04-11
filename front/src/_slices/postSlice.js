@@ -5,7 +5,6 @@ import shortid from 'shortid';
 export const loadPost = createAsyncThunk(
   "post/loadPost",
   async (loadPostData) =>{
-    // const response = await axios.post(`http://localhost:8000/api/${loadPostData.userNickname}/posts/${loadPostData.postId}`, loadPostData);
     const response = await axios.post(`http://localhost:8000/api/getPostData`, loadPostData);
     return response.data.dummyDataForContents;
   }
@@ -20,7 +19,7 @@ export const loadPostTOC = createAsyncThunk(
 export const savePost = createAsyncThunk(
   "post/savePost",
   async (savePostData) =>{
-    const response = await axios.post(`http://localhost:8000/api/savePostData`, savePostData);
+    const response = await axios.post(`http://localhost:8000/api/savePostData`, { "body": savePostData.body }, { "header": savePostData.header });
     console.log(response.data);
     return response.data;
   }
@@ -32,7 +31,7 @@ const initialState = {
   savePostData: 'idle',
   currPostId: '',
   activeId : '',
-  showPreview: false,
+  postViewMode: 'modify',
   modifyingPostContents: {
     postId: shortid.generate(),
     title: '',
@@ -55,8 +54,8 @@ export const postSlice = createSlice({
   name: 'post',
   initialState,
   reducers: {
-    changeViewModeToPreview:(state, action) => {
-      state.showPreview = action.payload;
+    changePostViewMode:(state, action) => {
+      state.postViewMode = action.payload;
     },
     savePostContents:(state, action) => {
       state.modifyingPostContents = action.payload;
@@ -108,7 +107,7 @@ export const postSlice = createSlice({
 
 export const { 
   addValue, 
-  changeViewModeToPreview,
+  changePostViewMode,
   savePostContents,
   setActiveId, 
   loadTempPostContents, 
@@ -120,7 +119,7 @@ export const selectLoadPostStatus = (state) => state.post.loadPostStatus;
 export const selectActiveId = (state) => state.post.activeId;
 export const selectPostData = (state) => state.post.PostData;
 export const selectPostTOC = (state) => state.post.TOCData;
-export const selectShowPreview = (state) => state.post.showPreview;
+export const selectPostViewMode = (state) => state.post.postViewMode;
 export const selectModifyingPostData = (state) => state.post.modifyingPostContents;
 export const selectAuthorNickname = (state) => state.post.PostData.author.nickname;
 export const selectPostId = (state) => state.post.PostData.postId;

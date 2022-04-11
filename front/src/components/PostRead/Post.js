@@ -22,7 +22,7 @@ const Post = ({ temporary = false }) => {
   return (
     <div className='Contents'>
       {
-        loadPostStatus === 'success'
+        loadPostStatus === 'success' || temporary === true
         ? <>
           <h1>{PostData?.title}</h1>
           <h3>{PostData?.subtitle}</h3>
