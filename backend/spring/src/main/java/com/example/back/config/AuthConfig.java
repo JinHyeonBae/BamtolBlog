@@ -49,7 +49,7 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("*");
+        configuration.addAllowedOrigin("/*");
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE"));
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
