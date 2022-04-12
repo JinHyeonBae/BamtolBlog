@@ -29,7 +29,7 @@ export const savePost = createAsyncThunk(
 
 const initialState = {
   loadPostStatus: 'idle',
-  savePostData: 'idle',
+  savePostDataStatus: 'idle',
   currPostId: '',
   activeId : '',
   postViewMode: 'modify',
@@ -117,14 +117,14 @@ export const postSlice = createSlice({
       state.error = action.payload;
     })
     builder.addCase(savePost.pending, (state)=> {
-      state.savePostData = 'loading';
+      state.savePostDataStatus = 'loading';
     })
     builder.addCase(savePost.fulfilled, (state, {payload})=> {
-      state.savePostData = 'success';
+      state.savePostDataStatus = 'success';
       state.currPostId = payload.postId;
     })
     builder.addCase(savePost.rejected, (state, action)=> {
-      state.savePostData = 'failed';
+      state.savePostDataStatus = 'failed';
       state.error = action.payload;
     })
   }
