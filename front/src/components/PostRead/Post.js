@@ -15,7 +15,7 @@ const Post = ({ temporary = false }) => {
     if(temporary){
       dispatch(loadTempPostContents());
     } else {
-      dispatch(loadPost({userNickname: userNickname, postsId: postsId, token:'tokentoken'}));
+      dispatch(loadPost({userNickname: userNickname, postsId: postsId}));
     }
   },[])
 

@@ -11,7 +11,7 @@ const IndexChart = () => {
   const TOCData = useSelector(selectPostTOC);
 
   useEffect(()=>{
-    dispatch(loadPostTOC({userNickname: userNickname, postId: postsId, token:'tokentoken'}));
+    dispatch(loadPostTOC({userNickname: userNickname, postsId: postsId}));
   },[])
   
   useEffect(()=>{
