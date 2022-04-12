@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import Axios from '../axiosConfig';
 import shortid from 'shortid';
 
 export const login = createAsyncThunk(
   "user/login",
   async (loginData) =>{
-    const response = await axios.post(`http://${window.location.hostname}:8080/auth/login`, loginData,  { withCredentials: true });
+    const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
     return response.data;
   }
 )
@@ -34,7 +34,6 @@ export const postSlice = createSlice({
     builder.addCase(login.fulfilled, (state, {payload})=> {
       state.loginStatus = 'success';
       state.user = payload.user;
-      state.token = payload.token;
     })
     builder.addCase(login.rejected, (state, action)=> {
       state.loginStatus = 'failed';
