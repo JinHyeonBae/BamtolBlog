@@ -14,17 +14,6 @@ export const loadPost = createAsyncThunk(
     return response.data;
   }
 )
-export const loadPostTOC = createAsyncThunk(
-  "post/loadPostTOC",
-  async (loadPostTOCData) =>{
-    const response = await axios.post(
-      `http://localhost:8000/api/getPostTOCData`, 
-      loadPostTOCData, 
-      { headers: { token: Cookies.get('token')} }
-    );
-    return response.data;
-  }
-)
 export const savePost = createAsyncThunk(
   "post/savePost",
   async (savePostData) =>{
@@ -40,7 +29,6 @@ export const savePost = createAsyncThunk(
 
 const initialState = {
   loadPostStatus: 'idle',
-  loadPostTOC: 'idle',
   savePostData: 'idle',
   currPostId: '',
   activeId : '',
@@ -79,6 +67,41 @@ export const postSlice = createSlice({
     loadTempPostContents: (state) => {
       const tempPostContents = state.modifyingPostContents;
       state.PostData = tempPostContents;
+    },
+    makeIndexChartObject: (state) => {
+      let TOCData = [];
+      state.PostData.contents.forEach((block_h1) => {
+        if(block_h1.type.startsWith('header_')){
+          let blockChildren_h2 = [];
+          block_h1.children.forEach((block_h2) => {
+            if(block_h2.type.startsWith('header_')){
+              let blockChildren_h3 = [];
+              block_h2.children.forEach((block_h3) => {
+                if(block_h3.type.startsWith('header_')){
+                  const blockObject_h3 = {
+                    id: block_h3.id,
+                    text: block_h3.text
+                  };
+                  blockChildren_h3.push(blockObject_h3);
+                }
+              });
+              const blockObject_h2 = {
+                id: block_h2.id,
+                text: block_h2.text,
+                children: blockChildren_h3
+              };
+              blockChildren_h2.push(blockObject_h2);
+            }
+          })
+          const blockObject_h1 = {
+            id: block_h1.id,
+            text: block_h1.text,
+            children: blockChildren_h2
+          };
+          TOCData.push(blockObject_h1);
+        }
+      });
+      state.TOCData = TOCData;
     }
   },
   extraReducers: builder => {
@@ -91,17 +114,6 @@ export const postSlice = createSlice({
     })
     builder.addCase(loadPost.rejected, (state, action)=> {
       state.loadPostStatus = 'failed';
-      state.error = action.payload;
-    })
-    builder.addCase(loadPostTOC.pending, (state)=> {
-      state.loadPostTOCStatus = 'loading';
-    })
-    builder.addCase(loadPostTOC.fulfilled, (state, {payload})=> {
-      state.loadPostTOCStatus = 'success';
-      state.TOCData = payload;
-    })
-    builder.addCase(loadPostTOC.rejected, (state, action)=> {
-      state.loadPostTOCStatus = 'failed';
       state.error = action.payload;
     })
     builder.addCase(savePost.pending, (state)=> {
@@ -123,7 +135,8 @@ export const {
   changePostViewMode,
   savePostContents,
   setActiveId, 
-  loadTempPostContents, 
+  loadTempPostContents,
+  makeIndexChartObject, 
 } = postSlice.actions;
 
 export default postSlice.reducer;
