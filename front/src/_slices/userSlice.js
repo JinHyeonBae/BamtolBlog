@@ -5,7 +5,7 @@ import shortid from 'shortid';
 export const login = createAsyncThunk(
   "user/login",
   async (loginData) =>{
-    const response = await axios.post(`http://localhost:8000/api/login`, loginData,  { withCredentials: true });
+    const response = await axios.post(`http://${window.location.hostname}:8080/auth/login`, loginData,  { withCredentials: true });
     return response.data;
   }
 )
