@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import Axios from '../axiosConfig';
 import shortid from 'shortid';
 
 export const login = createAsyncThunk(
   "user/login",
   async (loginData) =>{
-    const response = await axios.post(`http://localhost:8000/api/login`, loginData,  { withCredentials: true });
+    const response = await Axios.post(`api/login`, loginData,  { withCredentials: true });
     return response.data;
   }
 )

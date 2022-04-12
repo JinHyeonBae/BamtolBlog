@@ -1,13 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import Axios from '../axiosConfig';
 import Cookies from 'js-cookie';
 import shortid from 'shortid';
 
 export const loadPost = createAsyncThunk(
   "post/loadPost",
   async (loadPostData) =>{
-    const response = await axios.post(
-      `http://localhost:8000/api/getPostData`,
+    const response = await Axios.post(
+      `api/getPostData`,
       loadPostData,
       { headers: { token: Cookies.get('token')} }
     );
@@ -17,12 +17,11 @@ export const loadPost = createAsyncThunk(
 export const savePost = createAsyncThunk(
   "post/savePost",
   async (savePostData) =>{
-    const response = await axios.post(
-      `http://localhost:8000/api/savePostData`, 
+    const response = await Axios.post(
+      `api/savePostData`, 
       savePostData, 
       { headers: { token: Cookies.get('token')} }
       );
-    console.log(response.data);
     return response.data;
   }
 )
