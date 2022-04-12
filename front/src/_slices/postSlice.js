@@ -150,4 +150,4 @@ export const selectModifyingPostData = (state) => state.post.modifyingPostConten
 export const selectAuthorNickname = (state) => state.post.PostData.author.nickname;
 export const selectPostId = (state) => state.post.PostData.postId;
 export const selectCurrPostId = (state) => state.post.currPostId;
-export const selectSavePostDataState = (state) => state.post.savePostData;
+export const selectSavePostDataStatus = (state) => state.post.savePostDataStatus;

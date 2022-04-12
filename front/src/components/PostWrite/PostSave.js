@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
-import { changePostViewMode, savePost, selectModifyingPostData, selectSavePostDataState, selectCurrPostId } from '../../_slices/postSlice';
+import { changePostViewMode, savePost, selectModifyingPostData, selectSavePostDataStatus, selectCurrPostId } from '../../_slices/postSlice';
 import { selectUser } from '../../_slices/userSlice';
 import useInput from '../../hooks/useInput';
 
@@ -12,7 +12,7 @@ const PostSave = () => {
   const { userNickname } = useParams();
 
   const postData = useSelector(selectModifyingPostData);
-  const savePostDataState = useSelector(selectSavePostDataState);
+  const savePostDataStatus = useSelector(selectSavePostDataStatus);
   const currPostId = useSelector(selectCurrPostId);
   const user = useSelector(selectUser);
   
@@ -21,10 +21,10 @@ const PostSave = () => {
   const [price, onChangePrice] = useInput(0);
   
   useEffect(()=>{
-    if(savePostDataState === 'success') {
+    if(savePostDataStatus === 'success') {
       navigate(`/${userNickname}/posts/${currPostId}`);
     }
-  },[savePostDataState])
+  },[savePostDataStatus])
 
   const changeViewMode = useCallback((mode)=>{
     dispatch(changePostViewMode(mode))
