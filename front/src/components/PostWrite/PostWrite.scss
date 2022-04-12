@@ -1,0 +1,16 @@
+.PostWrite {
+  width: 1024px;
+  background-color: azure;
+}
+
+.PostModify {
+  background-color: rgb(206, 245, 245);
+  width: 100%;
+  .blockObject {
+    height: 20px;
+  }
+}
+
+.PostPreview {
+  background-color: rgb(211, 248, 231);
+}
