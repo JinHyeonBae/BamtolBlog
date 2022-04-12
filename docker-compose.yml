@@ -19,8 +19,7 @@ services:
       - mysql
       - spring
     ports:
-      - 80:80
-      - 443:443
+      - 81:80
     networks:
       - frontend
       - backend
@@ -36,9 +35,10 @@ services:
       MARIADB_PASSWORD: test1234!
       MARIADB_ROOT_PASSWORD: test1234!
     volumes:
-      - ./docker/mysql:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./docker/mysql/data:/var/lib/mysql
     ports:
-      - 3306:3306
+      - 3307:3307
     networks:
       - backend
 
@@ -51,7 +51,7 @@ services:
     ports:
       - 8080:8081
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/blog?useSSL=false&serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3307/blog?useSSL=false&serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
       SPRING_DATASOURCE_USERNAME: test
       SPRING_DATASOURCE_PASSWORD: test1234!
     volumes:
