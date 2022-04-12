@@ -1,0 +1,62 @@
+version: "3.9"
+
+networks:
+  frontend:
+  backend:
+
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./docker
+      dockerfile: nginx.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    volumes:
+      - ./front/build:/var/www/html:delegated
+    depends_on:
+      - mysql
+      - spring
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - frontend
+      - backend
+    
+  mysql:
+    image: mariadb:latest
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    environment:
+      MARIADB_DATABASE: blog
+      MARIADB_USER: test
+      MARIADB_PASSWORD: test1234!
+      MARIADB_ROOT_PASSWORD: test1234!
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - backend
+
+  spring:
+    container_name: spring
+    build:
+      context: ./docker
+      dockerfile: spring.dockerfile
+    platform: linux/amd64
+    ports:
+      - 8080:8081
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/blog?useSSL=false&serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
+      SPRING_DATASOURCE_USERNAME: test
+      SPRING_DATASOURCE_PASSWORD: test1234!
+    volumes:
+      - ./backend/spring:/app:delegated
+    depends_on:
+      - mysql
+    networks:
+      - backend
