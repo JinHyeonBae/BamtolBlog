@@ -5,6 +5,7 @@ import shortid from 'shortid';
 export const loadPost = createAsyncThunk(
   "post/loadPost",
   async (loadPostData) =>{
+
     const response = await Axios.post(`api/getPostData`, loadPostData);
     return response.data;
   }
