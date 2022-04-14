@@ -12,6 +12,7 @@ import com.example.back.dto.PostDto;
 import com.example.back.dto.PermissionDto.PostPermissionDto;
 import com.example.back.dto.PostDto.createPostDto;
 import com.example.back.dto.PostDto.postInformationDto;
+import com.example.back.dto.PostDto.readPostDto;
 import com.example.back.model.Permission;
 import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import io.swagger.models.Response;
 
 @Service
 public class PostService {
@@ -73,9 +73,9 @@ public class PostService {
     @Autowired
     PermissionRepository permissionRepository;
 
-    public CreateResponseDto createPost(createPostDto createPostInfo, String nickname){
+    public CreateResponseDto createPost(createPostDto createPostInfo){
 
-        UserInformation usersInfo = urInfoRepo.findByNickname(nickname);
+        UserInformation usersInfo = urInfoRepo.findByNickname(createPostInfo.getNickname());
         int publisherUserId = usersInfo.getUserId();
 
         CreateResponseDto createDto = new CreateResponseDto();
@@ -114,27 +114,37 @@ public class PostService {
     }
 
 
-    public ReadResponseDto readPost(int userId, int postId) throws NoPermissionException{
+    public ReadResponseDto readPost(readPostDto body) throws NoPermissionException{
 
         //userId, postId로 
-        PostInformation postPermission = postInformationRepository.findByUserIdAndPostId(userId, postId);
+        int userId = body.getUserId();
+        int postId = body.getPostId();
+
+        PostPermission postPermission = postPermissionRepo.findByUserIdAndPostId(userId, postId);
         //보내려는 정보
-        PostInformation postInfo = postInformationRepository.findByPostId(postId);
+        PostInformation postInfo = null;
         
         ReadResponseDto readDto = null;
-        
+                    
         if(postPermission == null){
+            postInfo = postInformationRepository.findByPostId(postId);
+
             try{
                 
-                boolean Qualification = this.assignUserRole(userId, postId);
+                boolean Qualification = assignUserRole(userId, postId);
                 if(Qualification){
                     // 여기서 그럼 또 userRepo에 접근해서 닉네임을 얻어오나
                     readDto = new ReadResponseDto(HttpStatus.OK, "읽기 요청이 완료되었습니다.", postInfo.getContents(), postInfo.getTitle());
 
                 }
+                else{
+                    readDto = new ReadResponseDto();
+                    readDto.readErrorDto(HttpStatus.UNAUTHORIZED, "해당 포스트를 볼 권한이 없습니다.");
+                }
             }
             catch(Exception e){
                 System.out.println("에러 발생.");
+                System.out.println(e.getMessage());
                 //throw new NoPermissionException("해당 포스트를 볼 권한이 없습니다.");
                 readDto = new ReadResponseDto();
                 readDto.readErrorDto(HttpStatus.BAD_GATEWAY, e.getMessage());
@@ -142,10 +152,12 @@ public class PostService {
             }
         }
         else{
-            if(Role.valueOf(postPermission.getDisplayLevel()).equals(Role.DOMAIN_SUBSCRIBER)){
+            postInfo = postInformationRepository.findByPostId(postId);
+
+            if(Role.valueOf(postPermission.getPermissionId()).equals(Role.DOMAIN_SUBSCRIBER)){
                 System.out.println("당신의 권한은 도메인 구독자 권한입니다.");
             }
-            else if(Role.valueOf(postPermission.getDisplayLevel()).equals(Role.POST_SUBSCRIBER))
+            else if(Role.valueOf(postPermission.getPermissionId()).equals(Role.POST_SUBSCRIBER))
                 System.out.println("당신의 권한은 포스트 구독자 권한입니다.");
             else{
                 System.out.println("당신의 권한은 퍼블리셔 권한입니다.");
@@ -158,7 +170,7 @@ public class PostService {
     }
 
 
-    protected boolean assignUserRole(int userId, int postId){    
+    public boolean assignUserRole(int userId, int postId){    
         //도메인 구독자인지 확인한다.
 
         //권한 정보 들고 있다.
@@ -200,9 +212,11 @@ public class PostService {
         return checkPostPermission(userRole, postId);
     }
 
-    protected boolean checkPostPermission(Role userRole, int postId){
+    public boolean checkPostPermission(Role userRole, int postId){
 
-        String postLevel = postInformationRepository.findByPostId(postId).getDisplayLevel();
+        PostInformation postRole = postInformationRepository.findByPostId(postId);
+        String postLevel = postRole.getDisplayLevel();
+
         Role postLevelRole = Role.valueOf(postLevel);
         System.out.println("현재 사용자의 권한은 " + userRole.name());
         //System.out.println(postLevelRole.name());
