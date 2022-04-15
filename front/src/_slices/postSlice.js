@@ -1,34 +1,26 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import Axios from '../axiosConfig';
 import shortid from 'shortid';
 
 export const loadPost = createAsyncThunk(
   "post/loadPost",
   async (loadPostData) =>{
-    const response = await axios.post(`http://localhost:8000/api/getPostData`, loadPostData);
-    return response.data.dummyDataForContents;
-  }
-)
-export const loadPostTOC = createAsyncThunk(
-  "post/loadPostTOC",
-  async (loadPostTOCData) =>{
-    const response = await axios.post(`http://localhost:8000/api/getPostTOCData`, loadPostTOCData);
-    return response.data.dummyDataForTOC;
+
+    const response = await Axios.post(`api/getPostData`, loadPostData);
+    return response.data;
   }
 )
 export const savePost = createAsyncThunk(
   "post/savePost",
   async (savePostData) =>{
-    const response = await axios.post(`http://localhost:8000/api/savePostData`, { "body": savePostData.body }, { "header": savePostData.header });
-    console.log(response.data);
+    const response = await Axios.post(`api/savePostData`, savePostData);
     return response.data;
   }
 )
 
 const initialState = {
   loadPostStatus: 'idle',
-  loadPostTOC: 'idle',
-  savePostData: 'idle',
+  savePostDataStatus: 'idle',
   currPostId: '',
   activeId : '',
   postViewMode: 'modify',
@@ -66,6 +58,41 @@ export const postSlice = createSlice({
     loadTempPostContents: (state) => {
       const tempPostContents = state.modifyingPostContents;
       state.PostData = tempPostContents;
+    },
+    makeIndexChartObject: (state) => {
+      let TOCData = [];
+      state.PostData.contents.forEach((block_h1) => {
+        if(block_h1.type.startsWith('header_')){
+          let blockChildren_h2 = [];
+          block_h1.children.forEach((block_h2) => {
+            if(block_h2.type.startsWith('header_')){
+              let blockChildren_h3 = [];
+              block_h2.children.forEach((block_h3) => {
+                if(block_h3.type.startsWith('header_')){
+                  const blockObject_h3 = {
+                    id: block_h3.id,
+                    text: block_h3.text
+                  };
+                  blockChildren_h3.push(blockObject_h3);
+                }
+              });
+              const blockObject_h2 = {
+                id: block_h2.id,
+                text: block_h2.text,
+                children: blockChildren_h3
+              };
+              blockChildren_h2.push(blockObject_h2);
+            }
+          })
+          const blockObject_h1 = {
+            id: block_h1.id,
+            text: block_h1.text,
+            children: blockChildren_h2
+          };
+          TOCData.push(blockObject_h1);
+        }
+      });
+      state.TOCData = TOCData;
     }
   },
   extraReducers: builder => {
@@ -80,26 +107,15 @@ export const postSlice = createSlice({
       state.loadPostStatus = 'failed';
       state.error = action.payload;
     })
-    builder.addCase(loadPostTOC.pending, (state)=> {
-      state.loadPostTOCStatus = 'loading';
-    })
-    builder.addCase(loadPostTOC.fulfilled, (state, {payload})=> {
-      state.loadPostTOCStatus = 'success';
-      state.TOCData = payload;
-    })
-    builder.addCase(loadPostTOC.rejected, (state, action)=> {
-      state.loadPostTOCStatus = 'failed';
-      state.error = action.payload;
-    })
     builder.addCase(savePost.pending, (state)=> {
-      state.savePostData = 'loading';
+      state.savePostDataStatus = 'loading';
     })
     builder.addCase(savePost.fulfilled, (state, {payload})=> {
-      state.savePostData = 'success';
+      state.savePostDataStatus = 'success';
       state.currPostId = payload.postId;
     })
     builder.addCase(savePost.rejected, (state, action)=> {
-      state.savePostData = 'failed';
+      state.savePostDataStatus = 'failed';
       state.error = action.payload;
     })
   }
@@ -110,7 +126,8 @@ export const {
   changePostViewMode,
   savePostContents,
   setActiveId, 
-  loadTempPostContents, 
+  loadTempPostContents,
+  makeIndexChartObject, 
 } = postSlice.actions;
 
 export default postSlice.reducer;
@@ -124,4 +141,4 @@ export const selectModifyingPostData = (state) => state.post.modifyingPostConten
 export const selectAuthorNickname = (state) => state.post.PostData.author.nickname;
 export const selectPostId = (state) => state.post.PostData.postId;
 export const selectCurrPostId = (state) => state.post.currPostId;
-export const selectSavePostDataState = (state) => state.post.savePostData;
+export const selectSavePostDataStatus = (state) => state.post.savePostDataStatus;
