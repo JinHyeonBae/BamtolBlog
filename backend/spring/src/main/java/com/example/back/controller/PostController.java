@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ResponseHeader;
 import io.swagger.models.Response;
+import io.swagger.annotations.ApiResponses;
 
 @RestController
 public class PostController {
@@ -32,17 +36,20 @@ public class PostController {
     @Autowired
     JwtProvider jwtProvider;
 
-    @Autowired
     AuthService authService;
 
     @Autowired
     PostService postService;
     
-
     //읽기 요청
-    @PostMapping("@{nickname}/posts/{postId}")
-    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody readPostDto body,
-        @PathVariable int postId, @PathVariable String nickname) throws NoPermissionException{
+    @GetMapping("/posts/{postId}")
+    @ApiOperation(value="포스트 읽기 요청", notes = "포스트 읽기 요청을 할 때의 규격입니다.")
+    @ApiResponses({
+        @ApiResponse(code = 200, message = "포스트 읽기 요청 성공"),
+        @ApiResponse(code = 403, message = "해당 포스트를 볼 권한이 없음"),
+        @ApiResponse(code = 500, message = "서버 에러")
+    })
+    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody readPostDto body) throws NoPermissionException{
         // 먼저 온 토큰으로 userId를 받는다.   
         
         ReadResponseDto readDto = new ReadResponseDto();
@@ -51,7 +58,7 @@ public class PostController {
             
         //이 권한 검사는 서비스에서 다 마쳐야 하나..?
             try{
-                readDto = postService.readPost(body.getUserId(), postId);
+                readDto = postService.readPost(body);
                 
                 responseEntity = ResponseEntity.status(readDto.getStatus()).body(readDto);
             }
@@ -60,38 +67,44 @@ public class PostController {
                 System.out.println("해당 포스트를 볼 권한이 없습니다.");
                 //throw new NoPermissionException("해당 포스트를 볼 권한이 없습니다.");
                 
-                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
             catch(NullPointerException e){
                 System.out.println("해당 포스트를 볼 권한이 없습니다.");
-                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
         
         return responseEntity;
     }
 
     //쓰기 요청
-    @PostMapping("@{nickname}/posts/write")
-    public ResponseEntity<CreateResponseDto> createPost(@RequestHeader HttpHeaders headers, 
-                                                                  @PathVariable String nickname, @RequestBody createPostDto body){
+    @PostMapping("/posts/write")
+    @ApiOperation(value="포스트 생성", notes = "포스트를 생성할 때 요청 규격입니다.")
+    @ApiResponses({
+        @ApiResponse(code = 201, message = "포스트 생성 요청 성공"),
+        @ApiResponse(code = 403, message = "포스트를 생성할 권한이 없음"),
+        @ApiResponse(code = 500, message = "서버 에러")
+    })
+    public ResponseEntity<CreateResponseDto> createPost(@RequestHeader HttpHeaders headers, @RequestBody createPostDto body){
 
         System.out.println(headers);
         String token = headers.get("token").get(0);
         System.out.println("token :" + token);
-        // token이 valid하다고 가정 
+        
         ResponseEntity<CreateResponseDto> responseEntity = null;
 
         if(authService.isValidToken(token)){
             System.out.println("정확한 토큰");
 
-            CreateResponseDto result = postService.createPost(body, nickname);
+            CreateResponseDto result = postService.createPost(body);
             HttpStatus status = result.getStatus();
+            
             responseEntity = ResponseEntity.status(status).body(result);
             
         }
         else{
-            CreateResponseDto createDto = new CreateResponseDto(HttpStatus.UNAUTHORIZED,  "토큰이 유효하지 않습니다.");
-            responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(createDto);
+            CreateResponseDto createDto = new CreateResponseDto(HttpStatus.FORBIDDEN,  "토큰이 유효하지 않습니다.");
+            responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(createDto);
         }
 
         return responseEntity;
