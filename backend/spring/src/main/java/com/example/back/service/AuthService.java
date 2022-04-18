@@ -161,7 +161,7 @@ public class AuthService {
         HashMap<String, String> result = new HashMap<>();
 
         String accessToken = jwtProvider.createAccessToken(loginDto, userId);
-        System.out.println("createToken !");
+        System.out.println("Token createToken");
         // String refreshToken = jwtProvider.createAccessToken(loginDto).get("refreshToken");
         // String refreshTokenExpirationAt = jwtProvider.createRepreshToken(loginDto).get("refreshExpireationAt");
 
