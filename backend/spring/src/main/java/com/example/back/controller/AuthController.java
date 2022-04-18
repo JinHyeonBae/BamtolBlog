@@ -66,13 +66,13 @@ public class AuthController {
     // 쿠키에 토큰을 넣어서 보냄, 파싱
     @ApiOperation(value="로그인", notes = "사용자 회원가입")
     @ApiResponses({
-        @ApiResponse(code = 201, message = "로그인 성공"),
+        @ApiResponse(code = 200, message = "로그인 성공"),
         @ApiResponse(code = 400, message = "유효하지 않은 토큰"),
         @ApiResponse(code = 403, message = "비밀번호 오류"),
         @ApiResponse(code = 404, message = "존재하지 않는 아이디"),
         @ApiResponse(code = 500, message = "서버 에러")
     })
-    @ResponseStatus(value = HttpStatus.CREATED)
+    @ResponseStatus(value = HttpStatus.OK)
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponseDto> login(@RequestHeader HttpHeaders headers, @RequestBody LoginDto loginRequest){     
         
@@ -85,12 +85,15 @@ public class AuthController {
             e.printStackTrace();
         }
         
-        ResponseCookie responseCookie = ResponseCookie.from("accessToken", loginResponseDto.getAccessToken())
+        ResponseCookie responseCookie = ResponseCookie.from("access_Token", loginResponseDto.getAccesstoken())
                 .httpOnly(true)
                 .secure(true)
                 .maxAge(60*60*24) // 1일
                 .build();
 
+        System.out.println(responseCookie.getName());
+        
+        loginResponseDto.setAccesstoken("");
         return ResponseEntity.status(loginResponseDto.getStatus()).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(loginResponseDto);
     }
 

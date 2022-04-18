@@ -2,6 +2,8 @@ package com.example.back.response;
 
 import org.springframework.http.HttpStatus;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class ResponseDto {
 
     HttpStatus status;
@@ -21,9 +24,18 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+
+    @ApiModel(value="포스트 생성 요청 반환 DTO")
     public static class CreateResponseDto{
+
+        @ApiModelProperty(value="요청에 따른 상태코드")
         HttpStatus status;
+
+        @ApiModelProperty(value="상태코드 설명")
         String message;
+
+        @ApiModelProperty(value="포스트 고유 넘버")
+        int postId;
 
     }
 
@@ -31,8 +43,13 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @ApiModel(value="포스트 읽기 요청 반환 DTO")
     public static class ReadResponseDto{
+        
+        @ApiModelProperty(value="요청에 따른 상태코드")
         HttpStatus status;
+        
+        @ApiModelProperty(value="상태코드 설명")
         String message;
         
         String contents;
@@ -49,19 +66,34 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @ApiModel(value="로그인 요청 반환 DTO")
     public static class LoginResponseDto{
+
+        @ApiModelProperty(value="요청에 따른 상태코드")
         HttpStatus status;
+
+        @ApiModelProperty(value="상태코드 설명")
         String message;
 
-        String accessToken;
+        @ApiModelProperty(value="사용자 고유 넘버")
+        int userId;
+
+        @ApiModelProperty(value="액세스 토큰")
+        String accesstoken;
+
     }
     
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @ApiModel(value="회원가입 요청 반환 DTO")
     public static class SignUpResponseDto{
+
+        @ApiModelProperty(value="요청에 따른 상태코드")
         HttpStatus status;
+
+        @ApiModelProperty(value="상태코드 설명")
         String message;
 
     
