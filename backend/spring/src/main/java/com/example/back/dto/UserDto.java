@@ -20,12 +20,12 @@ import lombok.Setter;
 public class UserDto {
     
     private int id;
-    private String email;
+    private String nickname;
 
     //빌더 패턴
     public Users toEntity() {
         return Users.builder()
-                .email(this.email)
+                .nickname(this.nickname)
                 .build();
     }
 

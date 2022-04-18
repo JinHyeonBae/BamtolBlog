@@ -23,18 +23,18 @@ public class Users {
     @Column(name="created_at", columnDefinition = "datetime")
     private String created_at;
 
-    @Column(name="email")
-    private String email;
+    @Column(name="nickname")
+    private String nickname;
 
     @Builder
     // entity -> dto
-    public Users(String email){
-        this.email = email;
+    public Users(String nickname){
+        this.nickname = nickname;
     }
 
-    public Users(int id, String email){
+    public Users(int id, String nickname){
         this.id = id;
-        this.email = email;
+        this.nickname = nickname;
     }
 
 }

@@ -26,7 +26,7 @@ public interface UserRepository extends JpaRepository<Users, Integer>, InsertCus
     
     public void saveSignUpUserInfo(Users user);
     public Users findById(int id);
-    public Users findByEmail(String email);
+    public Users findByNickname(String nickname);
 
     // public void saveLoginUserInfo(Users dto);
     // public void saveSignUpUserInfo(Users dto);
