@@ -4,9 +4,8 @@ import shortid from 'shortid';
 
 export const loadPost = createAsyncThunk(
   "post/loadPost",
-  async (loadPostData) =>{
-
-    const response = await Axios.post(`api/getPostData`, loadPostData);
+  async (postId) =>{
+    const response = await Axios.get(`posts/${postId}`);
     return response.data;
   }
 )

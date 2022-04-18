@@ -7,7 +7,7 @@ import Contents from './Contents';
 
 const Post = ({ temporary = false }) => {
   const dispatch = useDispatch();
-  const {userNickname, postsId} = useParams();
+  const {postId} = useParams();
   const PostData = useSelector(selectPostData);
   const loadPostStatus = useSelector(selectLoadPostStatus);
 
@@ -15,7 +15,7 @@ const Post = ({ temporary = false }) => {
     if(temporary){
       dispatch(loadTempPostContents());
     } else {
-      dispatch(loadPost({userNickname: userNickname, postsId: postsId}));
+      dispatch(loadPost(postId));
     }
   },[])
 
