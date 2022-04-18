@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
+import CryptoJS from 'crypto-js';
 import useInput from "../../hooks/useInput";
 import { signup, checkEmailDuplicate, checkNicknameDuplicate,
   setSignupStatusIdle, setEmailDuplicateStatusIdle, setNicknameDuplicateStatusIdle,
@@ -156,10 +157,9 @@ const SignUp = () => {
       return ;
     }
 
-    //암호화
     const body = {
       email: Email,
-      password: Password,
+      password: CryptoJS.AES.encrypt(Password, process.env.REACT_APP_SECRET_KEY).toString(),
       nickname: Nickname
     }
     dispatch(signup(body));
