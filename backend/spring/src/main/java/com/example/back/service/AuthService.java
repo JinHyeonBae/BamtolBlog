@@ -27,6 +27,7 @@ import com.example.back.security.JwtProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -110,13 +111,6 @@ public class AuthService {
 
     }
 
-    
-    // 유저를 조회하고, 토큰과 리프레쉬 토큰을 생성하는 서비스
-
-    private void saveToken(String token, int userId){ 
-        urAuthRepo.saveUserToken(UserAuth.builder().token(token).userId(userId).build());
-    }
-
 
     public LoginResponseDto login(LoginDto loginDto) throws AuthenticationException{
         
@@ -124,7 +118,7 @@ public class AuthService {
 
         try{
             UserInformation userInfo = urInfoRepo.findByEmail(loginDto.getEmail());
-
+            System.out.println("login Email :" + loginDto.getEmail());
             if(!loginDto.getPassword().equals(userInfo.getPassword())){
                 loginResponseDto.setStatus(HttpStatus.FORBIDDEN);
                 loginResponseDto.setMessage("비밀번호가 일치하지 않습니다.");
@@ -133,9 +127,11 @@ public class AuthService {
             }
 
             HashMap<String, String> createToken = createTokenReturn(loginDto, userInfo.getUserId());
-            loginResponseDto.setAccessToken(createToken.get("accessToken"));
+            loginResponseDto.setAccesstoken(createToken.get("accessToken"));
             loginResponseDto.setStatus(HttpStatus.OK);
             loginResponseDto.setMessage("로그인 되었습니다.");
+            loginResponseDto.setUserId(userInfo.getUserId());
+            // 추후에 security 추가하면 없어질 코드
 
             System.out.println("로그 확인");
             //saveToken(createToken.get("accessToken"), userInfo.getUserId());
@@ -171,11 +167,16 @@ public class AuthService {
     }
 
     // 보안적인 면에서 String 자체를 넘기는 게 괜찮을까
-    public boolean isValidToken(String token){
-        
-        if(jwtProvider.validateJwtToken(token)){
-            
-            String email = jwtProvider.getUserInfo(token);
+    public boolean isValidToken(String cookie){
+
+        String Cookies[] = cookie.split("=");
+        String token[] = Cookies[1].split(";");
+
+        if(jwtProvider.validateJwtToken(token[0])){
+            System.out.println("validation 통과!");
+
+            String email = jwtProvider.getUserInfo(token[0]);
+            System.out.println("Email :" + email);
             UserInformation userAuths = urInfoRepo.findByEmail(email);  
             
             if(userAuths == null){
