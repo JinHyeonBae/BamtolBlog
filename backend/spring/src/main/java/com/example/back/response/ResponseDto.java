@@ -45,6 +45,27 @@ public class ResponseDto {
 
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LoginResponseDto{
+        HttpStatus status;
+        String message;
+
+        String accessToken;
+    }
+    
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SignUpResponseDto{
+        HttpStatus status;
+        String message;
+
+    
+    }
     
 
 }
