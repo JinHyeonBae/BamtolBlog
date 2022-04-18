@@ -1,6 +1,7 @@
 package com.example.back.service;
 
 import java.nio.channels.AlreadyBoundException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import javax.transaction.Transactional;
 
 import com.example.back.dto.AuthDto;
 import com.example.back.dto.UserDto;
+import com.example.back.dto.AuthDto.LoginDto;
+import com.example.back.dto.AuthDto.SignUpDto;
 import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.UserPermission;
@@ -18,9 +21,12 @@ import com.example.back.repository.UserAuthRepository;
 import com.example.back.repository.UserInformationRepository;
 import com.example.back.repository.UserPermissionReposotiry;
 import com.example.back.repository.UserRepository;
+import com.example.back.response.ResponseDto.LoginResponseDto;
+import com.example.back.response.ResponseDto.SignUpResponseDto;
 import com.example.back.security.JwtProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,15 +35,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import io.swagger.annotations.ApiResponse;
-import javassist.NotFoundException;
 
 @Service
 public class AuthService {
+
     @Autowired  
     private JwtProvider jwtProvider;
   
-    // db로 아이디 값을 체크하면 끝
     @Autowired
     UserRepository urRepo;
 
@@ -53,25 +57,38 @@ public class AuthService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    public HttpStatus SignUp(AuthDto.SignUpDto signUpDto){
+    public SignUpResponseDto SignUp(SignUpDto signUpDto){
 
-        System.out.println("Test email is :" + signUpDto.getEmail());
-        // users 테이블에서 email을 가져옴
-        Users isUser = urRepo.findByEmail(signUpDto.getEmail());
-    
-        if(isUser != null){
-            System.out.println("get user Email at DB ! :"+ isUser.getEmail());
-            return HttpStatus.CONFLICT;
+        System.out.println("Test nickname is :" + signUpDto.getNickname());
+        // users 테이블에서 nickname 가져옴
+        Users isExistNickname = urRepo.findByNickname(signUpDto.getNickname());
+        UserInformation isExistUserEmail = urInfoRepo.findByEmail(signUpDto.getEmail());
+
+        SignUpResponseDto signUpResponseDto = new SignUpResponseDto();
+        
+        //이메일, 닉네임 고유함
+        if(isExistNickname != null){
+            System.out.println("get user nickname at DB ! :"+ isExistNickname.getNickname());
+            signUpResponseDto.setStatus(HttpStatus.CONFLICT);
+            signUpResponseDto.setMessage("이미 있는 닉네임입니다.");
+
+            return signUpResponseDto;
         }
 
+        if(isExistUserEmail != null){
+            System.out.println("get user email at DB ! :"+ isExistUserEmail.getNickname());
+            signUpResponseDto.setStatus(HttpStatus.CONFLICT);
+            signUpResponseDto.setMessage("이미 있는 이메일입니다.");
+
+            return signUpResponseDto;
+        }
 
         try{    
-            urRepo.saveSignUpUserInfo(new Users(signUpDto.getEmail()));
+            urRepo.saveSignUpUserInfo(new Users(signUpDto.getNickname()));
+            Users users = urRepo.findByNickname(signUpDto.getNickname());
             
-            Users users = urRepo.findByEmail(signUpDto.getEmail());
-            String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
-
-            signUpDto.setPassword(encodedPassword);
+            //이미 클라이언트에서 암호화된 데이터
+            signUpDto.setPassword(signUpDto.getPassword());
             signUpDto.setUserId(users.getId());
             
             // users, user_information에 데이터 삽입
@@ -81,63 +98,70 @@ public class AuthService {
             // user_permission 테이블에 refresh token save
         }
         catch(Exception e){
-            System.out.println("exception :" + e.getMessage());
+            System.out.println("exception 내용은:" + e.getMessage());
+            signUpResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            signUpResponseDto.setMessage("내부 서버 에러입니다.");
         }
 
-        return HttpStatus.CREATED;
+        signUpResponseDto.setStatus(HttpStatus.CREATED);
+        signUpResponseDto.setMessage("회원가입 되셨습니다.");
+
+        return signUpResponseDto;
+
     }
 
     
     // 유저를 조회하고, 토큰과 리프레쉬 토큰을 생성하는 서비스
 
-    private void saveToken(String token){ 
-        urAuthRepo.saveUserToken(UserAuth.builder().token(token).build());
+    private void saveToken(String token, int userId){ 
+        urAuthRepo.saveUserToken(UserAuth.builder().token(token).userId(userId).build());
     }
 
-    public HashMap<String, String> login(AuthDto.LoginDto loginDto) throws AuthenticationException{
-        HashMap<String, String> result = new HashMap<String, String>();
 
-        System.out.println("loginDto :"+ loginDto);
-
-        System.out.println("loginDto password :"+ loginDto.getPassword());
+    public LoginResponseDto login(LoginDto loginDto) throws AuthenticationException{
         
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
+
         try{
-            // authenticationManager.authenticate(
-            //     new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
-            System.out.println("여기");
-            UserInformation users = urInfoRepo.findByEmail(loginDto.getEmail());
+            UserInformation userInfo = urInfoRepo.findByEmail(loginDto.getEmail());
 
-            System.out.println("저기");
-            if(users == null){
-                result.put("404", "존재하지 않는 아이디입니다.");
-                return result;
+            if(!loginDto.getPassword().equals(userInfo.getPassword())){
+                loginResponseDto.setStatus(HttpStatus.FORBIDDEN);
+                loginResponseDto.setMessage("비밀번호가 일치하지 않습니다.");
+
+                return loginResponseDto;
             }
 
-            if(!passwordEncoder.matches(loginDto.getPassword(), users.getPassword())){
-                System.out.println("비밀번호 에러 :"+loginDto.getEmail());
-                result.put("401", "비밀번호가 일치하지 않습니다.");
-                return result;
-            }
+            HashMap<String, String> createToken = createTokenReturn(loginDto, userInfo.getUserId());
+            loginResponseDto.setAccessToken(createToken.get("accessToken"));
+            loginResponseDto.setStatus(HttpStatus.OK);
+            loginResponseDto.setMessage("로그인 되었습니다.");
 
-            HashMap<String, String> createToken = createTokenReturn(loginDto, users.getUserId());
-            result.put("accessToken", createToken.get("accessToken"));
-            saveToken(createToken.get("accessToken"));
+            System.out.println("로그 확인");
+            //saveToken(createToken.get("accessToken"), userInfo.getUserId());
 
         }
-
+        // 유저가 없는 경우
+        catch(NullPointerException e){
+            loginResponseDto.setStatus(HttpStatus.NOT_FOUND);
+            loginResponseDto.setMessage("존재하지 않는 아이디입니다.");
+            
+            return loginResponseDto;
+        }
         catch(Exception e){
-            e.printStackTrace();
-            throw new AuthenticationException();
+            System.out.println(e.getMessage());
+            loginResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            loginResponseDto.setMessage("서버 에러");
         }
 
-        return result;
+        return loginResponseDto;
     }
 
     private HashMap<String, String> createTokenReturn(AuthDto.LoginDto loginDto, int userId){
         HashMap<String, String> result = new HashMap<>();
 
         String accessToken = jwtProvider.createAccessToken(loginDto, userId);
-        System.out.println("createToken ! :" + accessToken);
+        System.out.println("createToken !");
         // String refreshToken = jwtProvider.createAccessToken(loginDto).get("refreshToken");
         // String refreshTokenExpirationAt = jwtProvider.createRepreshToken(loginDto).get("refreshExpireationAt");
 
