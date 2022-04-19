@@ -2,8 +2,9 @@ package com.example.back.dto;
 
 import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
-import com.example.back.model.user.Users;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,8 +17,13 @@ public class AuthDto{
     @Setter
     @NoArgsConstructor
     // 이메일과 패스워드가 맞는 지를 확인하는 용도
+
+    @ApiModel
     public static class LoginDto{
+
+        @ApiModelProperty(value="이메일")
         String email;
+        @ApiModelProperty(value="비밀번호")
         String password;
 
         public LoginDto(String email, String password){
@@ -35,11 +41,18 @@ public class AuthDto{
     
     @Getter
     @Setter
+    @ApiModel
     public static class SignUpDto{
+
+        @ApiModelProperty(value="이메일")
         String email;
+        @ApiModelProperty(value="패스워드")
         String password;
+        @ApiModelProperty(value="이름")
         String name;
+        @ApiModelProperty(value="닉네임")
         String nickname;
+        @ApiModelProperty(value="사용자 고유 번호")
         int userId;
 
         //dto -> entity
@@ -56,9 +69,11 @@ public class AuthDto{
 
     public static class TokenDto{
         String token;
+        int userId;
 
         public UserAuth toEntity(){
             return UserAuth.builder()
+                .userId(this.userId)
                 .token(this.token)
                 .build();
         }        

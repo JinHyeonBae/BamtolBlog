@@ -1,6 +1,5 @@
 package com.example.back.repository;
 
-import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 
 import org.springframework.data.jpa.repository.JpaRepository;
