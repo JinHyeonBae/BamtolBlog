@@ -4,11 +4,9 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.annotation.Resource;
 import javax.persistence.EntityManager;
-import javax.transaction.UserTransaction;
+import javax.persistence.PersistenceContext;
 
-import com.example.back.dto.AuthDto;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
@@ -17,22 +15,24 @@ import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.back.config.JPAConfiguration;
 
 @Repository
 @Transactional
 public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     
+    //EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("mainEntityManager");
     @Autowired
-    @Qualifier("entityManagerBean")
+    @PersistenceContext
     EntityManager entityManager;
 
+
     @Override
+    @Modifying
     @Transactional
     public void saveSignUpUserInfo(UserInformation userInfo){
         //entityManager.flush();
@@ -54,16 +54,16 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
         String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         //System.out.println("this");
         
-            entityManager.createNativeQuery("Insert into users(created_at, nickname) values(?, ?)")
-                        .setParameter(1, formatedNow)
-                        .setParameter(2, user.getNickname())
-                        .executeUpdate();
-
-        
+        entityManager.createNativeQuery("Insert into users(created_at, nickname) values(?, ?)")
+                    .setParameter(1, formatedNow)
+                    .setParameter(2, user.getNickname())
+                    .executeUpdate();
+    
 
     }
 
     @Override
+    @Modifying
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveUserToken(UserAuth token){
         entityManager.createNativeQuery("Insert into user_auth(token, user_id) values(?,?)")
@@ -73,33 +73,51 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     }
 
     @Override
+    @Modifying
     @Transactional
     public void savePostPermission(PostPermission permission){
+
         entityManager.createNativeQuery("Insert into post_permission(permission_id, post_id, user_id) values(?,?,?)")
                     .setParameter(1, permission.getPermissionId())
                     .setParameter(2, permission.getPostId())
                     .setParameter(3, permission.getUserId())
                     .executeUpdate();
+
+            
     }
 
     @Override
     @Transactional
     public void savePostInformation(PostInformation postInfo) throws SQLException{
-        entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=? where user_id = ?")
-                    .setParameter(1, postInfo.getContents())
-                    .setParameter(2, postInfo.getDisplayLevel())
-                    .setParameter(3, postInfo.getTitle())
-                    .setParameter(4, postInfo.getUserId())
-                    .executeUpdate();
-        
+        //entityManager.getTransaction().begin(); //Update
+
+        //getPrice로 넣어도 어차피 display level 기준으로 권한을 검사하니까 0만 아니면 되는 거 아님?
+        System.out.println(postInfo);
+        try{
+            entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=?, is_charged=? where user_id = ?")
+                        .setParameter(1, postInfo.getContents())
+                        .setParameter(2, postInfo.getDisplayLevel())
+                        .setParameter(3, postInfo.getTitle())
+                        .setParameter(4, postInfo.getIsCharged())
+                        .setParameter(5, postInfo.getUserId())
+                        .executeUpdate();
+            entityManager.flush();
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+        //entityManager.flush();
+
     }
 
     @Override
+    @Modifying
     @Transactional
     public void savePosts(Posts post) throws SQLException{
         entityManager.createNativeQuery("insert into posts(user_id) values(?)")
                     .setParameter(1, post.getUserId())
                     .executeUpdate();
+
     }
 
     
