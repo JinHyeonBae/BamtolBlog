@@ -1,23 +1,15 @@
 package com.example.back.config;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -38,9 +30,9 @@ public class JPAConfiguration{
         return DataSourceBuilder.create()
                                 .url("jdbc:mysql://localhost:3307/blogTest?useSSL=false&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul")
                                 
-                                .password("ㅔㅁㄴㄴ")
-                                .username("ㄴㄴㄹㅇ")
-                                .build();  
+                                .password("test")
+                                .username("1234abcd")
+                                .build(); 
     }  
 
 

@@ -1,21 +1,13 @@
 package com.example.back.service;
 
-import java.nio.channels.AlreadyBoundException;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.naming.AuthenticationException;
-import javax.transaction.Transactional;
 
 import com.example.back.dto.AuthDto;
-import com.example.back.dto.UserDto;
 import com.example.back.dto.AuthDto.LoginDto;
 import com.example.back.dto.AuthDto.SignUpDto;
-import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
-import com.example.back.model.user.UserPermission;
 import com.example.back.model.user.Users;
 import com.example.back.repository.UserAuthRepository;
 import com.example.back.repository.UserInformationRepository;
@@ -26,13 +18,8 @@ import com.example.back.response.ResponseDto.SignUpResponseDto;
 import com.example.back.security.JwtProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -167,6 +154,7 @@ public class AuthService {
     }
 
     // 보안적인 면에서 String 자체를 넘기는 게 괜찮을까
+    // TODO: 함수 이름 변경, 토큰 유효성 검사 로직 수정
     public boolean isValidToken(String cookie){
 
         String Cookies[] = cookie.split("=");
@@ -178,6 +166,7 @@ public class AuthService {
             String email = jwtProvider.getUserInfo(token[0]);
             System.out.println("Email :" + email);
             UserInformation userAuths = urInfoRepo.findByEmail(email);  
+            
             
             if(userAuths == null){
                 throw new UsernameNotFoundException("User "+ email + " Not Found");

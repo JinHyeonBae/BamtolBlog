@@ -1,6 +1,5 @@
 package com.example.back.repository;
 
-import java.util.List;
 
 import com.example.back.model.user.UserPermission;
 

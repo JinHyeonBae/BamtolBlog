@@ -1,15 +1,11 @@
 package com.example.back.dto;
 
 import com.example.back.model.user.Users;
-import com.example.back.service.Role;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Data
 @Getter

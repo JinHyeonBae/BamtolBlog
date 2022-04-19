@@ -2,7 +2,6 @@ package com.example.back.dto;
 
 import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
-import com.example.back.model.user.Users;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

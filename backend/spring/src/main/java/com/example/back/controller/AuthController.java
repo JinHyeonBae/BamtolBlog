@@ -1,18 +1,9 @@
 package com.example.back.controller;
 
-import java.util.HashMap;
-import java.util.List;
 
 import javax.naming.AuthenticationException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.example.back.dto.AuthDto;
-import com.example.back.dto.UserDto;
 import com.example.back.dto.AuthDto.LoginDto;
 import com.example.back.dto.AuthDto.SignUpDto;
-import com.example.back.model.user.Users;
 import com.example.back.response.ResponseDto.LoginResponseDto;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
 import com.example.back.service.AuthService;
@@ -22,9 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.BodyBuilder;
-import org.springframework.http.StreamingHttpOutputMessage.Body;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -35,7 +23,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import io.swagger.models.Response;
 
 @RestController
 @Api("/auth")
@@ -52,7 +39,7 @@ public class AuthController {
     })
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/auth/signup")
-    // @ResponseBody Error : 
+    // @ResponseBody Error 
     public ResponseEntity<SignUpResponseDto> signUp(SignUpDto signUpDto){
         
         SignUpResponseDto signUpResult = auth.SignUp(signUpDto);
