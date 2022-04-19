@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostPermissionRepository extends JpaRepository<PostPermission, Integer>, InsertCustomRepository{
     
+    public PostPermission findByUserIdAndPostId(int userId, int postId);
+
     public void savePostPermission(PostPermission permission);
     public PostPermission findById(int id);
 }

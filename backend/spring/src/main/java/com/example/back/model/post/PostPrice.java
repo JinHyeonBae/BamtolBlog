@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -21,4 +22,9 @@ public class PostPrice {
     
     @Column(name="price")
     private int price;
+
+    @Builder
+    public PostPrice(int price){
+        this.price = price;
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.back.dto;
 
 import com.example.back.model.post.PostInformation;
+import com.example.back.model.post.PostPrice;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -57,13 +58,21 @@ public class PostDto {
         @ApiModelProperty(value="현재 포스트를 생성하려는 유저의 고유 넘버")
         int userId;
 
-        public PostInformation toEntity(){
+        public PostInformation PostInfoToEntity(){
             return PostInformation.builder()
                                 .title(this.title)
                                 .contents(this.contents)
                                 .displayLevel(this.displayLevel)
                                 .userId(this.userId)
+                                .isCharged(this.price)
                                 .build();
+        
+        }
+
+        public PostPrice PostPriceToEntity(){
+            return PostPrice.builder()
+                            .price(this.price)
+                            .build();
         }
     }
 
