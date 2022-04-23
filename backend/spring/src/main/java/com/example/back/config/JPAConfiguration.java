@@ -28,10 +28,9 @@ public class JPAConfiguration{
     public DataSource dataSource() {
 
         return DataSourceBuilder.create()
-                                .url("jdbc:mysql://localhost:3307/blogTest?useSSL=false&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul")
-                                
-                                .password("test")
-                                .username("1234abcd")
+                                .url("jdbc:mysql://url")
+                                .username("id")
+                                .password("password")
                                 .build(); 
     }  
 
