@@ -73,7 +73,6 @@ public class PostService {
             System.out.println("권한을 충족하였습니다.");
             try{
                 PostInformation cpPostInformation = createPostInfo.PostInfoToEntity();
-                cpPostInformation.setIsCharged(createPostInfo.getPrice());
                 
                 postsRepository.savePosts(new Posts(publisherUserId));
                 postInformationRepository.savePostInformation(cpPostInformation);
