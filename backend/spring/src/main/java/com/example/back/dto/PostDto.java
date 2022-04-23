@@ -64,7 +64,7 @@ public class PostDto {
                                 .contents(this.contents)
                                 .displayLevel(this.displayLevel)
                                 .userId(this.userId)
-                                .isCharged(this.price)
+                                .price(this.price)
                                 .build();
         
         }

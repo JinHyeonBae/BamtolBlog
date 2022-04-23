@@ -1,7 +1,6 @@
 package com.example.back;
 
 import javax.naming.NoPermissionException;
-import javax.transaction.Transactional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -49,6 +48,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @SpringBootTest
@@ -119,7 +119,7 @@ public class ServiceTest {
                         .title("테스트1")
                         .contents("testPostInfo_1로 진행하는 테스트입니다.")
                         .displayLevel("public")
-                        .isCharged(price)
+                        .price(price)
                         .userId(22)
                         .postId(1)
                         .build();
@@ -146,7 +146,7 @@ public class ServiceTest {
                         .title("테스트2")
                         .contents("testPostInfo_2로 진행하는 테스트입니다.")
                         .displayLevel("private")
-                        .isCharged(price)
+                        .price(price)
                         .userId(23)
                         .postId(2)
                         .build();
@@ -171,7 +171,7 @@ public class ServiceTest {
                         .title("테스트3")
                         .contents("testPostInfo_3으로 진행하는 테스트입니다.")
                         .displayLevel("private")
-                        .isCharged(price)
+                        .price(price)
                         .userId(2)
                         .postId(3)
                         .build();
