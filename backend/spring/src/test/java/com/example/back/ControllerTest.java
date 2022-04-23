@@ -80,7 +80,7 @@ public class ControllerTest {
                         .title("테스트1")
                         .contents("testPostInfo_1로 진행하는 테스트입니다.")
                         .displayLevel("public")
-                        .isCharged(price)
+                        .price(price)
                         .userId(22)
                         .build();
 
@@ -88,7 +88,7 @@ public class ControllerTest {
                         .title("테스트2")
                         .contents("testPostInfo_2로 진행하는 테스트입니다.")
                         .displayLevel("private")
-                        .isCharged(price)
+                        .price(price)
                         .userId(23)
                         .build();
 

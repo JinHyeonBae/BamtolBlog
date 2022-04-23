@@ -43,8 +43,8 @@ public class PostInformation {
     @Column(name="display_level")
     private String displayLevel;
 
-    @Column(name="is_charged", columnDefinition = "integer")
-    private Integer isCharged;
+    @Column(name="price", columnDefinition = "integer")
+    private Integer price;
 
     @Builder
     public PostInformation(String title, String contents, String displayLevel, int userId){
@@ -55,11 +55,11 @@ public class PostInformation {
     }
 
     @Builder
-    public PostInformation(String title, String contents, String displayLevel, int isCharged, int postId, int userId){
+    public PostInformation(String title, String contents, String displayLevel, int price, int postId, int userId){
         this.title = title;
         this.contents = contents;
         this.displayLevel = displayLevel;
-        this.isCharged = isCharged;
+        this.price = price;
         this.userId = userId;
         this.postId = postId;
     }

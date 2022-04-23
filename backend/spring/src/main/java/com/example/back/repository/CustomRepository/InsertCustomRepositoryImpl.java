@@ -94,11 +94,11 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
         //getPrice로 넣어도 어차피 display level 기준으로 권한을 검사하니까 0만 아니면 되는 거 아님?
         System.out.println(postInfo);
         try{
-            entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=?, is_charged=? where user_id = ?")
+            entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=?, price=? where user_id = ?")
                         .setParameter(1, postInfo.getContents())
                         .setParameter(2, postInfo.getDisplayLevel())
                         .setParameter(3, postInfo.getTitle())
-                        .setParameter(4, postInfo.getIsCharged())
+                        .setParameter(4, postInfo.getPrice())
                         .setParameter(5, postInfo.getUserId())
                         .executeUpdate();
             entityManager.flush();
