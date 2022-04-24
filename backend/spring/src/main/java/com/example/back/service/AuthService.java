@@ -47,8 +47,9 @@ public class AuthService {
 
     public SignUpResponseDto SignUp(SignUpDto signUpDto){
 
-        System.out.println("Test nickname is :" + signUpDto.getNickname());
-        // users 테이블에서 nickname 가져옴
+        System.out.println("사용자 닉네임 :" + signUpDto.getNickname());
+        
+        // 고유한 값들을 모아놓은 건 어떨까? 생각해보자
         Users isExistNickname = urRepo.findByNickname(signUpDto.getNickname());
         UserInformation isExistUserEmail = urInfoRepo.findByEmail(signUpDto.getEmail());
 
@@ -56,7 +57,7 @@ public class AuthService {
         
         //이메일, 닉네임 고유함
         if(isExistNickname != null){
-            System.out.println("get user nickname at DB ! :"+ isExistNickname.getNickname());
+            System.out.println("데이터베이스에서 똑같은 닉네임 발견! :"+ isExistNickname.getNickname());
             signUpResponseDto.setStatus(HttpStatus.CONFLICT);
             signUpResponseDto.setMessage("이미 있는 닉네임입니다.");
 
@@ -64,7 +65,7 @@ public class AuthService {
         }
 
         if(isExistUserEmail != null){
-            System.out.println("get user email at DB ! :"+ isExistUserEmail.getNickname());
+            System.out.println("데이터베이스에서 똑같은 이메일 발견! :"+ isExistUserEmail.getNickname());
             signUpResponseDto.setStatus(HttpStatus.CONFLICT);
             signUpResponseDto.setMessage("이미 있는 이메일입니다.");
 
@@ -73,14 +74,11 @@ public class AuthService {
 
         try{    
             urRepo.saveSignUpUserInfo(new Users(signUpDto.getNickname()));
-            Users users = urRepo.findByNickname(signUpDto.getNickname());
-            
+
             //이미 클라이언트에서 암호화된 데이터
             signUpDto.setPassword(signUpDto.getPassword());
-            signUpDto.setUserId(users.getId());
             
-            // users, user_information에 데이터 삽입
-            //System.out.println("last idx :" + lastIdx);
+            //users, user_information에 데이터 삽입
             urInfoRepo.saveSignUpUserInfo(signUpDto.toEntity());
 
             // user_permission 테이블에 refresh token save
@@ -126,6 +124,7 @@ public class AuthService {
         }
         // 유저가 없는 경우
         catch(NullPointerException e){
+            System.out.println("NULL ERROR");
             loginResponseDto.setStatus(HttpStatus.NOT_FOUND);
             loginResponseDto.setMessage("존재하지 않는 아이디입니다.");
             

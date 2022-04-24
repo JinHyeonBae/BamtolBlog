@@ -52,8 +52,6 @@ public class AuthDto{
         String name;
         @ApiModelProperty(value="닉네임")
         String nickname;
-        @ApiModelProperty(value="사용자 고유 번호")
-        int userId;
 
         //dto -> entity
         public UserInformation toEntity() {
@@ -62,7 +60,6 @@ public class AuthDto{
                     .password(this.password)
                     .name(this.name)
                     .nickname(this.nickname)
-                    .userId(this.userId)
                     .build();
         }
     }
