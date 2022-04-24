@@ -25,24 +25,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     
-    //EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("mainEntityManager");
     @Autowired
     @PersistenceContext
     EntityManager entityManager;
 
-
+    //겹치는 아이디가 있으면 그것도 에러 처리를 해야한다.
     @Override
     @Modifying
     @Transactional
     public void saveSignUpUserInfo(UserInformation userInfo){
         //entityManager.flush();
-        
-        entityManager.createNativeQuery("Update user_information set email=?, password=?, nickname=?, name=? WHERE user_id = ?")
+        String sql = "Insert into user_information(email, password, nickname, name, user_id) VALUES(?,?,?,?, (SELECT id from users where nickname=?))";
+        entityManager
+        .createNativeQuery(sql)
                     .setParameter(1, userInfo.getEmail())
                     .setParameter(2, userInfo.getPassword())
                     .setParameter(3, userInfo.getNickname())
                     .setParameter(4, userInfo.getName())
-                    .setParameter(5, userInfo.getUserId())
+                    .setParameter(5, userInfo.getNickname())
                     .executeUpdate();
         
     }
@@ -52,7 +52,7 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     public void saveSignUpUserInfo(Users user) throws SQLException{
         LocalDateTime now = LocalDateTime.now();
         String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        //System.out.println("this");
+        System.out.println("this");
         
         entityManager.createNativeQuery("Insert into users(created_at, nickname) values(?, ?)")
                     .setParameter(1, formatedNow)
@@ -91,8 +91,6 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     public void savePostInformation(PostInformation postInfo) throws SQLException{
         //entityManager.getTransaction().begin(); //Update
 
-        //getPrice로 넣어도 어차피 display level 기준으로 권한을 검사하니까 0만 아니면 되는 거 아님?
-        System.out.println(postInfo);
         try{
             entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=?, price=? where user_id = ?")
                         .setParameter(1, postInfo.getContents())
