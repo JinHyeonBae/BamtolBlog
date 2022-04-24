@@ -40,8 +40,8 @@ public class AuthController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/auth/signup")
     // @ResponseBody Error 
-    public ResponseEntity<SignUpResponseDto> signUp(SignUpDto signUpDto){
-        
+    public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
+
         SignUpResponseDto signUpResult = auth.SignUp(signUpDto);
         HttpStatus signStatus = signUpResult.getStatus();
         ResponseEntity<SignUpResponseDto> responseEntity = ResponseEntity.status(signStatus).body(signUpResult);
@@ -74,6 +74,7 @@ public class AuthController {
         
         ResponseCookie responseCookie = ResponseCookie.from("access_Token", loginResponseDto.getAccesstoken())
                 .httpOnly(true)
+                .sameSite("None")
                 .secure(true)
                 .maxAge(60*60*24) // 1일
                 .build();
