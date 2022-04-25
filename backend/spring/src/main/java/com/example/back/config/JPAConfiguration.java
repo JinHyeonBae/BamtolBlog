@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableJpaRepositories("com.example.back.repository")
 public class JPAConfiguration{
-    
 
 
     @Primary  
@@ -28,9 +27,9 @@ public class JPAConfiguration{
     public DataSource dataSource() {
 
         return DataSourceBuilder.create()
-                                .url("jdbc:mysql://url")
-                                .username("id")
-                                .password("password")
+                                .url("jdbc:mysql://125.134.138.184:3306/bamtolBlog?useSSL=false&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul")
+                                .username("bamtol")
+                                .password("Bamtol1234!")
                                 .build(); 
     }  
 
