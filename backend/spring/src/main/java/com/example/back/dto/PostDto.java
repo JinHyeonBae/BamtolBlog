@@ -1,7 +1,6 @@
 package com.example.back.dto;
 
 import com.example.back.model.post.PostInformation;
-import com.example.back.model.post.PostPrice;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -67,12 +66,6 @@ public class PostDto {
                                 .price(this.price)
                                 .build();
         
-        }
-
-        public PostPrice PostPriceToEntity(){
-            return PostPrice.builder()
-                            .price(this.price)
-                            .build();
         }
     }
 

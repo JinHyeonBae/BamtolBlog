@@ -18,7 +18,7 @@ public class AuthDto{
     @NoArgsConstructor
     // 이메일과 패스워드가 맞는 지를 확인하는 용도
 
-    @ApiModel
+    @ApiModel(value="로그인 요청 DTO 규격")
     public static class LoginDto{
 
         @ApiModelProperty(value="이메일")
@@ -41,7 +41,7 @@ public class AuthDto{
     
     @Getter
     @Setter
-    @ApiModel
+    @ApiModel(value="회원가입 요청 DTO 규격")
     public static class SignUpDto{
 
         @ApiModelProperty(value="이메일")

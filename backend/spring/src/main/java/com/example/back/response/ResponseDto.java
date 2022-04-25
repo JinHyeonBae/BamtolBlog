@@ -15,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 
+// 동일한 건 통일성 있도록 묶는다.
 public class ResponseDto {
 
     HttpStatus status;
@@ -25,7 +26,7 @@ public class ResponseDto {
     @AllArgsConstructor
     @NoArgsConstructor
 
-    @ApiModel(value="포스트 생성 요청 반환 DTO")
+    @ApiModel(value="포스트 생성 응답 DTO")
     public static class CreateResponseDto{
 
         @ApiModelProperty(value="요청에 따른 상태코드")
@@ -43,7 +44,7 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    @ApiModel(value="포스트 읽기 요청 반환 DTO")
+    @ApiModel(value="포스트 읽기 응답 DTO")
     public static class ReadResponseDto{
         
         @ApiModelProperty(value="요청에 따른 상태코드")
@@ -66,7 +67,7 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    @ApiModel(value="로그인 요청 반환 DTO")
+    @ApiModel(value="로그인 응답 DTO")
     public static class LoginResponseDto{
 
         @ApiModelProperty(value="요청에 따른 상태코드")
@@ -87,7 +88,7 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    @ApiModel(value="회원가입 요청 반환 DTO")
+    @ApiModel(value="회원가입 응답 DTO")
     public static class SignUpResponseDto{
 
         @ApiModelProperty(value="요청에 따른 상태코드")
@@ -95,9 +96,7 @@ public class ResponseDto {
 
         @ApiModelProperty(value="상태코드 설명")
         String message;
-
     
     }
-    
 
 }

@@ -1,6 +1,15 @@
 package com.example.back.model.post;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import javax.persistence.*;
+
+import com.example.back.model.user.Users;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +23,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "post_information")
+@EntityListeners(AuditingEntityListener.class) 
+@Table(name="post_information")
 public class PostInformation {
     
     @Id
@@ -35,10 +45,12 @@ public class PostInformation {
     private String contents;
 
     @Column(name="created_at", columnDefinition = "datetime")
-    private String createdAt;
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     @Column(name="updated_at", columnDefinition = "datetime")
-    private String updatedAt;
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
     @Column(name="display_level")
     private String displayLevel;
@@ -64,5 +76,14 @@ public class PostInformation {
         this.postId = postId;
     }
 
+    // 연관관계
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
+    Users user;
+
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(referencedColumnName="id", insertable = false, updatable = false)
+    Posts post;
 
 }

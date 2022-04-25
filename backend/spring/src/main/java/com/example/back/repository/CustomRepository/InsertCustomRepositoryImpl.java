@@ -1,6 +1,7 @@
 package com.example.back.repository.CustomRepository;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -29,33 +30,37 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @PersistenceContext
     EntityManager entityManager;
 
+
+    public String getCurrentTime(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
     //겹치는 아이디가 있으면 그것도 에러 처리를 해야한다.
     @Override
     @Modifying
     @Transactional
     public void saveSignUpUserInfo(UserInformation userInfo){
-        //entityManager.flush();
-        String sql = "Insert into user_information(email, password, nickname, name, user_id) VALUES(?,?,?,?, (SELECT id from users where nickname=?))";
-        entityManager
-        .createNativeQuery(sql)
-                    .setParameter(1, userInfo.getEmail())
-                    .setParameter(2, userInfo.getPassword())
-                    .setParameter(3, userInfo.getNickname())
-                    .setParameter(4, userInfo.getName())
-                    .setParameter(5, userInfo.getNickname())
-                    .executeUpdate();
-        
+
+        String nickname = userInfo.getNickname();
+
+        Users new_user = new Users(nickname);
+        new_user.setUserInfo(null);
+        new_user.setUserAuth(null);
+        entityManager.persist(new_user); 
+
+        //UserInformation new_userInfo = userInfo;
+        userInfo.setUserId(new_user.getId());
+        entityManager.persist(userInfo);
+        entityManager.flush();
     }
 
     @Override
     @Transactional
     public void saveSignUpUserInfo(Users user) throws SQLException{
-        LocalDateTime now = LocalDateTime.now();
-        String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        System.out.println("this");
-        
+
+        String currentTime = this.getCurrentTime();
         entityManager.createNativeQuery("Insert into users(created_at, nickname) values(?, ?)")
-                    .setParameter(1, formatedNow)
+                    .setParameter(1, currentTime)
                     .setParameter(2, user.getNickname())
                     .executeUpdate();
     
@@ -77,44 +82,52 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Transactional
     public void savePostPermission(PostPermission permission){
 
-        entityManager.createNativeQuery("Insert into post_permission(permission_id, post_id, user_id) values(?,?,?)")
+        String sql = "INSERT INTO post_permission(permission_id, post_id, user_id) VALUES(?,?,(SELECT id from posts WHERE user_id=?))";
+        entityManager.createNativeQuery(sql)
                     .setParameter(1, permission.getPermissionId())
-                    .setParameter(2, permission.getPostId())
+                    .setParameter(2, permission.getUserId())
                     .setParameter(3, permission.getUserId())
                     .executeUpdate();
-
-            
-    }
-
-    @Override
-    @Transactional
-    public void savePostInformation(PostInformation postInfo) throws SQLException{
-        //entityManager.getTransaction().begin(); //Update
-
-        try{
-            entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=?, price=? where user_id = ?")
-                        .setParameter(1, postInfo.getContents())
-                        .setParameter(2, postInfo.getDisplayLevel())
-                        .setParameter(3, postInfo.getTitle())
-                        .setParameter(4, postInfo.getPrice())
-                        .setParameter(5, postInfo.getUserId())
-                        .executeUpdate();
-            entityManager.flush();
-        }
-        catch(Exception e){
-            System.out.println(e.getMessage());
-        }
-        //entityManager.flush();
 
     }
 
     @Override
     @Modifying
     @Transactional
-    public void savePosts(Posts post) throws SQLException{
+    public void savePostInformation(PostInformation postInfo) throws SQLException{
+        //entityManager.getTransaction().begin(); //Update
+
+        //
+    }
+
+    @Override
+    @Modifying
+    @Transactional
+    public void savePosts(Posts postInfo) throws SQLException{
+        //posts -> id, post_id
         entityManager.createNativeQuery("insert into posts(user_id) values(?)")
-                    .setParameter(1, post.getUserId())
+                    .setParameter(1, postInfo.getUserId())
                     .executeUpdate();
+
+        // 1. 
+
+        // String postInformation_sql = "INSERT INTO post_information(title, contents, display_level, price, user_id, post_id) VALUES (?,?,?,?,?,?)";
+        // try{
+        //     entityManager.createNativeQuery(postInformation_sql)
+        //                 .setParameter(1, postInfo.getTitle())
+        //                 .setParameter(2, postInfo.getContents())
+        //                 .setParameter(3, postInfo.getDisplayLevel())
+        //                 .setParameter(4, postInfo.getPrice())
+        //                 .setParameter(5, postInfo.getUserId())
+        //                 .setParameter(6, postInfo.getPostId())
+        //                 .executeUpdate();
+        //     entityManager.flush();
+        // }
+        // catch(Exception e){
+        //     System.out.println(e.getMessage());
+        // }
+        //entityManager.flush();
+        
 
     }
 
