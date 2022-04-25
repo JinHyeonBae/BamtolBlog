@@ -3,9 +3,20 @@ import Axios from '../axiosConfig';
 
 export const login = createAsyncThunk(
   "user/login",
-  async (loginData) =>{
-    const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
-    return response.data;
+  async (loginData, { rejectWithValue }) =>{
+    try {
+      const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
+      return response.data;
+    } catch (err) {
+      let error = err;
+      if(!error.response){
+        throw err;
+        }
+        if(error.response.status === 404){
+        error.response.data = '아이디 또는 비밀번호를 잘못 입력했습니다.'
+      }
+      return rejectWithValue(error.response.data);
+    }
   }
 )
 export const signup = createAsyncThunk(
@@ -83,7 +94,7 @@ export const postSlice = createSlice({
     })
     builder.addCase(signup.rejected, (state, action)=> {
       state.signupStatus = 'failed';
-      state.error = action.payload;
+      state.error = action.error;
     })
     builder.addCase(checkEmailDuplicate.pending, (state)=> {
       state.emailDuplicateStatus = 'loading';
@@ -94,7 +105,7 @@ export const postSlice = createSlice({
     })
     builder.addCase(checkEmailDuplicate.rejected, (state, action)=> {
       state.emailDuplicateStatus = 'failed';
-      state.error = action.payload;
+      state.error = action.error;
     })
     builder.addCase(checkNicknameDuplicate.pending, (state)=> {
       state.nicknameDuplicateStatus = 'loading';
@@ -105,7 +116,7 @@ export const postSlice = createSlice({
     })
     builder.addCase(checkNicknameDuplicate.rejected, (state, action)=> {
       state.nicknameDuplicateStatus = 'failed';
-      state.error = action.payload;
+      state.error = action.error;
     })
   }
 });
@@ -126,4 +137,5 @@ export const selectEmailDuplicateStatus = (state) => state.user.emailDuplicateSt
 export const selectEmailNotDuplication = (state) => state.user.emailNotDuplication;
 export const selectNicknameDuplicateStatus = (state) => state.user.nicknameDuplicateStatus;
 export const selectNicknameNotDuplication = (state) => state.user.nicknameNotDuplication;
+export const selectError = (state) => state.user.error;
 

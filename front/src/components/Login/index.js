@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import CryptoJS from 'crypto-js';
 import useInput from '../../hooks/useInput';
-import { login, selectLoginStatus } from './../../_slices/userSlice';
+import { login, selectLoginStatus, selectError } from './../../_slices/userSlice';
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const loginStatus = useSelector(selectLoginStatus);
+  const error = useSelector(selectError);
 
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
@@ -19,7 +20,8 @@ const Login = () => {
     }
   }, [loginStatus])
 
-  const logIn = () => {
+  const logIn = (e) => {
+    e.preventDefault();
     const body = {
       email: email,
       password: CryptoJS.AES.encrypt(password, process.env.REACT_APP_SECRET_KEY).toString(),
@@ -28,15 +30,16 @@ const Login = () => {
   }
 
   return (
-    <>
+    <form onSubmit={logIn}>
       <label htmlFor='email'>Email :</label>
       <input id='email' value={email} onChange={onChangeEmail} />
 
       <label htmlFor='password'>Password :</label>
-      <input id='password' type='password' value={password} onChange={onChangePassword} />
+      <input id='password' type='password' value={password} onChange={onChangePassword} autoComplete="off" />
 
-      <button onClick={logIn}>login</button>
-    </>
+      <button>login</button>
+      {loginStatus === 'failed' && <div className="ErrorMessage">{error}</div>}
+    </form>
   )
 }
 
