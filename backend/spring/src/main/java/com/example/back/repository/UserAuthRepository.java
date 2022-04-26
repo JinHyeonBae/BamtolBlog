@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserAuthRepository extends JpaRepository<UserAuth, Integer>, InsertCustomRepository{
 
 
-    @Transactional
-    public void saveUserToken(UserAuth token);
+    // @Transactional
+    // public void saveUserToken(UserAuth token);
 
     @Query("select * from user_auth where user_id =?")
     public UserAuth findByUserId(int id);

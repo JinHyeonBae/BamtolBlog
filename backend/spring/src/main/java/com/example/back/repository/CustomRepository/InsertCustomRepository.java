@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
-import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
 
 import org.springframework.stereotype.Repository;

@@ -74,22 +74,22 @@ public class AuthController {
             e.printStackTrace();
         }
         
-        // ResponseCookie responseCookie = ResponseCookie.from("access_Token", loginResponseDto.getAccesstoken())
-        //         .httpOnly(true)
-        //         .sameSite("None")
-        //         .secure(true)
-        //         .maxAge(cookieExpiration) // 1일
-        //         .build();
+        ResponseCookie responseCookie = ResponseCookie.from("access_Token", loginResponseDto.getAccesstoken())
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .maxAge(cookieExpiration) // 1일
+                .build();
 
-        // System.out.println(responseCookie.getName());
+        System.out.println(responseCookie.getName());
 
-        // return ResponseEntity.status(loginResponseDto.getStatus()).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(loginResponseDto);
+        return ResponseEntity.status(loginResponseDto.getStatus()).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(loginResponseDto);
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.add("access_Token", loginResponseDto.getAccesstoken());
+        // HttpHeaders responseHeaders = new HttpHeaders();
+        // responseHeaders.add("access_Token", loginResponseDto.getAccesstoken());
         
-        loginResponseDto.setAccesstoken("");
-        return ResponseEntity.status(loginResponseDto.getStatus()).headers(responseHeaders).body(loginResponseDto);
+        // loginResponseDto.setAccesstoken("");
+        // return ResponseEntity.status(loginResponseDto.getStatus()).headers(responseHeaders).body(loginResponseDto);
     }
 
 }
