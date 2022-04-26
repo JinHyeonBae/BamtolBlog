@@ -31,11 +31,11 @@ services:
       dockerfile: docker/spring.dockerfile
     platform: linux/amd64
     ports:
-      - 8080:8081
+      - 8080:8080
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://125.134.138.184:3306/blog?useSSL=false&serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
-      SPRING_DATASOURCE_USERNAME: test
-      SPRING_DATASOURCE_PASSWORD: test1234!
+      SPRING_DATASOURCE_USERNAME: bamtol
+      SPRING_DATASOURCE_PASSWORD: Bamtol1234!
     networks:
       - backend
 
