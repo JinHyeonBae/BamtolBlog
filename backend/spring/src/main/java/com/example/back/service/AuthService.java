@@ -73,7 +73,7 @@ public class AuthService {
         }
 
         try{    
-            urRepo.saveSignUpUserInfo(new Users(signUpDto.getNickname()));
+            //urRepo.saveSignUpUserInfo(new Users(signUpDto.getNickname()));
 
             //이미 클라이언트에서 암호화된 데이터
             signUpDto.setPassword(signUpDto.getPassword());
@@ -87,6 +87,8 @@ public class AuthService {
             System.out.println("exception 내용은:" + e.getMessage());
             signUpResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             signUpResponseDto.setMessage("내부 서버 에러입니다.");
+
+            return signUpResponseDto;
         }
 
         signUpResponseDto.setStatus(HttpStatus.CREATED);

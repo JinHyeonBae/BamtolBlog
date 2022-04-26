@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 public class UserAuth {
 
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
     Users user;
     
@@ -33,13 +33,18 @@ public class UserAuth {
     @Column(name="user_id")
     private int userId;
 
-    @Column(name="token", columnDefinition = "text")
-    private String token;
+    @Column(name="access_token", columnDefinition = "varchar")
+    private String accessToken;
+    
+    @Column(name="refresh_token", columnDefinition = "varchar")
+    private String refreshToken;
+    
 
     @Builder
-    public UserAuth(int userId, String token){
+    public UserAuth(int userId, String accessToken, String refreshToken){
         this.userId = userId;
-        this.token = token;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     // 연관관계

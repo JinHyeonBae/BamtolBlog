@@ -1,7 +1,6 @@
 package com.example.back.repository.CustomRepository;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -11,14 +10,12 @@ import javax.persistence.PersistenceContext;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
-import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -41,11 +38,12 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Transactional
     public void saveSignUpUserInfo(UserInformation userInfo){
 
+        //영속성 컨텍스트는 데이터베이스와 애플리케이션 사이에서 객체를 저장하는 기법
         String nickname = userInfo.getNickname();
 
         Users new_user = new Users(nickname);
-        new_user.setUserInfo(null);
         new_user.setUserAuth(null);
+        new_user.setUserInfo(null);
         entityManager.persist(new_user); 
 
         //UserInformation new_userInfo = userInfo;
@@ -54,28 +52,15 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
         entityManager.flush();
     }
 
-    @Override
-    @Transactional
-    public void saveSignUpUserInfo(Users user) throws SQLException{
-
-        String currentTime = this.getCurrentTime();
-        entityManager.createNativeQuery("Insert into users(created_at, nickname) values(?, ?)")
-                    .setParameter(1, currentTime)
-                    .setParameter(2, user.getNickname())
-                    .executeUpdate();
-    
-
-    }
-
-    @Override
-    @Modifying
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveUserToken(UserAuth token){
-        entityManager.createNativeQuery("Insert into user_auth(token, user_id) values(?,?)")
-                    .setParameter(1, token.getToken())
-                    .setParameter(2, token.getUserId())
-                    .executeUpdate();
-    }
+    // @Override
+    // @Modifying
+    // @Transactional(propagation = Propagation.REQUIRES_NEW)
+    // public void saveUserToken(UserAuth token){
+    //     entityManager.createNativeQuery("Insert into user_auth(token, user_id) values(?,?)")
+    //                 .setParameter(1, token.getToken())
+    //                 .setParameter(2, token.getUserId())
+    //                 .executeUpdate();
+    // }
 
     @Override
     @Modifying
@@ -97,7 +82,15 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     public void savePostInformation(PostInformation postInfo) throws SQLException{
         //entityManager.getTransaction().begin(); //Update
 
-        //
+        // Posts post = new Posts();
+
+        // post.setPostInfo(null);
+        // entityManager.persist(post);
+
+        // int postId = post.getId();
+        // postInfo.setPostId(postId);
+        // entityManager.persist(postInfo);
+        
     }
 
     @Override
