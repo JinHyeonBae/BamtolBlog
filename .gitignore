@@ -1,4 +1,7 @@
 front/node_modules
 
-backend/spring/bin/*
-backend/spring/class/*
+backend/spring/bin
+backend/spring/class
+backend/spring/.gradle
+backend/spring/build/**
+!backend/spring/build/libs
