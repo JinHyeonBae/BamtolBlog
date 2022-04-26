@@ -1,9 +1,10 @@
 package com.example.back.controller;
 
 import javax.naming.NoPermissionException;
+import javax.servlet.http.HttpServletRequest;
 
-import com.example.back.dto.PostDto.createPostDto;
-import com.example.back.dto.PostDto.readPostDto;
+import com.example.back.dto.PostDto.CreatePostDto;
+import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.response.ResponseDto.CreateResponseDto;
 import com.example.back.response.ResponseDto.ReadResponseDto;
 import com.example.back.security.JwtProvider;
@@ -11,13 +12,9 @@ import com.example.back.service.AuthService;
 import com.example.back.service.PostService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.server.Session.Cookie;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,12 +25,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.WebUtils;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ResponseHeader;
-import io.swagger.models.Response;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
@@ -57,37 +51,41 @@ public class PostController {
         @ApiResponse(code = 500, message = "서버 에러")
     })
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<CreateResponseDto> createPost(@RequestHeader HttpHeaders headers, @RequestBody createPostDto body){
+    public ResponseEntity<CreateResponseDto> createPost(HttpServletRequest request){
 
-        System.out.println("header :"+ headers);    
-        String Cookies;
+        System.out.println("Header :" + request.getCookies());
+        
+        // for(int i=0; i<cookies.length; i++){
+        //     System.out.println("cookie :"cookies[i]);
+        // }
 
-        if(headers.getFirst("cookie").contains("JSESSIONID"))
-            Cookies = headers.get("cookie").get(1);
-        else
-            Cookies = headers.get("cookie").get(0);
+        return null;
+        // // if(headers.getFirst("cookie").contains("JSESSIONID"))
+        // //     Cookies = headers.get("cookie").get(1);
+        // // else
+        // //     Cookies = headers.get("cookie").get(0);
         
 
-        System.out.println("String cookie :" + Cookies);
+        // // System.out.println("String cookie :" + Cookies);
         
-        //headers.getCookies();
-        ResponseEntity<CreateResponseDto> responseEntity = null;
+        // // //headers.getCookies();
+        // // ResponseEntity<CreateResponseDto> responseEntity = null;
 
-        if(authService.isValidToken(Cookies)){
-            System.out.println("정확한 토큰");
+        // if(authService.isValidToken(Cookies)){
+        //     System.out.println("정확한 토큰");
 
-            CreateResponseDto result = postService.createPost(body);
-            HttpStatus status = result.getStatus();
+        //     CreateResponseDto result = postService.createPost(body);
+        //     HttpStatus status = result.getStatus();
             
-            responseEntity = ResponseEntity.status(status).body(result);
+        //     responseEntity = ResponseEntity.status(status).body(result);
             
-        }
-        else{
-            CreateResponseDto createDto = new CreateResponseDto(HttpStatus.FORBIDDEN,  "토큰이 유효하지 않습니다.", 0);
-            responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(createDto);
-        }
+        // }
+        // else{
+        //     CreateResponseDto createDto = new CreateResponseDto(HttpStatus.FORBIDDEN,  "토큰이 유효하지 않습니다.", 0);
+        //     responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(createDto);
+        // }
 
-        return responseEntity;
+        // return responseEntity;
     }
 
     //읽기 요청
@@ -99,7 +97,7 @@ public class PostController {
         @ApiResponse(code = 500, message = "서버 에러")
     })
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody readPostDto body) throws NoPermissionException{
+    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody ReadPostDto body) throws NoPermissionException{
         // 먼저 온 토큰으로 userId를 받는다.   
         
         ReadResponseDto readDto = new ReadResponseDto();

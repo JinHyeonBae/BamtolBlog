@@ -37,7 +37,7 @@ public class PostDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @ApiModel
-    public static class createPostDto{
+    public static class CreatePostDto{
 
         @ApiModelProperty(value="포스트 제목")
         String title;
@@ -74,7 +74,7 @@ public class PostDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @ApiModel
-    public static class readPostDto{
+    public static class ReadPostDto{
 
         @ApiModelProperty(value="현재 포스트를 읽으려는 유저의 고유 넘버")
         int userId;

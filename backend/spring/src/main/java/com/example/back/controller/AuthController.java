@@ -1,11 +1,16 @@
 package com.example.back.controller;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.naming.AuthenticationException;
 import com.example.back.dto.AuthDto.LoginDto;
 import com.example.back.dto.AuthDto.SignUpDto;
+import com.example.back.response.ResponseDto;
 import com.example.back.response.ResponseDto.LoginResponseDto;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
+import com.example.back.response.ResponseDto.TokenDto;
 import com.example.back.service.AuthService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +38,15 @@ public class AuthController {
 
     int cookieExpiration = 60*60*24; //1일
 
+    // value
     @ApiOperation(value="회원가입", notes = "사용자 회원가입")
     @ApiResponses({
         @ApiResponse(code = 201, message = "회원가입 성공"),
-        @ApiResponse(code = 409, message = "이미 존재하는 아이디, 혹은 닉네임"),
+        @ApiResponse(code = 409, message = "이미 존재하는 이메일, 혹은 닉네임"),
         @ApiResponse(code = 500, message = "서버 에러")
     })
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/auth/signup")
-    // @ResponseBody Error 
     public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
 
         SignUpResponseDto signUpResult = auth.SignUp(signUpDto);
@@ -65,31 +70,39 @@ public class AuthController {
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponseDto> login(@RequestHeader HttpHeaders headers, @RequestBody LoginDto loginRequest){     
         
+        TokenDto tokenDto = new TokenDto();
+        ResponseCookie responseCookie;
+
         LoginResponseDto loginResponseDto = new LoginResponseDto();
+        List<Object> loginList = new ArrayList<Object>();
         
         try {
-            loginResponseDto = auth.login(loginRequest);
+            loginList = auth.login(loginRequest);
+            loginResponseDto = (LoginResponseDto) loginList.get(0);
+
+            if(loginList.size() != 1) tokenDto = (TokenDto) loginList.get(1);
+            else tokenDto = null;
+
         } catch (AuthenticationException e) {
             System.out.println("Authentication Error:" + e.getMessage());
             e.printStackTrace();
         }
         
-        ResponseCookie responseCookie = ResponseCookie.from("access_Token", loginResponseDto.getAccesstoken())
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .maxAge(cookieExpiration) // 1일
-                .build();
 
-        System.out.println(responseCookie.getName());
+        if(tokenDto != null){
+            responseCookie = ResponseCookie.from("access_Token", tokenDto.getAccessToken())
+                                            .httpOnly(true)
+                                            .sameSite("None")
+                                            .secure(true)
+                                            .maxAge(cookieExpiration) //1일
+                                            .path("/")
+                                            .build();
 
-        return ResponseEntity.status(loginResponseDto.getStatus()).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(loginResponseDto);
-
-        // HttpHeaders responseHeaders = new HttpHeaders();
-        // responseHeaders.add("access_Token", loginResponseDto.getAccesstoken());
-        
-        // loginResponseDto.setAccesstoken("");
-        // return ResponseEntity.status(loginResponseDto.getStatus()).headers(responseHeaders).body(loginResponseDto);
+            return ResponseEntity.status(loginResponseDto.getStatus()).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(loginResponseDto);
+        }
+        else{
+            return ResponseEntity.status(loginResponseDto.getStatus()).body(loginResponseDto);
+        }
     }
 
 }

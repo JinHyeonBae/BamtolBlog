@@ -1,6 +1,8 @@
 package com.example.back.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.naming.AuthenticationException;
 
@@ -13,8 +15,10 @@ import com.example.back.repository.UserAuthRepository;
 import com.example.back.repository.UserInformationRepository;
 import com.example.back.repository.UserPermissionReposotiry;
 import com.example.back.repository.UserRepository;
+import com.example.back.response.ResponseDto;
 import com.example.back.response.ResponseDto.LoginResponseDto;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
+import com.example.back.response.ResponseDto.TokenDto;
 import com.example.back.security.JwtProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,27 +63,35 @@ public class AuthService {
         if(isExistNickname != null){
             System.out.println("데이터베이스에서 똑같은 닉네임 발견! :"+ isExistNickname.getNickname());
             signUpResponseDto.setStatus(HttpStatus.CONFLICT);
-            signUpResponseDto.setMessage("이미 있는 닉네임입니다.");
-
-            return signUpResponseDto;
+            signUpResponseDto.setMessage("이미 존재하는 닉네임입니다");
+            signUpResponseDto.setNicknameDuplicated(true);
         }
 
         if(isExistUserEmail != null){
-            System.out.println("데이터베이스에서 똑같은 이메일 발견! :"+ isExistUserEmail.getNickname());
+            System.out.println("데이터베이스에서 똑같은 이메일 발견! :"+ isExistUserEmail.getEmail());
             signUpResponseDto.setStatus(HttpStatus.CONFLICT);
-            signUpResponseDto.setMessage("이미 있는 이메일입니다.");
+            signUpResponseDto.setEmailDuplicated(true);
 
-            return signUpResponseDto;
+            if(signUpResponseDto.getMessage() != null)
+                signUpResponseDto.setMessage(signUpResponseDto.getMessage() + ", 존재하는 이메일입니다.");
+            else
+                signUpResponseDto.setMessage("이미 존재하는 이메일입니다.");
+    
         }
 
-        try{    
-            //urRepo.saveSignUpUserInfo(new Users(signUpDto.getNickname()));
+        if(signUpResponseDto.isNicknameDuplicated() || signUpResponseDto.isEmailDuplicated())
+            return signUpResponseDto;
+    
 
+        try{    
             //이미 클라이언트에서 암호화된 데이터
             signUpDto.setPassword(signUpDto.getPassword());
             
             //users, user_information에 데이터 삽입
             urInfoRepo.saveSignUpUserInfo(signUpDto.toEntity());
+
+            signUpResponseDto.setStatus(HttpStatus.CREATED);
+            signUpResponseDto.setMessage("회원가입 되셨습니다.");
 
             // user_permission 테이블에 refresh token save
         }
@@ -91,18 +103,19 @@ public class AuthService {
             return signUpResponseDto;
         }
 
-        signUpResponseDto.setStatus(HttpStatus.CREATED);
-        signUpResponseDto.setMessage("회원가입 되셨습니다.");
 
         return signUpResponseDto;
 
     }
 
 
-    public LoginResponseDto login(LoginDto loginDto) throws AuthenticationException{
+    public List<Object> login(LoginDto loginDto) throws AuthenticationException{
         
         LoginResponseDto loginResponseDto = new LoginResponseDto();
+        TokenDto tokenDto = new TokenDto();
 
+        List<Object> responseList = new ArrayList<Object>();
+        
         try{
             UserInformation userInfo = urInfoRepo.findByEmail(loginDto.getEmail());
             System.out.println("login Email :" + loginDto.getEmail());
@@ -110,18 +123,22 @@ public class AuthService {
                 loginResponseDto.setStatus(HttpStatus.FORBIDDEN);
                 loginResponseDto.setMessage("비밀번호가 일치하지 않습니다.");
 
-                return loginResponseDto;
+                responseList.add(0, loginResponseDto);
+                
+                return responseList;
             }
 
             HashMap<String, String> createToken = createTokenReturn(loginDto, userInfo.getUserId());
-            loginResponseDto.setAccesstoken(createToken.get("accessToken"));
+            tokenDto.setAccessToken(createToken.get("accessToken"));
+
             loginResponseDto.setStatus(HttpStatus.OK);
             loginResponseDto.setMessage("로그인 되었습니다.");
             loginResponseDto.setUserId(userInfo.getUserId());
             // 추후에 security 추가하면 없어질 코드
 
-            System.out.println("로그 확인");
-            //saveToken(createToken.get("accessToken"), userInfo.getUserId());
+            System.out.println("성공 로그 확인");
+            responseList.add(loginResponseDto);
+            responseList.add(tokenDto);
 
         }
         // 유저가 없는 경우
@@ -129,16 +146,22 @@ public class AuthService {
             System.out.println("NULL ERROR");
             loginResponseDto.setStatus(HttpStatus.NOT_FOUND);
             loginResponseDto.setMessage("존재하지 않는 아이디입니다.");
+
+            responseList.add(loginResponseDto);
             
-            return loginResponseDto;
+            return responseList;
         }
         catch(Exception e){
             System.out.println(e.getMessage());
             loginResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             loginResponseDto.setMessage("서버 에러");
+
+            responseList.add(loginResponseDto);
+
+            return responseList;
         }
 
-        return loginResponseDto;
+        return responseList;
     }
 
     private HashMap<String, String> createTokenReturn(AuthDto.LoginDto loginDto, int userId){

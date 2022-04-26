@@ -60,7 +60,6 @@ public class ResponseDto {
             this.status = status;
             this.message = message;
         }
-
     }
 
     @Getter
@@ -79,9 +78,6 @@ public class ResponseDto {
         @ApiModelProperty(value="사용자 고유 넘버")
         int userId;
 
-        @ApiModelProperty(value="액세스 토큰")
-        String accesstoken;
-
     }
     
     @Getter
@@ -96,7 +92,21 @@ public class ResponseDto {
 
         @ApiModelProperty(value="상태코드 설명")
         String message;
-    
+
+        @ApiModelProperty(value="이메일 중복 여부")
+        boolean emailDuplicated;
+
+        @ApiModelProperty(value="닉네임 중복 여부")
+        boolean nicknameDuplicated;
+        
+    }
+
+    @Getter
+    @Setter
+    public static class TokenDto{
+        String accessToken;
+        String refreshToken;
+        
     }
 
 }
