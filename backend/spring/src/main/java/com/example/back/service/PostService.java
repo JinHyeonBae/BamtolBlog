@@ -3,8 +3,8 @@ package com.example.back.service;
 import javax.naming.NoPermissionException;
 
 import com.example.back.config.CustomModelMapper;
-import com.example.back.dto.PostDto.createPostDto;
-import com.example.back.dto.PostDto.readPostDto;
+import com.example.back.dto.PostDto.CreatePostDto;
+import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
@@ -61,7 +61,7 @@ public class PostService {
     @Autowired
     PermissionRepository permissionRepository;
 
-    public CreateResponseDto createPost(createPostDto createPostInfo){
+    public CreateResponseDto createPost(CreatePostDto createPostInfo){
 
         System.out.println("nickname :" + createPostInfo.getNickname());
         UserInformation usersInfo = urInfoRepo.findByNickname(createPostInfo.getNickname());
@@ -104,7 +104,7 @@ public class PostService {
     }
 
 
-    public ReadResponseDto readPost(readPostDto body) throws NoPermissionException{
+    public ReadResponseDto readPost(ReadPostDto body) throws NoPermissionException{
 
         //userId, postId로 
         Integer userId = body.getUserId();

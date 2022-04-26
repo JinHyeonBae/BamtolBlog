@@ -64,19 +64,5 @@ public class AuthDto{
         }
     }
 
-    public static class TokenDto{
-        String accessToken;
-        String refreshToken;
-        int userId;
-
-        public UserAuth toEntity(){
-            return UserAuth.builder()
-                .userId(this.userId)
-                .accessToken(this.accessToken)
-                .refreshToken(this.refreshToken)
-                .build();
-        }        
-    }
-
 
 }
