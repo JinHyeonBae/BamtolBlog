@@ -1,4 +1,4 @@
 front/node_modules
 
-backend/spring/bin/*
-backend/spring/class/*
+backend/spring/bin
+backend/spring/class
