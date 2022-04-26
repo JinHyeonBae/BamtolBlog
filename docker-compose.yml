@@ -36,6 +36,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://125.134.138.184:3306/blog?useSSL=false&serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
       SPRING_DATASOURCE_USERNAME: bamtol
       SPRING_DATASOURCE_PASSWORD: Bamtol1234!
+    volumes:
+      - ./backend/spring:/app:delegated
     networks:
       - backend
 
