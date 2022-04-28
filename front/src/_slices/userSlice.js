@@ -11,9 +11,6 @@ export const login = createAsyncThunk(
       let error = err;
       if(!error.response){
         throw err;
-        }
-        if(error.response.status === 404){
-        error.response.data = '아이디 또는 비밀번호를 잘못 입력했습니다.'
       }
       return rejectWithValue(error.response.data);
     }
@@ -21,39 +18,29 @@ export const login = createAsyncThunk(
 )
 export const signup = createAsyncThunk(
   "user/signup",
-  async (signupData) =>{
-    const response = await Axios.post(`api/signup`, signupData,  { withCredentials: true });
-    return response.data;
+  async (signupData, { rejectWithValue }) =>{
+    try {
+      const response = await Axios.post(`auth/signup`, signupData,  { withCredentials: true });
+      return response.data;
+    } catch (err) {
+      let error = err;
+      if(!error.response){
+        throw err;
+      }
+      return rejectWithValue(error.response.data);
+    }
   }
 )
-export const checkEmailDuplicate = createAsyncThunk(
-  "user/checkEmailDuplicate",
-  async (email) => {
-    const response = await Axios.post(`api/checkEmailDuplicate`, {"email": email});
-    return response.data;
-  }
-)
-export const checkNicknameDuplicate = createAsyncThunk(
-  "user/checkNicknameDuplicate",
-  async (nickname) => {
-    const response = await Axios.post(`api/checkNicknameDuplicate`, {"nickname": nickname});
-    return response.data;
-  }
-)
-
 
 const initialState = {
   loginStatus: 'idle',
   signupStatus: 'idle',
-  emailDuplicateStatus: '',
-  nicknameDuplicateStatus: '',
-  emailNotDuplication: true,
-  nicknameNotDuplication: true,
+  emailDuplication: false,
+  nicknameDuplication: false,
   user: {
     id: null,
     nickname: '',
   },
-  token: '',
   error: null
 };
 
@@ -67,11 +54,11 @@ export const postSlice = createSlice({
     setSignupStatusIdle: (state) => {
       state.signupStatus = 'idle';
     },
-    setEmailDuplicateStatusIdle: (state) => {
-      state.emailDuplicateStatus = 'idle';
+    initEmailDuplicate: (state) => {
+      state.emailDuplication = false;
     },
-    setNicknameDuplicateStatusIdle: (state) => {
-      state.nicknameDuplicateStatus = 'idle';
+    initNicknameDuplicate: (state) => {
+      state.nicknameDuplication = false;
     }
   },
   extraReducers: builder => {
@@ -94,29 +81,9 @@ export const postSlice = createSlice({
     })
     builder.addCase(signup.rejected, (state, action)=> {
       state.signupStatus = 'failed';
-      state.error = action.error;
-    })
-    builder.addCase(checkEmailDuplicate.pending, (state)=> {
-      state.emailDuplicateStatus = 'loading';
-    })
-    builder.addCase(checkEmailDuplicate.fulfilled, (state, {payload})=> {
-      state.emailDuplicateStatus = 'success';
-      state.emailNotDuplication = payload.success;
-    })
-    builder.addCase(checkEmailDuplicate.rejected, (state, action)=> {
-      state.emailDuplicateStatus = 'failed';
-      state.error = action.error;
-    })
-    builder.addCase(checkNicknameDuplicate.pending, (state)=> {
-      state.nicknameDuplicateStatus = 'loading';
-    })
-    builder.addCase(checkNicknameDuplicate.fulfilled, (state, {payload})=> {
-      state.nicknameDuplicateStatus = 'success';
-      state.nicknameNotDuplication = payload.success;
-    })
-    builder.addCase(checkNicknameDuplicate.rejected, (state, action)=> {
-      state.nicknameDuplicateStatus = 'failed';
-      state.error = action.error;
+      state.error = action.payload;
+      state.emailDuplication = action.payload.emailDuplicated;
+      state.nicknameDuplication = action.payload.nicknameDuplicated;
     })
   }
 });
@@ -124,18 +91,15 @@ export const postSlice = createSlice({
 export const { 
   logout,
   setSignupStatusIdle,
-  setEmailDuplicateStatusIdle,
-  setNicknameDuplicateStatusIdle
+  initEmailDuplicate,
+  initNicknameDuplicate
 } = postSlice.actions;
 export default postSlice.reducer;
 
 export const selectUser = (state) => state.user.user;
-export const selectToken = (state) => state.user.token;
 export const selectLoginStatus = (state) => state.user.loginStatus;
 export const selectSignupStatus = (state) => state.user.signupStatus;
-export const selectEmailDuplicateStatus = (state) => state.user.emailDuplicateStatus;
-export const selectEmailNotDuplication = (state) => state.user.emailNotDuplication;
-export const selectNicknameDuplicateStatus = (state) => state.user.nicknameDuplicateStatus;
-export const selectNicknameNotDuplication = (state) => state.user.nicknameNotDuplication;
+export const selectEmailDuplication = (state) => state.user.emailDuplication;
+export const selectNicknameDuplication = (state) => state.user.nicknameDuplication;
 export const selectError = (state) => state.user.error;
 
