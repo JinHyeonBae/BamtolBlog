@@ -1,6 +1,5 @@
 package com.example.back.dto;
 
-import com.example.back.model.Permission;
 import com.example.back.model.user.UserPermission;
 import com.example.back.service.Role;
 

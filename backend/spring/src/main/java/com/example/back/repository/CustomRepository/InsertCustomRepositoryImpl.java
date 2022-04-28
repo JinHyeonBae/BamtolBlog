@@ -3,23 +3,21 @@ package com.example.back.repository.CustomRepository;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
 
-import com.example.back.dto.AuthDto;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
-import com.example.back.model.user.UserAuth;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Repository
 @Transactional
@@ -30,68 +28,100 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     EntityManager entityManager;
 
 
+    public String getCurrentTime(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    //겹치는 아이디가 있으면 그것도 에러 처리를 해야한다.
     @Override
+    @Modifying
+    @Transactional
     public void saveSignUpUserInfo(UserInformation userInfo){
-        //entityManager.flush();
-        entityManager.createNativeQuery("Update user_information set email=?, password=?, nickname=?, name=? WHERE user_id = ?")
-                    .setParameter(1, userInfo.getEmail())
-                    .setParameter(2, userInfo.getPassword())
-                    .setParameter(3, userInfo.getNickname())
-                    .setParameter(4, userInfo.getName())
-                    .setParameter(5, userInfo.getUserId())
-                    .executeUpdate();
+
+        //영속성 컨텍스트는 데이터베이스와 애플리케이션 사이에서 객체를 저장하는 기법
+        String nickname = userInfo.getNickname();
+
+        Users new_user = new Users(nickname);
+        new_user.setUserAuth(null);
+        new_user.setUserInfo(null);
+        entityManager.persist(new_user); 
+
+        //UserInformation new_userInfo = userInfo;
+        userInfo.setUserId(new_user.getId());
+        entityManager.persist(userInfo);
+        entityManager.flush();
     }
 
-    @Override
-    public void saveSignUpUserInfo(Users user){
-        LocalDateTime now = LocalDateTime.now();
-        String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        //System.out.println("this");
-        try{
-            entityManager.createNativeQuery("Insert into users(created_at, email) values(?, ?)")
-                        .setParameter(1, formatedNow)
-                        .setParameter(2, user.getEmail())
-                        .executeUpdate();
-
-        }
-        catch(Exception e){
-            System.out.println("saveSignUp에서의 에러 :" + e.getMessage());
-        }
-
-    }
+    // @Override
+    // @Modifying
+    // @Transactional(propagation = Propagation.REQUIRES_NEW)
+    // public void saveUserToken(UserAuth token){
+    //     entityManager.createNativeQuery("Insert into user_auth(token, user_id) values(?,?)")
+    //                 .setParameter(1, token.getToken())
+    //                 .setParameter(2, token.getUserId())
+    //                 .executeUpdate();
+    // }
 
     @Override
-    public void saveUserToken(UserAuth token){
-        entityManager.createNativeQuery("Insert into user_auth(token) values(?)")
-                    .setParameter(1, token.getToken())
-                    .executeUpdate();
-    }
-
-    @Override
+    @Modifying
+    @Transactional
     public void savePostPermission(PostPermission permission){
-        entityManager.createNativeQuery("Insert into post_permission(permission_id, post_id, user_id) values(?,?,?)")
+
+        String sql = "INSERT INTO post_permission(permission_id, post_id, user_id) VALUES(?,?,(SELECT id from posts WHERE user_id=?))";
+        entityManager.createNativeQuery(sql)
                     .setParameter(1, permission.getPermissionId())
-                    .setParameter(2, permission.getPostId())
+                    .setParameter(2, permission.getUserId())
                     .setParameter(3, permission.getUserId())
                     .executeUpdate();
+
     }
 
     @Override
+    @Modifying
+    @Transactional
     public void savePostInformation(PostInformation postInfo) throws SQLException{
-        entityManager.createNativeQuery("Update post_information set contents=?, display_level=?, title=? where user_id = ?")
-                    .setParameter(1, postInfo.getContents())
-                    .setParameter(2, postInfo.getDisplayLevel())
-                    .setParameter(3, postInfo.getTitle())
-                    .setParameter(4, postInfo.getUserId())
-                    .executeUpdate();
+        //entityManager.getTransaction().begin(); //Update
+
+        // Posts post = new Posts();
+
+        // post.setPostInfo(null);
+        // entityManager.persist(post);
+
+        // int postId = post.getId();
+        // postInfo.setPostId(postId);
+        // entityManager.persist(postInfo);
         
     }
 
     @Override
-    public void savePosts(Posts post) throws SQLException{
+    @Modifying
+    @Transactional
+    public void savePosts(Posts postInfo) throws SQLException{
+        //posts -> id, post_id
         entityManager.createNativeQuery("insert into posts(user_id) values(?)")
-                    .setParameter(1, post.getUserId())
+                    .setParameter(1, postInfo.getUserId())
                     .executeUpdate();
+
+        // 1. 
+
+        // String postInformation_sql = "INSERT INTO post_information(title, contents, display_level, price, user_id, post_id) VALUES (?,?,?,?,?,?)";
+        // try{
+        //     entityManager.createNativeQuery(postInformation_sql)
+        //                 .setParameter(1, postInfo.getTitle())
+        //                 .setParameter(2, postInfo.getContents())
+        //                 .setParameter(3, postInfo.getDisplayLevel())
+        //                 .setParameter(4, postInfo.getPrice())
+        //                 .setParameter(5, postInfo.getUserId())
+        //                 .setParameter(6, postInfo.getPostId())
+        //                 .executeUpdate();
+        //     entityManager.flush();
+        // }
+        // catch(Exception e){
+        //     System.out.println(e.getMessage());
+        // }
+        //entityManager.flush();
+        
+
     }
 
     

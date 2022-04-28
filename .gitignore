@@ -1,3 +1,5 @@
-front/node_modules
-front/.env.development
-front/.env.production
+backend/spring/bin
+backend/spring/class
+backend/spring/.gradle
+backend/spring/build/**
+!backend/spring/build/libs

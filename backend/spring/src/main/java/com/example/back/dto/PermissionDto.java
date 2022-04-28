@@ -1,7 +1,5 @@
 package com.example.back.dto;
 
-import javax.persistence.Id;
-
 import com.example.back.model.post.PostPermission;
 import com.example.back.service.Role;
 

@@ -1,6 +1,5 @@
 package com.example.back.repository;
 
-import com.example.back.dto.AuthDto;
 import com.example.back.model.user.UserInformation;
 import com.example.back.repository.CustomRepository.InsertCustomRepository;
 
