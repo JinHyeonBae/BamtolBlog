@@ -1,22 +1,47 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import Axios from '../axiosConfig';
-import shortid from 'shortid';
 
 export const login = createAsyncThunk(
   "user/login",
-  async (loginData) =>{
-    const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
-    return response.data;
+  async (loginData, { rejectWithValue }) =>{
+    try {
+      const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
+      return response.data;
+    } catch (err) {
+      let error = err;
+      if(!error.response){
+        throw err;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+)
+export const signup = createAsyncThunk(
+  "user/signup",
+  async (signupData, { rejectWithValue }) =>{
+    try {
+      const response = await Axios.post(`auth/signup`, signupData,  { withCredentials: true });
+      return response.data;
+    } catch (err) {
+      let error = err;
+      if(!error.response){
+        throw err;
+      }
+      return rejectWithValue(error.response.data);
+    }
   }
 )
 
 const initialState = {
   loginStatus: 'idle',
+  signupStatus: 'idle',
+  emailDuplication: false,
+  nicknameDuplication: false,
   user: {
-    id: shortid.generate(),
+    id: null,
     nickname: '',
   },
-  token: ''
+  error: null
 };
 
 export const postSlice = createSlice({
@@ -26,6 +51,15 @@ export const postSlice = createSlice({
     logout:(state) => {
       state.loginStatus = 'idle';
     },
+    setSignupStatusIdle: (state) => {
+      state.signupStatus = 'idle';
+    },
+    initEmailDuplicate: (state) => {
+      state.emailDuplication = false;
+    },
+    initNicknameDuplicate: (state) => {
+      state.nicknameDuplication = false;
+    }
   },
   extraReducers: builder => {
     builder.addCase(login.pending, (state)=> {
@@ -39,15 +73,33 @@ export const postSlice = createSlice({
       state.loginStatus = 'failed';
       state.error = action.payload;
     })
+    builder.addCase(signup.pending, (state)=> {
+      state.signupStatus = 'loading';
+    })
+    builder.addCase(signup.fulfilled, (state)=> {
+      state.signupStatus = 'success';
+    })
+    builder.addCase(signup.rejected, (state, action)=> {
+      state.signupStatus = 'failed';
+      state.error = action.payload;
+      state.emailDuplication = action.payload.emailDuplicated;
+      state.nicknameDuplication = action.payload.nicknameDuplicated;
+    })
   }
 });
 
 export const { 
   logout,
+  setSignupStatusIdle,
+  initEmailDuplicate,
+  initNicknameDuplicate
 } = postSlice.actions;
 export default postSlice.reducer;
 
 export const selectUser = (state) => state.user.user;
-export const selectToken = (state) => state.user.token;
 export const selectLoginStatus = (state) => state.user.loginStatus;
+export const selectSignupStatus = (state) => state.user.signupStatus;
+export const selectEmailDuplication = (state) => state.user.emailDuplication;
+export const selectNicknameDuplication = (state) => state.user.nicknameDuplication;
+export const selectError = (state) => state.user.error;
 

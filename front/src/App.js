@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Home from './components/Home';
 import Login from './components/Login';
+import SignUp from './components/SignUp/index';
 import PostRead from './components/PostRead';
 import PostWrite from './components/PostWrite';
 
@@ -17,6 +18,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/:userNickname/posts/:postId" element={<PostRead />} />
           <Route path="/:userNickname/write" element={<PostWrite />} />
         </Routes>
