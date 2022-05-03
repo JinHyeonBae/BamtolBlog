@@ -5,25 +5,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import com.example.back.dto.AuthDto.LoginDto;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 @Component
 public class JwtProvider {
     
-    @Value("spring.jwt.secret")
-    private final String secretKey = "c8234au-3njkj2!-sd341=1224?&bsqqow9kl-fw*dazvzewrqw8";
-    // 60초 : 60000, # 60분 : 3600000, # 1일 : 86400000, # 7일 : 604800000 ms 단위
+    @Value(value = "${jwt.secret-key}")
+    private String secretKey;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtProvider.class);
     private final long accessExpireTime = 1000 * 60L * 60L * 48L; //2일,  ms 단위인가?
-    private final long refreshExpireTime = 1000 * 60 * 60 * 24L; // 하루.
+    private final long refreshExpireTime = 1000 * 60 * 60 * 96L; // 4일.
+    // 60초 : 60000, # 60분 : 3600000, # 1일 : 86400000, # 7일 : 604800000 ms 단위
 
-    //private CustomUserDetailService customUserDetailService;
+    private CustomUserDetailService customUserDetailService;
 
     //토큰을 생성하는 곳
     public String createAccessToken(LoginDto loginDto, int userId){
@@ -55,19 +67,32 @@ public class JwtProvider {
         return jwt;
     }
 
-    //토큰에서 인증정보 조회
-    // public Authentication getAuthontication(String token){
-    //     System.out.println("getAuthentication function");
-    //     //UserDetails userDailes = customUserDetailService.loadUserByUsername(this.getUserInfo(token));
-    //     //return new UsernamePasswordAuthenticationToken(userDailes, "", userDailes.getAuthorities());
-    // }
+    public String generateToken(Authentication authentication) {
+
+        Map<String, Object> headers = new HashMap<>();
+        Map<String, Object> payloads = new HashMap<>();
+
+        headers.put("type", "Bearer");
+
+        payloads.put("iss", "admin");
+        payloads.put("aud", authentication.getPrincipal());
+        
+		Date now = new Date();
+		Date expiryDate = new Date(now.getTime() + accessExpireTime);
+
+            return Jwts
+                    .builder()
+                    .setHeader(headers)
+                    .setClaims(payloads)
+                    .setSubject("userPrincipal")
+                    .setExpiration(expiryDate)
+                    .signWith(SignatureAlgorithm.HS256, secretKey)
+                    .compact();
+
+	}
 
     // 토큰에서 사용자 정보 조회
     public String getUserInfo(String token){
-        // Claims tokenInfo = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        // System.out.println("토큰 남은 시간 :" + tokenInfo.getExpiration());
-        System.out.println(token);
-        System.out.println((String) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("aud"));
         return (String) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("aud");
     }
 
@@ -76,18 +101,43 @@ public class JwtProvider {
         return request.get("token");
     }
 
-    // 토큰의 유효성 + 만료일자 확인
-    public boolean validateJwtToken(String token){
+    public Long getUserIdFromJWT(String token) { //userId 가져오기
+		Claims claims = Jwts.parser()
+				.setSigningKey(secretKey)
+				.parseClaimsJws(token)
+				.getBody();
+        
+		return Long.valueOf(claims.getSubject());
+	}
 
-        try{
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-            return true;
-        }
-        catch (Exception e){
-            System.out.println("Invalid Jwt Token :" + e.getMessage());
-        }
+    
+    public String getUserEmailFromJWT(String token) { //Email 가져오기
+		Claims claims = Jwts.parser()
+				.setSigningKey(secretKey)
+				.parseClaimsJws(token)
+				.getBody();
+        
+		return claims.getAudience();
+	}
 
-        return false;
-    }
+
+    // 토큰의 유효성 검사
+    public boolean validateToken(String authToken) {
+		try {
+			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
+			return true;
+		} catch (SignatureException ex) {
+			LOGGER.error("Invalid JWT signature");
+		} catch (MalformedJwtException ex) {
+			LOGGER.error("Invalid JWT token");
+		} catch (ExpiredJwtException ex) {
+			LOGGER.error("Expired JWT token");
+		} catch (UnsupportedJwtException ex) {
+			LOGGER.error("Unsupported JWT token");
+		} catch (IllegalArgumentException ex) {
+			LOGGER.error("JWT claims string is empty");
+		}
+		return false;
+	}
     
 }

@@ -2,9 +2,19 @@ package com.example.back.config;
 
 import java.util.Arrays;
 
+import com.example.back.repository.UserInformationRepository;
+import com.example.back.repository.UserRepository;
+import com.example.back.security.AuthProvider;
+import com.example.back.security.CustomUserDetailService;
+import com.example.back.security.JwtAuthenticationEntryPoint;
+import com.example.back.security.JwtAuthenticationFilter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -12,8 +22,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,15 +36,34 @@ import lombok.AllArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
+@ComponentScan(basePackages = {"com.example.back.security"})
 public class AuthConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired
-//    private CustomUserDetailService customUserDetailService;
+	private JwtAuthenticationEntryPoint unauthorizedHandler;
+	
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
+
+    @Autowired
+    private AuthProvider authProvider;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+
+    @Autowired
+	public AuthConfig(UserInformationRepository userInfoRepository, CustomUserDetailService customUserDetailService,
+		JwtAuthenticationEntryPoint unauthorizedHandler, JwtAuthenticationFilter jwtAuthenticationFilter, AuthProvider authProvider) {
+		this.customUserDetailService = customUserDetailService;
+		this.unauthorizedHandler = unauthorizedHandler;
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authProvider = authProvider;
+	}
 
     @Bean(name=BeanIds.AUTHENTICATION_MANAGER)
     @Override
@@ -63,25 +94,36 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
     protected void configure(HttpSecurity http) throws Exception{
         System.out.println("http Configure");
 
-        http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable();
-
-        //http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable();
-            // .and()
-            // .authorizeRequests()
-            // .antMatchers("/user.login").permitAll()
-            // .anyRequest().authenticated()
-            // .and()
-            // .formLogin()
-            // .loginProcessingUrl("/user/login")
-            // .permitAll();
+        // http
+        //     .cors().configurationSource(corsConfigurationSource())
         // .and()
-        // .formLogin()
-        // .loginProcessingUrl("/user/login")
-        //     .permitAll()
-        //     .defaultSuccessUrl("/")
-        //     .failureUrl("/user/login")
+        //     .csrf()
+        //     .disable()
+        //     .exceptionHandling()
+        //     .authenticationEntryPoint(this.unauthorizedHandler)
         //     .and()
-        // .logout();
+        //     .sessionManagement()
+        //     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        //     .and()
+        //     .authorizeRequests()
+        //     .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
+        //     .antMatchers(HttpMethod.GET, "/api/users/checkUsernameAvailability", "/api/users/checkEmailAvailability").permitAll()
+        //     .anyRequest().authenticated();
+
+        // http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        //http.authenticationProvider(authProvider);
+        http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable()
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .authorizeRequests()
+            .antMatchers("/**").permitAll()
+            .antMatchers("/auth/**").permitAll()
+            .anyRequest().authenticated();
+            //.and()
+            // formLogin을 하니까 authProvider가 작동함
+            // form login을 하면 UsernamePasswordAuthenticationFilter 활성화
+         
 
 
         // http
@@ -110,11 +152,20 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
     }
 
     @Override
+    @Autowired
     //실제 인증을 진행할 부분
     //모든 인증을 관ㅣ하는 Authentication Manager를 생성해줌. UserDetailService를 통해 유저의 정보를 customUserDetailSercie에 담음
     protected void configure(AuthenticationManagerBuilder auth) throws Exception{
         System.out.println("configure");
-        //auth.userDetailsService(customUserDetailService).passwordEncoder(passwordEncoder());
+        //auth.authenticationProvider(authProvider);
+        try{
+
+            auth.authenticationProvider(this.authProvider);
+            auth.userDetailsService(this.customUserDetailService);
+        }
+        catch(Exception e){
+            System.out.println("EROOOOR :" + e.getMessage());
+        }
     }
 
 
@@ -122,7 +173,13 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
     // 이미지, 자바스크립트, css 디렉토리 보안 설정
     public void configure(WebSecurity web){
         System.out.println("WebSec Configure");
-        web.ignoring().antMatchers("/js/**", "/css/**", "/images/**", "/font/**", "/html/**");
+        web.ignoring().antMatchers("/js/**", "/css/**", "/images/**", "/font/**", "/html/**",
+                "/swagger-ui/**",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html"
+        
+        );
     }
 
 }

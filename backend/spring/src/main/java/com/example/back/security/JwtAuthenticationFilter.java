@@ -1,51 +1,67 @@
-// package com.example.back.security;
+package com.example.back.security;
 
-// import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-// import javax.servlet.FilterChain;
-// import javax.servlet.Servlet;
-// import javax.servlet.ServletException;
-// import javax.servlet.ServletRequest;
-// import javax.servlet.ServletResponse;
-// import javax.servlet.http.HttpServletRequest;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.context.SecurityContextHolder;
-// import org.springframework.util.StringUtils;
-// import org.springframework.web.filter.GenericFilterBean;
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+	@Autowired
+	private JwtProvider tokenProvider;
+	@Autowired
+	private CustomUserDetailService customUserDetailsService;
 
-// import lombok.RequiredArgsConstructor;
+	// jwt만을 검증하는 시스템
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		try {
+			//System.out.println("request header : " + request.getCookies());
+			String jwt = getJwtFromRequest(request); //리퀘스트 헤더에서 토큰 분리
+			
+			if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) { //null 검사 & valid 토큰 검사
+				String email = tokenProvider.getUserEmailFromJWT(jwt);
 
-// @RequiredArgsConstructor
-// public class JwtAuthenticationFilter extends GenericFilterBean{
-   
-//     private JwtProvider jwtProvider;
+				UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+				
+				UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
+						userDetails.getAuthorities());
+				authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-//     public JwtAuthenticationFilter(JwtProvider jwtTokenProvider) {
-//         this.jwtProvider = jwtTokenProvider;
-//     }
+				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+			}
+		} catch (Exception ex) {
+			LOGGER.error("Could not set user authentication in security context", ex);
+		}
 
-//     // jwt 토큰의 인증 정보를 현재 실행중인 security context에 저장하는 역할을 수행
-//     // 토큰이 유효하다면, 유효성 체크 후 context에 인증정보 저장한다.
-//     @Override
-//     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException{
-        
-//         String token = jwtProvider.resolveToken((HttpServletRequest) request);
-//         System.out.println("to " + token);
-//         if(token != null && jwtProvider.validateJwtToken(request, token)){
-//             System.out.println("provider Token");
-//             Authentication authentication = jwtProvider.getAuthontication(token);
-//             //  저장
-//             SecurityContextHolder.getContext().setAuthentication(authentication);
-//         }    
+		filterChain.doFilter(request, response); // invoke the rest of the application
+	}
 
-//         System.out.println("Valid Token :" + token);
+	private String getJwtFromRequest(HttpServletRequest request) { //request에서 토큰 분리
+		
+		if(request.getCookies() != null){
+			String bearerToken = request.getCookies()[0].getValue();
+			//System.out.println("Bearer token :" + bearerToken);
 
-//         filterChain.doFilter(request, response);
-        
-//     }
-
-
-
-
-// }
+			if (StringUtils.hasText(bearerToken.toString())) {
+				return bearerToken.toString();
+			}
+			return null;
+		}
+		return null;
+	}
+}
