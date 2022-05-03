@@ -75,8 +75,9 @@ public class ResponseDto {
         @ApiModelProperty(value="상태코드 설명")
         String message;
 
-        @ApiModelProperty(value="사용자 고유 넘버")
-        int userId;
+        // // TODO: 필요없는 경우가 있을 수 있다. 삭제해야할듯
+        // @ApiModelProperty(value="사용자 고유 넘버")
+        // int userId;
 
     }
     
