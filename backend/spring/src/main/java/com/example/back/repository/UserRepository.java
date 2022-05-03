@@ -2,6 +2,7 @@ package com.example.back.repository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.example.back.model.user.Users;
 import com.example.back.repository.CustomRepository.InsertCustomRepository;
@@ -18,7 +19,7 @@ public interface UserRepository extends JpaRepository<Users, Integer>, InsertCus
     
     //public void saveSignUpUserInfo(Users user);
     public Users findById(int id);
-    public Users findByNickname(String nickname);
+    public Optional<Users> findByNickname(String nickname);
 
     // public void saveLoginUserInfo(Users dto);
     // public void saveSignUpUserInfo(Users dto);

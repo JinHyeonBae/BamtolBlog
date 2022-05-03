@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,41 +52,28 @@ public class PostController {
         @ApiResponse(code = 500, message = "서버 에러")
     })
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<CreateResponseDto> createPost(HttpServletRequest request){
+    public ResponseEntity<CreateResponseDto> createPost(HttpServletRequest request, @RequestBody CreatePostDto body){
+
+        ResponseEntity<CreateResponseDto> responseEntity;
 
         System.out.println("Header :" + request.getCookies());
-        
-        // for(int i=0; i<cookies.length; i++){
-        //     System.out.println("cookie :"cookies[i]);
-        // }
+        String token = request.getCookies()[0].toString();
 
-        return null;
-        // // if(headers.getFirst("cookie").contains("JSESSIONID"))
-        // //     Cookies = headers.get("cookie").get(1);
-        // // else
-        // //     Cookies = headers.get("cookie").get(0);
-        
+        if(jwtProvider.validateToken(token)){
+            System.out.println("정확한 토큰");
 
-        // // System.out.println("String cookie :" + Cookies);
-        
-        // // //headers.getCookies();
-        // // ResponseEntity<CreateResponseDto> responseEntity = null;
-
-        // if(authService.isValidToken(Cookies)){
-        //     System.out.println("정확한 토큰");
-
-        //     CreateResponseDto result = postService.createPost(body);
-        //     HttpStatus status = result.getStatus();
+            CreateResponseDto result = postService.createPost(body);
+            HttpStatus status = result.getStatus();
             
-        //     responseEntity = ResponseEntity.status(status).body(result);
+            responseEntity = ResponseEntity.status(status).body(result);
             
-        // }
-        // else{
-        //     CreateResponseDto createDto = new CreateResponseDto(HttpStatus.FORBIDDEN,  "토큰이 유효하지 않습니다.", 0);
-        //     responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(createDto);
-        // }
+        }
+        else{
+            CreateResponseDto createDto = new CreateResponseDto(HttpStatus.FORBIDDEN,  "토큰이 유효하지 않습니다.", 0);
+            responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(createDto);
+        }
 
-        // return responseEntity;
+        return responseEntity;
     }
 
     //읽기 요청

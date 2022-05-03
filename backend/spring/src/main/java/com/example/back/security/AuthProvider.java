@@ -1,69 +1,60 @@
-// package com.example.back.security;
+package com.example.back.security;
 
-// import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-
-// import com.example.back.dto.UserDto;
-// import com.example.back.repository.UserRepository;
-// import com.example.back.service.CustomUserDetailService;
-
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.security.authentication.AuthenticationProvider;
-// import org.springframework.security.authentication.BadCredentialsException;
-// import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.AuthenticationException;
-// import org.springframework.security.core.userdetails.UserDetails;
-// import org.springframework.security.core.userdetails.UserDetailsService;
-// import org.springframework.security.core.userdetails.UsernameNotFoundException;
-// import org.springframework.stereotype.Component;
-// import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 
+//계정 잠금여부, 활성화 
+@Component
+public class AuthProvider implements AuthenticationProvider{
 
-// //계정 잠금여부, 활성화 
-// @Component
-// public class AuthProvider implements AuthenticationProvider{
-
-//     @Autowired
-//     private CustomUserDetailService customUserDetailService;
-
-//     @Override
-//     public Authentication authenticate(Authentication authentication) throws AuthenticationException{
-        
-        
-//         //사용자가 화면에서 입력한 아디
-//         String userId = (String)authentication.getPrincipal();
-//         // 패스워드
-//         String userPassword = (String)authentication.getCredentials();   
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
 
 
-//         //userDetail 객체를 받아온다. 이를 provider에게 전달
-//         UserDetails user = customUserDetailService.loadUserByUsername(userId);
+    //로그인
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException{
+       
+        String userEmail = "";
+        String userPassword= "";
 
-//         System.out.println("반환된 유저의 값 " + user);
+        userEmail = (String)authentication.getPrincipal();
+        userPassword = (String)authentication.getCredentials();   
 
-//         // if(!matchPassword(userPassword, user.getPassword())){
-//         //     throw new BadCredentialsException(userId);
-//         // }
+        // userDetail 객체를 받아온다. 이를 provider에게 전달
+        // It is typically called by an AuthenticationProvider instance in order to authenticate a user. 
+        // when a username and password is submitted, a UserdetailsService is called to find the password for that user to see if it is correct. 
+        Map<String, String> authenticationList = new HashMap<String,String>();
 
-//         //계정 활성화 여부를 확인
+        authenticationList.put("email", userEmail);
+        authenticationList.put("password", userPassword);
 
-//         if(!user.isEnabled()){
-//             System.out.println("heyyy");
-//             throw new BadCredentialsException(userId);
-//         }
-        
-//         return new UsernamePasswordAuthenticationToken(user.getUsername(), userPassword, user.getAuthorities());
-//     }
+        UserDetails user = customUserDetailService.loadUserByUsername(authenticationList);
 
-//     @Override
-//     public boolean supports(Class<?> authentication){
-//         return true;
-//     }
+        if(!user.isEnabled()){
+            throw new BadCredentialsException(userEmail);
+        }
 
-//     private boolean matchPassword(String loginPwd, String pw){
-//         return loginPwd.equals(pw);
-//     }
+        return new UsernamePasswordAuthenticationToken(user.getUsername(), userPassword, user.getAuthorities());
+    }
 
-// }
+    @Override
+    public boolean supports(Class<?> authentication){
+        return true;
+    }
+
+    private boolean matchPassword(String loginPwd, String pw){
+        return loginPwd.equals(pw);
+    }
+
+}

@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
@@ -27,7 +28,7 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @PersistenceContext
     EntityManager entityManager;
 
-
+    
     public String getCurrentTime(){
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
@@ -40,10 +41,12 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
 
         //영속성 컨텍스트는 데이터베이스와 애플리케이션 사이에서 객체를 저장하는 기법
         String nickname = userInfo.getNickname();
-
+        // 비영속
         Users new_user = new Users(nickname);
         new_user.setUserAuth(null);
         new_user.setUserInfo(null);
+
+        // 영속
         entityManager.persist(new_user); 
 
         //UserInformation new_userInfo = userInfo;
@@ -81,16 +84,14 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Transactional
     public void savePostInformation(PostInformation postInfo) throws SQLException{
         //entityManager.getTransaction().begin(); //Update
-
-        // Posts post = new Posts();
-
-        // post.setPostInfo(null);
-        // entityManager.persist(post);
-
-        // int postId = post.getId();
-        // postInfo.setPostId(postId);
-        // entityManager.persist(postInfo);
-        
+        Posts post = new Posts();
+        post.setPostInfo(null);
+        post.setPostPermit(null);
+        entityManager.persist(post);
+        //여기서 user의 아이디는 어떻게 가져오는 거임
+        int postId = post.getId();
+        postInfo.setPostId(postId);
+        entityManager.persist(postInfo);   
     }
 
     @Override
@@ -98,29 +99,7 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Transactional
     public void savePosts(Posts postInfo) throws SQLException{
         //posts -> id, post_id
-        entityManager.createNativeQuery("insert into posts(user_id) values(?)")
-                    .setParameter(1, postInfo.getUserId())
-                    .executeUpdate();
 
-        // 1. 
-
-        // String postInformation_sql = "INSERT INTO post_information(title, contents, display_level, price, user_id, post_id) VALUES (?,?,?,?,?,?)";
-        // try{
-        //     entityManager.createNativeQuery(postInformation_sql)
-        //                 .setParameter(1, postInfo.getTitle())
-        //                 .setParameter(2, postInfo.getContents())
-        //                 .setParameter(3, postInfo.getDisplayLevel())
-        //                 .setParameter(4, postInfo.getPrice())
-        //                 .setParameter(5, postInfo.getUserId())
-        //                 .setParameter(6, postInfo.getPostId())
-        //                 .executeUpdate();
-        //     entityManager.flush();
-        // }
-        // catch(Exception e){
-        //     System.out.println(e.getMessage());
-        // }
-        //entityManager.flush();
-        
 
     }
 

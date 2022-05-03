@@ -3,7 +3,6 @@ package com.example.back.model.user;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -46,8 +45,8 @@ public class UserInformation {
     @Column(name="password", columnDefinition = "TEXT")
     private String password;
 
-    @Column(name="name", columnDefinition = "TEXT")
-    private String name;
+    @Column(name="UserName", columnDefinition = "TEXT")
+    private String username;
     
     @Column(name = "nickname", columnDefinition = "TEXT")
     private String nickname;
@@ -64,7 +63,7 @@ public class UserInformation {
     public UserInformation(String email, String password, String name, String nickname, int userId){
         this.email = email;
         this.password = password;
-        this.name = name;
+        this.username = name;
         this.nickname = nickname;
         this.userId = userId;
     }
