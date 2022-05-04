@@ -37,7 +37,6 @@ public class ResponseDto {
 
         @ApiModelProperty(value="포스트 고유 넘버")
         int postId;
-
     }
 
     @Getter
@@ -70,14 +69,25 @@ public class ResponseDto {
     public static class LoginResponseDto{
 
         @ApiModelProperty(value="요청에 따른 상태코드")
-        HttpStatus status;
+        Integer status;
 
         @ApiModelProperty(value="상태코드 설명")
         String message;
 
-        // // TODO: 필요없는 경우가 있을 수 있다. 삭제해야할듯
-        // @ApiModelProperty(value="사용자 고유 넘버")
-        // int userId;
+        // TODO: nickname 클라이언트에게 보내줘야함(링크 제작할 때 사용) 
+        @ApiModelProperty(value="유저")
+        Auth user;
+
+        @Setter
+        @Getter
+        @AllArgsConstructor
+        public static class Auth{        
+            @ApiModelProperty(value="유저 닉네임")
+            String nickname;    
+            
+            @ApiModelProperty(value="유저 고유 넘버")
+            Integer userId;
+        }
 
     }
     
@@ -89,7 +99,7 @@ public class ResponseDto {
     public static class SignUpResponseDto{
 
         @ApiModelProperty(value="요청에 따른 상태코드")
-        HttpStatus status;
+        Integer status;
 
         @ApiModelProperty(value="상태코드 설명")
         String message;

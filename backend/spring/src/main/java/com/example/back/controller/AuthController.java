@@ -1,15 +1,17 @@
 package com.example.back.controller;
 
-import java.util.List;
+
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.back.dto.AuthDto.LoginDto;
 import com.example.back.dto.AuthDto.SignUpDto;
+import com.example.back.repository.UserInformationRepository;
 import com.example.back.response.ResponseDto.LoginResponseDto;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
-import com.example.back.response.ResponseDto.TokenDto;
+import com.example.back.response.ResponseDto.LoginResponseDto.Auth;
 import com.example.back.security.JwtProvider;
 import com.example.back.service.AuthService;
 
@@ -22,8 +24,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,6 +42,9 @@ public class AuthController {
     @Autowired
     private AuthService auth;
 
+    @Autowired 
+    private UserInformationRepository userInformationRepository;
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
@@ -51,7 +54,7 @@ public class AuthController {
 
     int cookieExpiration = 60*60*24; //1일
 
-    // value
+    // value 
     @ApiOperation(value="회원가입", notes = "사용자 회원가입")
     @ApiResponses({
         @ApiResponse(code = 201, message = "회원가입 성공"),
@@ -64,9 +67,8 @@ public class AuthController {
     public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
         
         SignUpResponseDto signUpResult = auth.SignUp(signUpDto);
-        HttpStatus signStatus = signUpResult.getStatus();
 
-        return ResponseEntity.status(signStatus).body(signUpResult);
+        return ResponseEntity.ok().body(signUpResult);
     }
 
 
@@ -74,7 +76,7 @@ public class AuthController {
     @ApiOperation(value="로그인", notes = "사용자 회원가입")
     @ApiResponses({
         @ApiResponse(code = 200, message = "로그인 성공"),
-        @ApiResponse(code = 400, message = "유효하지 않은 토큰"),
+        //@ApiResponse(code = 400, message = "유효하지 않은 토큰"),
         @ApiResponse(code = 40101, message = "존재하지 않는 아이디"),
         @ApiResponse(code = 40102, message = "비밀번호 오류"), // status가 겹치는 경우에는 어떤 경우가 있는 지를 봐야한다. ex) 40401, 40402
         @ApiResponse(code = 500, message = "서버 에러")
@@ -90,9 +92,14 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		String jwt = jwtTokenProvider.generateToken(authentication);
+        //nickname, userId;
+        
+        Map<String, Object> loginResponseDto = auth.login(loginData.getEmail());
+        String nickname = (String) loginResponseDto.get("nickname");
+        Integer userId   = (Integer) loginResponseDto.get("userId"); 
         
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt).toString())
-                                .body(new LoginResponseDto(HttpStatus.OK, "정상적으로 로그인 되었습니다."));     
+                                .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     
         
     }
 
