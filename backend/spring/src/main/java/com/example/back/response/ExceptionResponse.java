@@ -1,17 +1,9 @@
 package com.example.back.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,34 +20,32 @@ public class ExceptionResponse {
 	private Integer status;
 
 	@ApiModelProperty(value="에러 설명")
-	private String messages;
+	private String message;
 
 	@ApiModelProperty(value="에러별 커스텀 코드", 
 					  notes = "에러를 종류에 따라 나누기 위해 만든 코드. C -> Common, M -> Member, A -> Admin")
 	private String code;
 
-	public ExceptionResponse(String messages, String code, Integer status) {
+	public ExceptionResponse(String message, String code, Integer status) {
 		this.status = status;
-		this.messages = messages;
+		this.message = message;
 		this.code = code;
-
 	}
 
-	public String getMessages() {
-		return messages == null ? null : this.messages;
+	public String getMessage() {
+		return message == null ? null : this.message;
 	}
 
-	public final void setMessages(String messages) {
-
-		if (messages == null) {
-			this.messages = null;
+	public final void setMessage(String message) {
+		if (message == null) {
+			this.message = null;
 		} else {
-			this.messages = messages;
+			this.message = message;
 		}
 	}
 
 	public ExceptionResponse(ErrorCode errorCode) {
-		this.messages = errorCode.getMessage();
+		this.message = errorCode.getMessage();
 		this.status = errorCode.getStatus();
 		this.code = errorCode.getCode();
 	  }
