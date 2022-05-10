@@ -17,7 +17,6 @@ import com.example.back.service.AuthService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,16 +26,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 @RestController
-@Api("/auth")
+////@Api("/auth")
+//@Tag(name = "user", description = "사용자 API")
 public class AuthController {
     
     @Autowired
@@ -55,14 +50,13 @@ public class AuthController {
     int cookieExpiration = 60*60*24; //1일
 
     // value 
-    @ApiOperation(value="회원가입", notes = "사용자 회원가입")
-    @ApiResponses({
-        @ApiResponse(code = 201, message = "회원가입 성공"),
-        @ApiResponse(code = 40901, message = "이미 존재하는 이메일"),
-        @ApiResponse(code = 40902, message = "이미 존재하는 닉네임"),
-        @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @ResponseStatus(value = HttpStatus.CREATED)
+    // @Operation(summary = "회원가입", description = "회원가입하는 규격입니다.", responses = {
+    //     //@ApiResponse(responseCode = "201", description = "회원가입 성공"),
+    //     //@ApiResponse(responseCode = "40901", description = "이미 존재하는 이메일"),
+    //     //@ApiResponse(responseCode = "40902", description = "이미 존재하는 닉네임"),
+    //     //@ApiResponse(responseCode = "500", description = "서버 에러")
+    // })
+    // @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/auth/signup")
     public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
         
@@ -73,15 +67,14 @@ public class AuthController {
 
 
     // 쿠키에 토큰을 넣어서 보냄, 파싱
-    @ApiOperation(value="로그인", notes = "사용자 회원가입")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = "로그인 성공"),
-        //@ApiResponse(code = 400, message = "유효하지 않은 토큰"),
-        @ApiResponse(code = 40101, message = "존재하지 않는 아이디"),
-        @ApiResponse(code = 40102, message = "비밀번호 오류"), // status가 겹치는 경우에는 어떤 경우가 있는 지를 봐야한다. ex) 40401, 40402
-        @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @ResponseStatus(value = HttpStatus.OK)
+    // //@ApiOperation(value="로그인", notes = "사용자 회원가입")
+    // //@ApiResponses({
+    //     //@ApiResponse(code = 200, message = "로그인 성공"),
+    //     ////@ApiResponse(code = 400, message = "유효하지 않은 토큰"),
+    //     //@ApiResponse(code = 40101, message = "존재하지 않는 아이디"),
+    //     //@ApiResponse(code = 40102, message = "비밀번호 오류"), // status가 겹치는 경우에는 어떤 경우가 있는 지를 봐야한다. ex) 40401, 40402
+    //     //@ApiResponse(code = 500, message = "서버 에러")
+    // })
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginDto loginData, 
                                                    HttpServletRequest request, HttpServletResponse response){     

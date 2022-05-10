@@ -1,13 +1,9 @@
 package com.example.back.exception;
 
-import java.util.Map;
-
-import javax.naming.AuthenticationException;
 
 import com.example.back.response.ErrorCode;
 import com.example.back.response.ExceptionResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice //이거라구..?
 public class AroundExceptionHandler{
 
 

@@ -1,0 +1,226 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v2
+servers:
+- url: http://localhost:8080/
+  description: bamtol Blog에 대한 api 규격입니다.
+  
+paths:
+  
+  /posts/{postId}:
+    parameters:
+    - name: postId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    put:
+      tags:
+      - post-controller
+      operationId: updatePost
+      responses:
+        "200":
+          description: OK
+    delete:
+      tags:
+      - post-controller
+      operationId: deletePost
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+      - post-controller
+      operationId: patchPost
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+  /auth/signup:
+    post:
+      tags:
+      - auth-controller
+      operationId: signUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SignUpResponseDto'
+                - $ref: '#/components/schemas/SignUpServerWriteErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+      - auth-controller
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/LoginDto'
+
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/LoginResponseDto'
+                - $ref: '#/components/schemas/LoginServerWriteErrorResponse'
+                    
+                  
+components:
+  schemas:
+    LoginServerWriteErrorResponse:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/InvalidEmailError'
+        - $ref: '#/components/schemas/InvalidPasswordError'
+    SignUpServerWriteErrorResponse:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/DuplicateEmailError'
+        - $ref: '#/components/schemas/DuplicateNicknameError'
+
+    SignUpDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        nickname:
+          type: string
+    SignUpResponseDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        emailDuplicated:
+          type: boolean
+        nicknameDuplicated:
+          type: boolean
+    LoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    Auth:
+      type: object
+      properties:
+        nickname:
+          type: string
+        userId:
+          type: integer
+          format: int32
+    LoginResponseDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        user:
+          $ref: '#/components/schemas/Auth'
+    
+
+    InvalidEmailError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40101
+        message:
+          type: string
+          example: 존재하지 않는 이메일입니다.
+        code:
+          type: string
+          example: "M001"
+
+
+    InvalidPasswordError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40102
+        message:
+          type: string
+          example: 비밀번호가 틀렸습니다.
+        code:
+          type: string
+          example : "M001"
+
+
+    NotFoundError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 404
+        message:
+          type: string
+        code:
+          type: string
+          example: "M002"
+
+
+    DuplicateEmailError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40901
+        message:
+          type: string
+          example: 중복된 이메일입니다.
+        code:
+          type: string
+          example: "M010"
+    
+
+    DuplicateNicknameError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40902
+        message:
+          type: string
+          example: 중복된 닉네임입니다.
+        code:
+          type: string
+          example: "M011"
+    

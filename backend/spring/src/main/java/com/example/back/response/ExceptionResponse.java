@@ -5,25 +5,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(value="에러 처리 클래스")
+////@ApiModel(value="에러 처리 클래스")
 public class ExceptionResponse {
 
 
-	@ApiModelProperty(value="에러 상태코드")
+	//@ApiModelProperty(value="에러 상태코드")
 	private Integer status;
 
-	@ApiModelProperty(value="에러 설명")
+	//@ApiModelProperty(value="에러 설명")
 	private String message;
 
-	@ApiModelProperty(value="에러별 커스텀 코드", 
-					  notes = "에러를 종류에 따라 나누기 위해 만든 코드. C -> Common, M -> Member, A -> Admin")
+	//@ApiModelProperty(value="에러별 커스텀 코드", 
+					  //notes = "에러를 종류에 따라 나누기 위해 만든 코드. C -> Common, M -> Member, A -> Admin")
 	private String code;
 
 	public ExceptionResponse(String message, String code, Integer status) {

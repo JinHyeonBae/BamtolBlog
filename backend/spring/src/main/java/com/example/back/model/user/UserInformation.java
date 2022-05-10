@@ -1,6 +1,5 @@
 package com.example.back.model.user;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
