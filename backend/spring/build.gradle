@@ -26,10 +26,9 @@ dependencies {
 	// jwt
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
-	//swagger
-	implementation group : 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
-	implementation group : 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
-
+	//openapi(swagger 3.0)
+	implementation 'org.springdoc:springdoc-openapi-ui:1.5.2'
+	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 
