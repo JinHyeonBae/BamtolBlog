@@ -44,10 +44,10 @@ public class AuthService {
 
         SignUpResponseDto signUpResponseDto = new SignUpResponseDto();
         
-        // User 테이블에서 nickname 빼자
-        urRepo.findByNickname(signUpDto.getNickname())
+        urInfoRepo.findByNickname(signUpDto.getNickname())
             .ifPresent(users->{
-                throw new IllegalStateException("DUPLICATE_NICKNAME");
+                if(users.getEmail().equals(signUpDto.getEmail())) throw new IllegalStateException("DUPLICATE_NICKNAME_AND_EMAIL");
+                else throw new IllegalStateException("DUPLICATE_NICKNAME");
             });
         
         urInfoRepo.findByEmail(signUpDto.getEmail())
@@ -61,7 +61,6 @@ public class AuthService {
 
         signUpResponseDto.setStatus(201);
         signUpResponseDto.setMessage("회원가입 되셨습니다.");
-
 
         return signUpResponseDto;
     }

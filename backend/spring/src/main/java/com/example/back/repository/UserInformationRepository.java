@@ -14,7 +14,7 @@ public interface UserInformationRepository extends JpaRepository<UserInformation
     
     void saveSignUpUserInfo(UserInformation dto);
     Optional<UserInformation> findByEmail(String email);
+    Optional<UserInformation> findByNickname(String nickname);
     Optional<UserInformation> findByEmailAndPassword(String email, String username);
-    UserInformation findByNickname(String nickname);
-
+ 
 }
