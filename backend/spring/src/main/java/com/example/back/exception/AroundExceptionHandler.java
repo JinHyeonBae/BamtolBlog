@@ -1,6 +1,9 @@
 package com.example.back.exception;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.back.response.ErrorCode;
 import com.example.back.response.ExceptionResponse;
 
@@ -20,13 +23,12 @@ public class AroundExceptionHandler{
     //@Autowired 를 빼니까 된다..?
     ExceptionResponse exceptionResponse;
 
-    @GetMapping("/invalid-input")
     @ExceptionHandler(value = {UsernameNotFoundException.class, BadCredentialsException.class, 
                                 InternalAuthenticationServiceException.class})
+
     // ExceptionResponse(String messages, String error, Integer status)
     public ResponseEntity<ExceptionResponse> UnauthorizeExceptionHandler(Exception e){
         System.out.println("Exeption Error :" + e.getMessage());
-        //String erorrMsg = e.getCause();
 
         if(e.getMessage().contains("EMAIL")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.EMAIL_INPUT_INVALID);
@@ -38,14 +40,13 @@ public class AroundExceptionHandler{
         }
         
         return null;
-
     }
 
 
     @GetMapping("/not-found")
     @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<ExceptionResponse> NotFoundExceptionHandler(NotFoundException e){
-        System.out.println("Exeption Error :" + e.getMessage());
+        System.out.println("ERROR :" + e.getMessage());
         return null;
     }
 
@@ -53,27 +54,40 @@ public class AroundExceptionHandler{
     @GetMapping("/null-pointer")
     @ExceptionHandler(value = {NullPointerException.class})
     public ResponseEntity<Object> NullPointerExceptionHandler(NullPointerException e){
-        System.out.println("NULL POINTER");
+        System.out.println("ERROR : "+ e.getMessage());
+        
+        if(e.getMessage().contains("HEADER")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.HEADER_NULL_POINTER);
+            return ResponseEntity.ok().body(response);
+        }
+
         return null;
     }
 
-    @GetMapping("/illgegal-statement")
     @ExceptionHandler(value = {IllegalStateException.class})
-    public ResponseEntity<ExceptionResponse> IllegalStateExceptionHandler(IllegalStateException e){
+    public ResponseEntity IllegalStateExceptionHandler(IllegalStateException e){
         System.out.println("ERROR : "+e.getMessage());
 
-        if(e.getMessage().contains("EMAIL")){
-            ExceptionResponse response = ExceptionResponse.of(ErrorCode.EMAIL_DUPLICATION);
-            return ResponseEntity.ok().body(response);
+        if(e.getMessage().contains("AND")){
+            List<ExceptionResponse> exceptionList = new ArrayList<>();
+
+            exceptionList = ExceptionResponse.more(ErrorCode.EMAIL_DUPLICATION, ErrorCode.NICKNAME_DUPLICATION);
+            return ResponseEntity.ok().body(exceptionList);
         }
-        else if(e.getMessage().contains("NICKNAME")){
-            ExceptionResponse response = ExceptionResponse.of(ErrorCode.NICKNAME_DUPLICATION);
-            return ResponseEntity.ok().body(response);
+        else{
+            if(e.getMessage().contains("EMAIL")){
+                ExceptionResponse response = ExceptionResponse.of(ErrorCode.EMAIL_DUPLICATION);
+                return ResponseEntity.ok().body(response);
+            }
+            else if(e.getMessage().contains("NICKNAME")){
+                ExceptionResponse response = ExceptionResponse.of(ErrorCode.NICKNAME_DUPLICATION);
+                return ResponseEntity.ok().body(response);
+            }
         }
         
         return null;
-
     }
+
 
 
 
