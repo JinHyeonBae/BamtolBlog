@@ -1,5 +1,8 @@
 package com.example.back.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +14,6 @@ import lombok.Setter;
 @NoArgsConstructor
 ////@ApiModel(value="에러 처리 클래스")
 public class ExceptionResponse {
-
 
 	//@ApiModelProperty(value="에러 상태코드")
 	private Integer status;
@@ -45,10 +47,22 @@ public class ExceptionResponse {
 		this.message = errorCode.getMessage();
 		this.status = errorCode.getStatus();
 		this.code = errorCode.getCode();
-	  }
+	}
 	
-	  public static ExceptionResponse of(ErrorCode errorCode) {
+	public static ExceptionResponse of(ErrorCode errorCode) {
 		return new ExceptionResponse(errorCode);
-	  }
+	}
+
+	// 가변인자
+	public static List<ExceptionResponse> more(ErrorCode...errorCode){
+		List<ExceptionResponse> exList = new ArrayList<>();
+		
+		for(int i=0; i<errorCode.length; i++){
+			exList.add(new ExceptionResponse(errorCode[i]));
+		}
+
+		return exList;
+	} 
+
 
 }

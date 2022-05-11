@@ -3,7 +3,7 @@ info:
   title: OpenAPI definition
   version: v2
 servers:
-- url: http://localhost:8080/
+- url: http://125.134.138.184:8080/ # 변경
   description: bamtol Blog에 대한 api 규격입니다.
   
 paths:
@@ -63,7 +63,8 @@ paths:
               schema:
                 oneOf:
                 - $ref: '#/components/schemas/SignUpResponseDto'
-                - $ref: '#/components/schemas/SignUpServerWriteErrorResponse'
+                - $ref: '#/components/schemas/SignUpErrorResponse'
+                - $ref: '#/components/schemas/SignUpArrayErrorResponse'
 
   /auth/login:
     post:
@@ -85,21 +86,28 @@ paths:
               schema:
                 oneOf:
                 - $ref: '#/components/schemas/LoginResponseDto'
-                - $ref: '#/components/schemas/LoginServerWriteErrorResponse'
+                - $ref: '#/components/schemas/LoginErrorResponse'
                     
                   
 components:
   schemas:
-    LoginServerWriteErrorResponse:
+    LoginErrorResponse:
       type: object
       oneOf:
         - $ref: '#/components/schemas/InvalidEmailError'
         - $ref: '#/components/schemas/InvalidPasswordError'
-    SignUpServerWriteErrorResponse:
+    SignUpErrorResponse:
       type: object
       oneOf:
         - $ref: '#/components/schemas/DuplicateEmailError'
         - $ref: '#/components/schemas/DuplicateNicknameError'
+
+    SignUpArrayErrorResponse:
+      type: array
+      items :
+        anyOf:
+          - $ref: '#/components/schemas/DuplicateEmailError'
+          - $ref: '#/components/schemas/DuplicateNicknameError'
 
     SignUpDto:
       type: object
@@ -108,22 +116,20 @@ components:
           type: string
         password:
           type: string
-        name:
-          type: string
         nickname:
           type: string
+
     SignUpResponseDto:
       type: object
       properties:
         status:
           type: integer
           format: int32
+          example: 201
         message:
           type: string
-        emailDuplicated:
-          type: boolean
-        nicknameDuplicated:
-          type: boolean
+          example: 정상적으로 로그인하였습니다.
+
     LoginDto:
       type: object
       properties:
@@ -139,14 +145,19 @@ components:
         userId:
           type: integer
           format: int32
+          example: 20
+    
     LoginResponseDto:
       type: object
       properties:
         status:
           type: integer
           format: int32
+          example: 200
         message:
           type: string
+          example: 정상적으로 로그인하였습니다.
+
         user:
           $ref: '#/components/schemas/Auth'
     
@@ -178,7 +189,7 @@ components:
           example: 비밀번호가 틀렸습니다.
         code:
           type: string
-          example : "M001"
+          example : "M002"
 
 
     NotFoundError:
@@ -192,7 +203,7 @@ components:
           type: string
         code:
           type: string
-          example: "M002"
+          example: "M004"
 
 
     DuplicateEmailError:

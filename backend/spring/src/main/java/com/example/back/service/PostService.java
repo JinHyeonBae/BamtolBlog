@@ -1,5 +1,7 @@
 package com.example.back.service;
 
+import java.util.Optional;
+
 import javax.naming.NoPermissionException;
 
 import com.example.back.config.CustomModelMapper;
@@ -26,6 +28,8 @@ import com.example.back.response.ResponseDto.ReadResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import net.bytebuddy.implementation.bytecode.Throw;
 
 
 @Service
@@ -64,7 +68,10 @@ public class PostService {
     public CreateResponseDto createPost(CreatePostDto createPostInfo){
 
         System.out.println("nickname :" + createPostInfo.getNickname());
-        UserInformation usersInfo = urInfoRepo.findByNickname(createPostInfo.getNickname());
+        UserInformation usersInfo = urInfoRepo.findByNickname(createPostInfo.getNickname()).orElseThrow(()->
+            new NullPointerException("NICKNAME NULL")
+        );
+
         int publisherUserId = usersInfo.getUserId();
 
         CreateResponseDto createDto = new CreateResponseDto();
