@@ -41,6 +41,12 @@ public class UserPrincipal implements UserDetails {
 		}
 	}
 
+	public UserPrincipal(int id, String email, String password){
+		this.id = id;
+		this.email = email;
+		this.password = password;
+	}
+
 	public static UserPrincipal create(UserInformation user) {
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
@@ -110,5 +116,4 @@ public class UserPrincipal implements UserDetails {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

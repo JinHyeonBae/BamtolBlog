@@ -1,16 +1,19 @@
 package com.example.back.security;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.example.back.model.user.UserInformation;
 import com.example.back.repository.UserInformationRepository;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +31,16 @@ public class CustomUserDetailService implements UserDetailsService{
 
     @Autowired
     UserInformationRepository userInfoRepo;
+
+    private int id;
+	@JsonIgnore
+	private String email;
+	@JsonIgnore
+	private String password;
+	private Collection<? extends GrantedAuthority> authorities;
+    
+
+
   
     @Transactional
     public UserDetails loadUserByUsername(Map<String, String> Data) 
@@ -45,35 +58,22 @@ public class CustomUserDetailService implements UserDetailsService{
         if(!userAuths.getPassword().equals(password)){
             throw new BadCredentialsException("PASSWORD_ERROR");
         }
-        
-        List<SimpleGrantedAuthority> authList = new ArrayList<SimpleGrantedAuthority>();
-        //유저 레벨 권한
-        authList.add(new SimpleGrantedAuthority("AUTH"));
  
         //엔티티 아님!
-        return new User(userAuths.getEmail(), userAuths.getPassword(), authList);
+        return UserPrincipal.create(userAuths);
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // TODO Auto-generated method stub
 
         UserInformation userAuths = userInfoRepo.findByEmail(email).orElseThrow(() -> 
-        new UsernameNotFoundException("User not found with email : " + email));  
+        new UsernameNotFoundException("User not found with email : " + email)); 
 
-        // if(userAuths == null){
-        //     throw new UnauthorizedException(HttpStatus.NOT_FOUND, "없는 이메일입니다.");
-        // }
-
-        // if(userAuths.getPassword() == password){
-        //     throw new UnauthorizedException(HttpStatus.UNAUTHORIZED, "비밀번호가 맞지 않습니다.");
-        // }
-
-        List<SimpleGrantedAuthority> authList = new ArrayList<SimpleGrantedAuthority>();
-        //유저 레벨 권한
-        authList.add(new SimpleGrantedAuthority("AUTH"));
-    
-        //엔티티 아님!
-        return new User(userAuths.getEmail(), userAuths.getPassword(), authList);
+        return UserPrincipal.create(userAuths);
     }
+
+
+
 }

@@ -3,11 +3,13 @@ package com.example.back.repository.CustomRepository;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
+import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
@@ -16,6 +18,7 @@ import com.example.back.model.user.Users;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,9 +43,9 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     public void saveSignUpUserInfo(UserInformation userInfo){
 
         //영속성 컨텍스트는 데이터베이스와 애플리케이션 사이에서 객체를 저장하는 기법
-        String nickname = userInfo.getNickname();
+        
         // 비영속
-        Users new_user = new Users(nickname);
+        Users new_user = new Users();
         new_user.setUserAuth(null);
         new_user.setUserInfo(null);
 
@@ -101,6 +104,10 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
         //posts -> id, post_id
 
 
+    }
+
+    public Optional<SubscribeUser> findWithSubscriberObject(@Param(value = "paramUser") Users Subscriber){
+        return null;
     }
 
     

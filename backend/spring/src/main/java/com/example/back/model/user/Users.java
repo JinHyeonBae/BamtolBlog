@@ -32,26 +32,12 @@ public class Users{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     // 사용자의 고유 넘버, 구독자 고유 넘버, 사용자 구독 레벨, 
 
     @Column(name="created_at", columnDefinition = "datetime")
     @CreatedDate
     private LocalDateTime createdAt;
-
-    @Column(name="nickname")
-    private String nickname;
-
-    @Builder
-    // entity -> dto
-    public Users(String nickname){
-        this.nickname = nickname;
-    }
-
-    public Users(int id, String nickname){
-        this.id = id;
-        this.nickname = nickname;
-    }
 
     @OneToMany(mappedBy = "user")
     private List<Posts> posts = new ArrayList<Posts>();
@@ -62,8 +48,11 @@ public class Users{
     @OneToMany(mappedBy = "user",cascade={CascadeType.MERGE, CascadeType.REMOVE})
     private List<SubscribePost> subPost = new ArrayList<SubscribePost>();
 
-    @OneToMany(mappedBy = "user",cascade={CascadeType.MERGE, CascadeType.REMOVE})
-    private List<SubscribeUser> subUser = new ArrayList<SubscribeUser>();
+    @OneToMany(mappedBy = "subscriber",cascade={CascadeType.MERGE, CascadeType.REMOVE})
+    private List<SubscribeUser> subHost = new ArrayList<SubscribeUser>();
+
+    @OneToMany(mappedBy = "publisher",cascade={CascadeType.MERGE, CascadeType.REMOVE})
+    private List<SubscribeUser> subReader = new ArrayList<SubscribeUser>();
 
     @OneToMany(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     private List<PostPermission> postPermit = new ArrayList<PostPermission>();
