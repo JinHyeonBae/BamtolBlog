@@ -1,5 +1,7 @@
 package com.example.back.controller;
 
+import java.nio.file.AccessDeniedException;
+
 import javax.naming.NoPermissionException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 
 
 @RestController
@@ -44,56 +47,19 @@ public class PostController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<CreateResponseDto> createPost(HttpServletRequest request, @RequestBody CreatePostDto body){
 
-        ResponseEntity<CreateResponseDto> responseEntity;
-
-        System.out.println("Header :" + request.getCookies());
-        String token = request.getCookies()[0].toString();
-
-        if(jwtProvider.validateToken(token)){
-            System.out.println("정확한 토큰");
-
-            CreateResponseDto result = postService.createPost(body);
-            HttpStatus status = result.getStatus();
-            
-            responseEntity = ResponseEntity.status(status).body(result);
-            
-        }
-        else{
-            CreateResponseDto createDto = new CreateResponseDto(HttpStatus.FORBIDDEN,  "토큰이 유효하지 않습니다.", 0);
-            responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(createDto);
-        }
-
-        return responseEntity;
+        CreateResponseDto result = postService.createPost(body);
+        
+        return ResponseEntity.ok().body(result);
     }
 
     //읽기 요청
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody ReadPostDto body) throws NoPermissionException{
+    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody ReadPostDto body) throws NoPermissionException, InternalServerError, AccessDeniedException{
         // 먼저 온 토큰으로 userId를 받는다.   
         
-        ReadResponseDto readDto = new ReadResponseDto();
+        ReadResponseDto readDto = postService.readPost(body);
 
-        ResponseEntity<ReadResponseDto> responseEntity = null;
-            
-        //이 권한 검사는 서비스에서 다 마쳐야 하나..?
-            try{
-                readDto = postService.readPost(body);
-                
-                responseEntity = ResponseEntity.status(readDto.getStatus()).body(readDto);
-            }
-            catch(NoPermissionException e){
-                System.out.println(e.getMessage());
-                System.out.println("해당 포스트를 볼 권한이 없습니다.");
-                //throw new NoPermissionException("해당 포스트를 볼 권한이 없습니다.");
-                
-                responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            }
-            catch(NullPointerException e){
-                System.out.println("해당 포스트를 볼 권한이 없습니다.");
-                responseEntity = ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            }
-        
-        return responseEntity;
+        return ResponseEntity.ok().body(readDto);
     }
 
 
