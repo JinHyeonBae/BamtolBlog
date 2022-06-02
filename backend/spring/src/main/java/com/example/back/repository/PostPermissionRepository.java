@@ -1,5 +1,7 @@
 package com.example.back.repository;
 
+import java.util.Optional;
+
 import com.example.back.model.post.PostPermission;
 import com.example.back.repository.CustomRepository.InsertCustomRepository;
 
@@ -9,7 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostPermissionRepository extends JpaRepository<PostPermission, Integer>, InsertCustomRepository{
     
-    public PostPermission findByUserIdAndPostId(int userId, int postId);
+    public Optional<PostPermission> findByUserIdAndPostId(int userId, int postId);
 
     public void savePostPermission(PostPermission permission);
     public PostPermission findById(int id);

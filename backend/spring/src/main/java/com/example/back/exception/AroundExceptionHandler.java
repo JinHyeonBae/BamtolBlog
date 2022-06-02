@@ -4,11 +4,16 @@ package com.example.back.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.NoPermissionException;
+
 import com.example.back.response.ErrorCode;
 import com.example.back.response.ExceptionResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,40 +26,15 @@ public class AroundExceptionHandler{
 
 
     //@Autowired 를 빼니까 된다..?
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AroundExceptionHandler.class);
+
     ExceptionResponse exceptionResponse;
 
-    @ExceptionHandler(value = {UsernameNotFoundException.class, BadCredentialsException.class, 
-                                InternalAuthenticationServiceException.class})
-
-    // ExceptionResponse(String messages, String error, Integer status)
-    public ResponseEntity<ExceptionResponse> UnauthorizeExceptionHandler(Exception e){
-        System.out.println("Exeption Error :" + e.getMessage());
-
-        if(e.getMessage().contains("EMAIL")){
-            ExceptionResponse response = ExceptionResponse.of(ErrorCode.EMAIL_INPUT_INVALID);
-            return ResponseEntity.ok().body(response);
-        }
-        else if(e.getMessage().contains("Bad credentials")){
-            ExceptionResponse response = ExceptionResponse.of(ErrorCode.PASSWORD_INPUT_INVALID);
-            return ResponseEntity.ok().body(response);
-        }
-        
-        return null;
-    }
-
-
-    @GetMapping("/not-found")
-    @ExceptionHandler(value = {NotFoundException.class})
-    public ResponseEntity<ExceptionResponse> NotFoundExceptionHandler(NotFoundException e){
-        System.out.println("ERROR :" + e.getMessage());
-        return null;
-    }
-
-
-    @GetMapping("/null-pointer")
+    
     @ExceptionHandler(value = {NullPointerException.class})
-    public ResponseEntity<Object> NullPointerExceptionHandler(NullPointerException e){
-        System.out.println("ERROR : "+ e.getMessage());
+    public ResponseEntity<Object> NullPointerExceptionHandler(NullPointerException e){ // 400
+        LOGGER.info("ERROR : "+ e.getMessage());
         
         if(e.getMessage().contains("HEADER")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.HEADER_NULL_POINTER);
@@ -64,23 +44,63 @@ public class AroundExceptionHandler{
         return null;
     }
 
+    @ExceptionHandler(value = {UsernameNotFoundException.class, BadCredentialsException.class, 
+                                InternalAuthenticationServiceException.class })
+
+    // ExceptionResponse(String messages, String error, Integer status)
+    public ResponseEntity<ExceptionResponse> UnauthorizeExceptionHandler(Exception e){ // 401
+        LOGGER.info("Exeption Error :" + e.getMessage());
+
+        if(e.getMessage().contains("EMAIL")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_EMAIL);
+            return ResponseEntity.ok().body(response);
+        }
+        else if(e.getMessage().contains("Bad credentials")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_PASSWORD);
+            return ResponseEntity.ok().body(response);
+        }
+        
+        return null;
+    }
+
+    @ExceptionHandler(value = {NoPermissionException.class, AccessDeniedException.class})
+    public ResponseEntity<ExceptionResponse> ForbiddenExceptionHandler(Exception e){
+        LOGGER.info("Exeption Error :" + e.getMessage());
+
+        if(e.getMessage().contains("PERMISSION")){ 
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.PERMISSION_DENIED);
+            return ResponseEntity.ok().body(response);
+        }
+
+        return null;
+    }
+
+
+    @ExceptionHandler(value = {NotFoundException.class})
+    public ResponseEntity<ExceptionResponse> NotFoundExceptionHandler(NotFoundException e){ //404
+        LOGGER.info("ERROR :" + e.getMessage());
+        return null;
+    }
+
+
+
     @ExceptionHandler(value = {IllegalStateException.class})
-    public ResponseEntity IllegalStateExceptionHandler(IllegalStateException e){
-        System.out.println("ERROR : "+e.getMessage());
+    public ResponseEntity IllegalStateExceptionHandler(IllegalStateException e){ //409
+        LOGGER.info("ERROR : "+e.getMessage());
 
         if(e.getMessage().contains("AND")){
             List<ExceptionResponse> exceptionList = new ArrayList<>();
 
-            exceptionList = ExceptionResponse.more(ErrorCode.EMAIL_DUPLICATION, ErrorCode.NICKNAME_DUPLICATION);
+            exceptionList = ExceptionResponse.more(ErrorCode.DUPLICATE_EMAIL, ErrorCode.DUPLICATE_NICKNAME);
             return ResponseEntity.ok().body(exceptionList);
         }
         else{
             if(e.getMessage().contains("EMAIL")){
-                ExceptionResponse response = ExceptionResponse.of(ErrorCode.EMAIL_DUPLICATION);
+                ExceptionResponse response = ExceptionResponse.of(ErrorCode.DUPLICATE_EMAIL);
                 return ResponseEntity.ok().body(response);
             }
             else if(e.getMessage().contains("NICKNAME")){
-                ExceptionResponse response = ExceptionResponse.of(ErrorCode.NICKNAME_DUPLICATION);
+                ExceptionResponse response = ExceptionResponse.of(ErrorCode.DUPLICATE_NICKNAME);
                 return ResponseEntity.ok().body(response);
             }
         }

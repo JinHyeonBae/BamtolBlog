@@ -28,6 +28,8 @@ public enum Role {
     private int value = 0;
     //key cnrk
 
+
+
     public static Role valueOf(int roleNum){
         Role role = null;
         switch (roleNum) {
@@ -54,7 +56,6 @@ public enum Role {
         }
         return role;
     }
-
-
-
 }
+
+
