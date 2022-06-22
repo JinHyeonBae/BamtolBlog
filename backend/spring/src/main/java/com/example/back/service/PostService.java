@@ -8,8 +8,11 @@ import java.util.Optional;
 import javax.naming.NoPermissionException;
 
 import com.example.back.config.CustomModelMapper;
+import com.example.back.config.GenericMapper;
 import com.example.back.dto.PostDto.CreatePostDto;
+import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.ReadPostDto;
+import com.example.back.dto.PostDto.UpdatePostDto;
 import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
@@ -28,8 +31,11 @@ import com.example.back.repository.UserPermissionReposotiry;
 import com.example.back.repository.UserRepository;
 import com.example.back.response.ErrorCode;
 import com.example.back.response.ResponseDto.CreateResponseDto;
+import com.example.back.response.ResponseDto.DeleteResponseDto;
 import com.example.back.response.ResponseDto.ReadResponseDto;
+import com.example.back.response.ResponseDto.UpdateResponseDto;
 
+import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +89,8 @@ public class PostService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
 
+    private GenericMapper<?, ?> mapper = Mappers.getMapper(GenericMapper.class);
+
     @Transactional
     public CreateResponseDto createPost(CreatePostDto createPostInfo) throws SQLException{
 
@@ -99,7 +107,7 @@ public class PostService {
         
         if(publisherUserId == createPostInfo.getUserId()){
 
-            LOGGER.info("권한을 충족하였습니다.");
+            LOGGER.info("생성 권한을 충족하였습니다.");
 
             PostInformation newPostInfo = new PostInformation();
         
@@ -148,7 +156,73 @@ public class PostService {
             throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
     }
+
+    public UpdateResponseDto updatePost(UpdatePostDto body, int postId) throws NoPermissionException{
+
+        int userId = body.getUserId();
+
+        System.out.println(postId);
+
+        Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
+            new NullPointerException("NICKNAME NULL")
+        );  
+
+        int publisherUserId = users.getId();
+
+        UpdateResponseDto updateDto = new UpdateResponseDto();
+        
+        if(publisherUserId == userId){
+
+            LOGGER.info("수정 권한을 충족하였습니다.");
+
+            PostInformation postInfo = postInformationRepository.findByPostId(postId);
+            
+            mapper.updateCustomerFromDto(body, postInfo);
+            postInformationRepository.save(postInfo);
+
+            updateDto.setStatus(200);
+            updateDto.setMessage("수정 요청이 완료되었습니다.");
+            
+        }
+        else{
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
+        }
+
+        return updateDto;
+
+    }
     
+    
+
+    public DeleteResponseDto deletePost(DeletePostDto body) throws NoPermissionException{
+
+        int userId = body.getUserId();
+        int postId = body.getPostId();
+
+        Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
+            new NullPointerException("NICKNAME NULL")
+        );  
+
+        int publisherUserId = users.getId();
+
+        DeleteResponseDto deleteDto = new DeleteResponseDto();
+        
+        if(publisherUserId == userId){
+
+            LOGGER.info("삭제 권한을 충족하였습니다.");
+            Posts post = postsRepository.findById(postId);
+
+            postsRepository.delete(post);
+            deleteDto.setStatus(204);
+            deleteDto.setMessage("삭제 요청이 완료되었습니다.");
+        }
+        else{
+             //false 일 경우는 권한이 없는 경우
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
+        }
+
+        return deleteDto;
+    }   
     
 
 }

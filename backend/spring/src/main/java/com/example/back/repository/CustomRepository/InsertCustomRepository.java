@@ -21,10 +21,11 @@ public interface InsertCustomRepository {
     //void saveLoginUserInfo(UserInformation dto);
     //void saveUserToken(UserAuth token);
     
-    void savePostPermission(PostPermission permission);
+    void savePostPermission(PostPermission permission, int userId);
 
     void savePostInformation(PostInformation postInfo) throws SQLException;
     void savePosts(Posts postInfo) throws SQLException;
+
 
     Optional<SubscribeUser> findWithSubscriberObject(Users Subscriber);
 }
