@@ -3,6 +3,7 @@ package com.example.back.model.user;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.*;
@@ -62,5 +63,32 @@ public class Users{
 
     @OneToOne(mappedBy = "user", targetEntity=UserAuth.class, cascade={CascadeType.MERGE, CascadeType.REMOVE})
     private UserAuth userAuth = new UserAuth();
+
+    
+    public void add(Posts post){
+        post.setUser(this);
+        this.posts.add(post);
+    }
+
+    public void setPostInfo(List<PostInformation> postsInfo){
+        if (postsInfo == null) {
+			this.postsInfo = null;
+		} else {
+			this.postsInfo = Collections.unmodifiableList(postsInfo);
+		}
+    }
+
+    public void add(PostPermission pp){
+        pp.setUser(this);
+        this.postPermit.add(pp);
+    }
+
+    public void add(PostInformation pi){
+        pi.setUser(this);
+        this.postsInfo.add(pi);
+    }
+    
+    
+
 
 }

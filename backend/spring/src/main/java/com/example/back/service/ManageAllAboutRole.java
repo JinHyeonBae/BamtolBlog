@@ -1,5 +1,6 @@
 package com.example.back.service;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,9 +12,11 @@ import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
+import com.example.back.model.post.Posts;
 import com.example.back.model.user.Users;
 import com.example.back.repository.PostInformationRepository;
 import com.example.back.repository.PostPermissionRepository;
+import com.example.back.repository.PostsRepository;
 import com.example.back.repository.SubscribePostRepository;
 import com.example.back.repository.SubscribeUserRepository;
 import com.example.back.repository.UserInformationRepository;
@@ -22,8 +25,10 @@ import com.example.back.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 @Component
 public class ManageAllAboutRole{
@@ -35,6 +40,9 @@ public class ManageAllAboutRole{
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    PostsRepository postsRepository;
 
     @Autowired
     UserInformationRepository uInformationRepository;
@@ -74,7 +82,8 @@ public class ManageAllAboutRole{
         LOGGER.info("ENTER IN READROLE!");
         Map<String, String> postAndUsersPermissions = new HashMap<String, String>();
         
-        PostInformation postInfo = postInformationRepository.findByPostId(postDto.getPostId());
+        // postInfo가 null인 경우 서버 에러로 처리하자
+        PostInformation postInfo = postInformationRepository.findByPostId(postDto.getPostId()); //optional로 날려줘야겠네
         
         LOGGER.info("postInfo role입니다 :" + postInfo.getDisplayLevel());
 
@@ -103,7 +112,8 @@ public class ManageAllAboutRole{
         System.out.println("UP :" +userPermission);
         System.out.println("PP :" + postPermission);
 
-        // post가 public일 경우
+        postPermission = postPermission.toUpperCase();
+
         if(postPermission.equals(Role.PUBLIC.getKey()))
             return true;
 
@@ -142,9 +152,10 @@ public class ManageAllAboutRole{
         Optional<SubscribeUser> subUser = subscribeUserRepository.findBySubscriber_Id(userId);
 
         //domain subscriber인 경우
+    
         subUser.ifPresent((action)->{   
             //userRole은 subscriberUser이다.
-            saveUserRole("DOMAIN_SUBSCRIBER", userId, postId);
+            this.saveUserRole("DOMAIN_SUBSCRIBER", userId, postId);
             this.userRole = Role.DOMAIN_SUBSCRIBER.getKey();
         });
 
@@ -161,8 +172,8 @@ public class ManageAllAboutRole{
             return this.userRole;
         
         Optional<Users> users = userRepository.findById(userId);
-        
-        if(users.get() != null){
+        System.out.println("users status:" + users);
+        if(!users.isEmpty()){
             this.userRole = Role.MEMBER.name();
             return this.userRole;
         }
@@ -171,12 +182,19 @@ public class ManageAllAboutRole{
     }
 
     
+    // foreign key
     private void saveUserRole(String userPermission, int userId, int postId){
-        postPermissionRepository.savePostPermission(PostPermission.builder()
-                                .permissionId(Role.valueOf(userPermission).getValue())
-                                .userId(userId)
-                                .postId(postId)
-                                .build());
+
+        // Posts post = postsRepository.findById(postId);
+        // Users user = userRepository.findById(userId).get();
+        // postPermission.setUser(user); -> save 는 위반성 에러 남    
+        PostPermission postPermission = new PostPermission();
+        
+        postPermission.setPostId(postId);
+        postPermission.setUserId(userId);
+        
+        postPermission.setPermissionId(Role.valueOf(userPermission).getValue());
+        postPermissionRepository.save(postPermission);
 
     }
 

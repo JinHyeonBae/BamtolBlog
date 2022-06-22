@@ -25,8 +25,10 @@ public enum ErrorCode {
     EXPIRE_TOKEN(40301, "M011", "토큰이 만료되었습니다."),
 
     DUPLICATE_EMAIL(40901, "M010", "중복된 이메일입니다."),
-    DUPLICATE_NICKNAME(40902, "M011", "중복된 닉네임입니다.");
+    DUPLICATE_NICKNAME(40902, "M011", "중복된 닉네임입니다."),
+    DUPLICATE_EMAIN_AND_NICKNAME(40903, "M012", "이메일, 닉네임 중복입니다."),
 
+    INTERNAL_ERROR(50001, "S001", "내부 서버 에러입니다.");
 
     //admin
 

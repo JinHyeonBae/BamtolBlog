@@ -59,6 +59,10 @@ public class AroundExceptionHandler{
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_PASSWORD);
             return ResponseEntity.ok().body(response);
         }
+        else if(e.getMessage().contains("INTERNAL")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.INTERNAL_ERROR);
+            return ResponseEntity.ok().body(response);
+        }
         
         return null;
     }
@@ -89,10 +93,8 @@ public class AroundExceptionHandler{
         LOGGER.info("ERROR : "+e.getMessage());
 
         if(e.getMessage().contains("AND")){
-            List<ExceptionResponse> exceptionList = new ArrayList<>();
-
-            exceptionList = ExceptionResponse.more(ErrorCode.DUPLICATE_EMAIL, ErrorCode.DUPLICATE_NICKNAME);
-            return ResponseEntity.ok().body(exceptionList);
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.DUPLICATE_EMAIN_AND_NICKNAME);
+            return ResponseEntity.ok().body(response);
         }
         else{
             if(e.getMessage().contains("EMAIL")){
