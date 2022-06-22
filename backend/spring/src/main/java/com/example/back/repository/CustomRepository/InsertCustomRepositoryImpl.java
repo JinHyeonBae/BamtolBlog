@@ -15,7 +15,9 @@ import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
+import com.example.back.repository.UserRepository;
 
+import org.hibernate.boot.spi.InFlightMetadataCollector.EntityTableXref;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
@@ -31,7 +33,8 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @PersistenceContext
     EntityManager entityManager;
 
-    
+
+
     public String getCurrentTime(){
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
@@ -71,30 +74,30 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Override
     @Modifying
     @Transactional
-    public void savePostPermission(PostPermission permission){
+    public void savePostPermission(PostPermission permission, int userId){
 
-        String sql = "INSERT INTO post_permission(permission_id, post_id, user_id) VALUES(?,?,(SELECT id from posts WHERE user_id=?))";
-        entityManager.createNativeQuery(sql)
-                    .setParameter(1, permission.getPermissionId())
-                    .setParameter(2, permission.getUserId())
-                    .setParameter(3, permission.getUserId())
-                    .executeUpdate();
-
+    
     }
 
     @Override
     @Modifying
     @Transactional
     public void savePostInformation(PostInformation postInfo) throws SQLException{
-        //entityManager.getTransaction().begin(); //Update
+       
         Posts post = new Posts();
-        post.setPostInfo(null);
-        post.setPostPermit(null);
+        post.setPostInfo(null); //이걸 해줘야하는 이유가 뭘까? 이걸 안 해주면 아직 저장이 되지 않은 걸 사용했다고 뜬다.
+        int userId = postInfo.getUserId();
+        post.setUserId(userId);
+        // 처음 에러는, postInfo의 id가 설정되어있었다. id가 존재하는 것은 곧 이미 영속화되었다고 간주하여, detach 에러가 난다.
+
         entityManager.persist(post);
-        //여기서 user의 아이디는 어떻게 가져오는 거임
-        int postId = post.getId();
-        postInfo.setPostId(postId);
-        entityManager.persist(postInfo);   
+        entityManager.flush();
+
+        postInfo.setUserId(post.getUserId());
+        postInfo.setPostId(post.getId());
+        entityManager.persist(postInfo); // detached entity passed to persist
+        
+        entityManager.flush();
     }
 
     @Override
