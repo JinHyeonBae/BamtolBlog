@@ -51,7 +51,7 @@ public class ResponseDto {
         String message;
         
         String contents;
-        String titles;
+        String title;
 
         public void readErrorDto(Integer status, String message){
             this.status = status;
