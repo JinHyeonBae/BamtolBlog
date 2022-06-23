@@ -21,11 +21,12 @@ paths:
       tags:
       - post-controller
       operationId: readPost
+      description : "포스트 읽기 요청"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: '#/components/schemas/ReadPostDto'
         required: true
       responses:
         "200":
@@ -40,6 +41,11 @@ paths:
       tags:
       - post-controller
       operationId: CreatePostResponse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDto'
       responses:
         "200":
           description: OK
@@ -53,6 +59,11 @@ paths:
       tags:
       - post-controller
       operationId: updatePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostDto'
       responses:
         "200":
           description: OK
@@ -66,6 +77,11 @@ paths:
       tags:
       - post-controller
       operationId: deletePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletePostDto'
       responses:
         "200":
           description: OK
@@ -125,7 +141,6 @@ paths:
           application/json:
             schema:
                 $ref: '#/components/schemas/LoginDto'
-
         required: true
       responses:
         "200":
@@ -180,6 +195,47 @@ components:
           type: string
           example: 정상적으로 로그인하였습니다.
 
+    CreatePostDto:
+      type: object
+      properties:
+        title:
+          type : string
+        contents:
+          type : string
+        displayLevel:
+          type : string
+        price :
+          type : integer
+        userId:
+          type : integer
+        
+    ReadPostDto:
+      type : object
+      properties:
+        userId:
+          type : integer
+    
+    UpdatePostDto:
+      type: object
+      properties:
+        title:
+          type : string
+        contents:
+          type : string
+        displayLevel:
+          type : string
+        price :
+          type : integer
+        userId:
+          type : integer
+
+    DeletePostDto:
+      type: object
+      properties:
+        userId :
+          type : integer
+          example : 10
+
     LoginDto:
       type: object
       properties:
@@ -221,6 +277,10 @@ components:
         message:
           type: string
           example: 포스트가 성공적으로 생성되었습니다.
+        postId :
+          type: integer
+          format: int32
+          example: 10
 
     ReadPostResponse:
       type: object
@@ -236,7 +296,7 @@ components:
           type: string
           example : 글 제목입니다.
         content:
-          type:
+          type: string
           example : 글 내용입니다.
         
     
