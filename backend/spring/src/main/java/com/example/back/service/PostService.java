@@ -1,18 +1,25 @@
 package com.example.back.service;
 
+import java.nio.file.AccessDeniedException;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.naming.NoPermissionException;
 
 import com.example.back.config.CustomModelMapper;
+import com.example.back.config.GenericMapper;
 import com.example.back.dto.PostDto.CreatePostDto;
+import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.ReadPostDto;
+import com.example.back.dto.PostDto.UpdatePostDto;
 import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
 import com.example.back.model.user.UserInformation;
+import com.example.back.model.user.Users;
 import com.example.back.repository.PermissionRepository;
 import com.example.back.repository.PostInformationRepository;
 import com.example.back.repository.PostPermissionRepository;
@@ -22,12 +29,24 @@ import com.example.back.repository.SubscribeUserRepository;
 import com.example.back.repository.UserInformationRepository;
 import com.example.back.repository.UserPermissionReposotiry;
 import com.example.back.repository.UserRepository;
+import com.example.back.response.ErrorCode;
 import com.example.back.response.ResponseDto.CreateResponseDto;
+import com.example.back.response.ResponseDto.DeleteResponseDto;
 import com.example.back.response.ResponseDto.ReadResponseDto;
+import com.example.back.response.ResponseDto.UpdateResponseDto;
 
+import org.mapstruct.factory.Mappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
+import org.springframework.web.server.ServerErrorException;
 
 import net.bytebuddy.implementation.bytecode.Throw;
 
@@ -65,185 +84,145 @@ public class PostService {
     @Autowired
     PermissionRepository permissionRepository;
 
-    public CreateResponseDto createPost(CreatePostDto createPostInfo){
+    @Autowired
+    ManageAllAboutRole roleProcessor;
 
-        System.out.println("nickname :" + createPostInfo.getNickname());
-        UserInformation usersInfo = urInfoRepo.findByNickname(createPostInfo.getNickname()).orElseThrow(()->
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
+
+    private GenericMapper<?, ?> mapper = Mappers.getMapper(GenericMapper.class);
+
+    @Transactional
+    public CreateResponseDto createPost(CreatePostDto createPostInfo) throws SQLException{
+
+        //이건 데이터가 제대로 매핑이 안되었거나 안 온 경우니까 
+        Users users = urRepo.findById(createPostInfo.getUserId()).orElseThrow(()->
             new NullPointerException("NICKNAME NULL")
-        );
+        );  
 
-        int publisherUserId = usersInfo.getUserId();
+        // Role이 상시적으로 바뀌는데..음..
+
+        int publisherUserId = users.getId();
 
         CreateResponseDto createDto = new CreateResponseDto();
         
         if(publisherUserId == createPostInfo.getUserId()){
-            System.out.println("권한을 충족하였습니다.");
-            try{
-                PostInformation cpPostInformation = createPostInfo.PostInfoToEntity();
-                
-                postsRepository.savePosts(new Posts(publisherUserId));
-                postInformationRepository.savePostInformation(cpPostInformation);
-                
-                // postPermissionRepo.savePostPermission(PostPermission.builder()
-                //                                 .permissionId(13)
-                //                                 .userId(publisherUserId)
-                //                                 .postId()
-                //                                 .build()
-                //                                 );
 
-                createDto.setStatus(HttpStatus.CREATED);
-                createDto.setMessage("포스트가 성공적으로 생성되었습니다.");
-            }
-            catch(Exception e){
-                createDto.setStatus(HttpStatus.valueOf(501));
-                createDto.setMessage(e.getMessage());
-            }
+            LOGGER.info("생성 권한을 충족하였습니다.");
+
+            PostInformation newPostInfo = new PostInformation();
+        
+            newPostInfo.setUserId(users.getId());
+            
+            customModelMapper.strictMapper().map(createPostInfo, newPostInfo);
+            
+            newPostInfo.setId(null);
+            postInformationRepository.savePostInformation(newPostInfo);
+
+            createDto.setStatus(201);
+            createDto.setMessage("포스트가 성공적으로 생성되었습니다.");
         }
         else{
-            System.out.println("권한이 없습니다.");
-
-            createDto.setStatus(HttpStatus.FORBIDDEN);
-            createDto.setMessage("접근 권한이 없습니다.");
+            new NoPermissionException("PERMISSION DENIED");
         }
 
         return createDto;
-    
     }
 
 
-    public ReadResponseDto readPost(ReadPostDto body) throws NoPermissionException{
+    public ReadResponseDto readPost(ReadPostDto body) throws NoPermissionException, InternalServerError, AccessDeniedException{
 
         //userId, postId로 
         Integer userId = body.getUserId();
         Integer postId = body.getPostId();
 
-        PostPermission postPermission = postPermissionRepo.findByUserIdAndPostId(userId, postId);
-        //보내려는 정보
-        PostInformation postInfo = null;
-        ReadResponseDto readDto = null;
-                    
-        if(postPermission == null){
-            postInfo = postInformationRepository.findByPostId(postId);
+        // 1차로 getAuthority 확인
+        HashMap<String,String> roleMap = roleProcessor.readRole(body);
 
-            try{
-                
-                boolean Qualification = assignUserRole(userId, postId);
-                if(Qualification){
-                    // 여기서 그럼 또 userRepo에 접근해서 닉네임을 얻어오나
-                    readDto = new ReadResponseDto(HttpStatus.OK, "읽기 요청이 완료되었습니다.", postInfo.getContents(), postInfo.getTitle());
-
-                }
-                else{
-                    readDto = new ReadResponseDto();
-                    readDto.readErrorDto(HttpStatus.FORBIDDEN, "해당 포스트를 볼 권한이 없습니다.");
-                }
-            }
-            catch(Exception e){
-                System.out.println("에러 발생.");
-                System.out.println(e.getMessage());
-                System.out.println(e.getStackTrace());
-                
-                //throw new NoPermissionException("해당 포스트를 볼 권한이 없습니다.");
-                readDto = new ReadResponseDto();
-                readDto.readErrorDto(HttpStatus.valueOf(500), e.getMessage());
-                
-            }
-        }
-        else{
-            postInfo = postInformationRepository.findByPostId(postId);
-
-            if(Role.valueOf(postPermission.getPermissionId()).equals(Role.DOMAIN_SUBSCRIBER)){
-                System.out.println("당신의 권한은 도메인 구독자 권한입니다.");
-            }
-            else if(Role.valueOf(postPermission.getPermissionId()).equals(Role.POST_SUBSCRIBER))
-                System.out.println("당신의 권한은 포스트 구독자 권한입니다.");
-            else{
-                System.out.println("당신의 권한은 퍼블리셔 권한입니다.");
-            }
-            
-            readDto = new ReadResponseDto(HttpStatus.OK, "읽기 요청이 완료되었습니다.", postInfo.getContents(), postInfo.getTitle());
-        }
-
-        return readDto;
-    }
-
-
-    public boolean assignUserRole(int userId, int postId){    
-        //도메인 구독자인지 확인한다.
-
-        //권한 정보 들고 있다.
-        Role userRole = null;
-
-        SubscribeUser subscribeUser = subscribeUserRepository.findById(userId);
-
-        if(subscribeUser !=null){
-            userRole = Role.DOMAIN_SUBSCRIBER;
-            System.out.println("당신의 권한은 도메인 구독자(블로그 구독자)입니다.");
-
-            postPermissionRepo.savePostPermission(PostPermission.builder()
-                                                .permissionId(14)
-                                                .userId(userId)
-                                                .postId(postId)
-                                                .build()
-                                                );
-            //insert to post_permission 14 
-            //return true;
+        if(roleMap.get("userPermissionLevel") == null){
+            String userRole = roleProcessor.findUserRole(userId, postId);
+            // userRole이 비로그인인 경우 null일 수 있다.
+            System.out.println("user :" + userRole);
+            roleMap.put("userPermissionLevel", userRole);
         }
         
-        SubscribePost subscribePost = subscribePostRepository.findByUserIdAndPostId(userId, postId); 
-        
-        if(subscribePost != null){
-            userRole = Role.POST_SUBSCRIBER;
-            System.out.println("당신의 권한은 포스트 구독자입니다.");
-            
-            //insert to post_permission 13
-            //동일한 데이터가 postPermission에 들어가면 안된다.
-            postPermissionRepo.savePostPermission(PostPermission.builder()
-                                                .permissionId(13)
-                                                .userId(userId)
-                                                .postId(postId)
-                                                .build()
-                                                );
-            //return true;
-        }
+        boolean isProperAccess = roleProcessor.isProperAccessRequest(roleMap.get("userPermissionLevel"), roleMap.get("postPermissionLevel"));
+        PostInformation postInfo = postInformationRepository.findByPostId(postId);
 
-        return checkPostPermission(userRole, postId);
-    }
-
-    public boolean checkPostPermission(Role userRole, int postId){
-
-        PostInformation postRole = postInformationRepository.findByPostId(postId);
-        System.out.println("PostRole :" + postRole);
-        String postLevel = postRole.getDisplayLevel();
-
-        Role postLevelRole = Role.valueOf(postLevel);
-       //System.out.println("현재 사용자의 권한은 " + userRole.name());
-        //System.out.println(postLevelRole.name());
-        // 포스트가 비공개인 것은 어차피 다른 사용자가 누를 수 없도록 만들어야 됨.
-        if(postLevelRole.equals(Role.PRIVATE)){
-            System.out.println("현재 포스트의 권한 레벨은 private입니다.");
-            if(userRole.equals(Role.PUBLISHER)){
-                System.out.println("해당 포스트를 볼 자격이 있습니다.");
-                return true;
-            }
-            System.out.println("해당 포스트를 볼 자격이 없습니다.");
-            return false;
-        }
-        else if(postLevelRole.equals(Role.PROTECT)){
-            System.out.println("현재 포스트의 권한 레벨은 protect입니다.");
-            if(userRole.equals(Role.DOMAIN_SUBSCRIBER) || userRole.equals(Role.POST_SUBSCRIBER) || userRole.equals(Role.PUBLISHER)){
-                System.out.println("해당 포스트를 볼 자격이 있습니다.");
-                return true;
-            }
-            System.out.println("해당 포스트를 볼 자격이 없습니다.");
-            return false;
+        if(isProperAccess){
+            return new ReadResponseDto(200, "읽기 요청이 완료되었습니다.", postInfo.getContents(), postInfo.getTitle());
         }
         else{
-            System.out.println("해당 포스트의 권한 레벨은 public입니다.");
-            System.out.println("해당 포스트를 볼 자격이 있습니다.");
-            return true;
+            //false 일 경우는 권한이 없는 경우
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
     }
 
+    public UpdateResponseDto updatePost(UpdatePostDto body, int postId) throws NoPermissionException{
+
+        int userId = body.getUserId();
+
+        System.out.println(postId);
+
+        Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
+            new NullPointerException("NICKNAME NULL")
+        );  
+
+        int publisherUserId = users.getId();
+
+        UpdateResponseDto updateDto = new UpdateResponseDto();
+        
+        if(publisherUserId == userId){
+
+            LOGGER.info("수정 권한을 충족하였습니다.");
+
+            PostInformation postInfo = postInformationRepository.findByPostId(postId);
+            
+            mapper.updateCustomerFromDto(body, postInfo);
+            postInformationRepository.save(postInfo);
+
+            updateDto.setStatus(200);
+            updateDto.setMessage("수정 요청이 완료되었습니다.");
+            
+        }
+        else{
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
+        }
+
+        return updateDto;
+
+    }
     
+    
+
+    public DeleteResponseDto deletePost(DeletePostDto body) throws NoPermissionException{
+
+        int userId = body.getUserId();
+        int postId = body.getPostId();
+
+        Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
+            new NullPointerException("NICKNAME NULL")
+        );  
+
+        int publisherUserId = users.getId();
+
+        DeleteResponseDto deleteDto = new DeleteResponseDto();
+        
+        if(publisherUserId == userId){
+
+            LOGGER.info("삭제 권한을 충족하였습니다.");
+            Posts post = postsRepository.findById(postId);
+
+            postsRepository.delete(post);
+            deleteDto.setStatus(204);
+            deleteDto.setMessage("삭제 요청이 완료되었습니다.");
+        }
+        else{
+             //false 일 경우는 권한이 없는 경우
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
+        }
+
+        return deleteDto;
+    }   
+    
+
 }

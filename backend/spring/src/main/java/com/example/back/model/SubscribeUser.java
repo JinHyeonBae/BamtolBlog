@@ -1,5 +1,7 @@
 package com.example.back.model;
 
+import java.sql.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,21 +29,18 @@ public class SubscribeUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name="subscriber",columnDefinition = "TEXT")
-    private String subscriber;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
+    @JoinColumn(referencedColumnName = "id", name="subscriber_id", insertable = false, updatable = false)
+    private Users subscriber;
     
-    @Column(name="publisher",columnDefinition = "TEXT")
-    private String publisher;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
+    @JoinColumn(referencedColumnName = "id", name="publisher_id", insertable = false, updatable = false)
+    private Users publisher;
 
     @Column(name="subscribed_date",columnDefinition = "datetime")
-    private String subscribeDate;
+    private Date subscribeDate;
 
     @Column(name="expiration_date",columnDefinition = "datetime")
-    private String expirationDate;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
-    @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
-    Users user;
+    private Date expirationDate;
     
-
 }

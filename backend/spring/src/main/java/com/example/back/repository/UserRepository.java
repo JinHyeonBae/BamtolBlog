@@ -1,5 +1,6 @@
 package com.example.back.repository;
 import org.springframework.stereotype.Repository;
+import org.webjars.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,9 +18,13 @@ public interface UserRepository extends JpaRepository<Users, Integer>, InsertCus
     //update
     public List<Users> findAll();
     
-    //public void saveSignUpUserInfo(Users user);
-    public Users findById(int id);
-    public Optional<Users> findByNickname(String nickname);
+    public Optional<Users> findById(int id);
+
+    default Users getUser(int id){
+        return findById(id).orElseThrow(
+            () -> new NotFoundException("요청한 유저 정보를 찾을 수 없습니다.")
+        );
+    }
 
     // public void saveLoginUserInfo(Users dto);
     // public void saveSignUpUserInfo(Users dto);

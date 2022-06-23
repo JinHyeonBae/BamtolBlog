@@ -16,20 +16,80 @@ paths:
       schema:
         type: integer
         format: int32
+
+    get:
+      tags:
+      - post-controller
+      operationId: readPost
+      description : "포스트 읽기 요청"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadPostDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ReadPostResponse'
+    
+    post:
+      tags:
+      - post-controller
+      operationId: CreatePostResponse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDto'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/CreatePostResponse'
+    
     put:
       tags:
       - post-controller
       operationId: updatePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostDto'
       responses:
         "200":
           description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/UpdatePostResponse'
+          
     delete:
       tags:
       - post-controller
       operationId: deletePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletePostDto'
       responses:
         "200":
           description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/DeletePostResponse'
     patch:
       tags:
       - post-controller
@@ -44,6 +104,12 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SignUpResponseDto'
+        
   /auth/signup:
     post:
       tags:
@@ -64,7 +130,6 @@ paths:
                 oneOf:
                 - $ref: '#/components/schemas/SignUpResponseDto'
                 - $ref: '#/components/schemas/SignUpErrorResponse'
-                - $ref: '#/components/schemas/SignUpArrayErrorResponse'
 
   /auth/login:
     post:
@@ -76,7 +141,6 @@ paths:
           application/json:
             schema:
                 $ref: '#/components/schemas/LoginDto'
-
         required: true
       responses:
         "200":
@@ -90,6 +154,7 @@ paths:
                     
                   
 components:
+
   schemas:
     LoginErrorResponse:
       type: object
@@ -130,6 +195,47 @@ components:
           type: string
           example: 정상적으로 로그인하였습니다.
 
+    CreatePostDto:
+      type: object
+      properties:
+        title:
+          type : string
+        contents:
+          type : string
+        displayLevel:
+          type : string
+        price :
+          type : integer
+        userId:
+          type : integer
+        
+    ReadPostDto:
+      type : object
+      properties:
+        userId:
+          type : integer
+    
+    UpdatePostDto:
+      type: object
+      properties:
+        title:
+          type : string
+        contents:
+          type : string
+        displayLevel:
+          type : string
+        price :
+          type : integer
+        userId:
+          type : integer
+
+    DeletePostDto:
+      type: object
+      properties:
+        userId :
+          type : integer
+          example : 10
+
     LoginDto:
       type: object
       properties:
@@ -161,6 +267,62 @@ components:
         user:
           $ref: '#/components/schemas/Auth'
     
+    CreatePostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 포스트가 성공적으로 생성되었습니다.
+        postId :
+          type: integer
+          format: int32
+          example: 10
+
+    ReadPostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 포스트가 성공적으로 요청되었습니다.
+        title:
+          type: string
+          example : 글 제목입니다.
+        content:
+          type: string
+          example : 글 내용입니다.
+        
+    
+    UpdatePostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 수정 요청이 완료되었습니다.
+    
+    DeletePostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 삭제 요청이 완료되었습니다.
+    
+
 
     InvalidEmailError:
       type: object
@@ -235,3 +397,17 @@ components:
           type: string
           example: "M011"
     
+
+    DuplicateNicknameAndEmailError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40903
+        message:
+          type: string
+          example: 중복된 닉네임, 이메일입니다.
+        code:
+          type: string
+          example: "M011"

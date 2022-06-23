@@ -25,7 +25,7 @@ public class PostDto {
         }
     }
 
-
+    
     @Getter
     @Setter
     @NoArgsConstructor
@@ -74,6 +74,40 @@ public class PostDto {
         int userId;
 
         //@ApiModelProperty(value="현재 포스트의 고유 번호")
+        int postId;
+    }
+
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdatePostDto{
+
+        int userId;
+
+        //@ApiModelProperty(value="포스트 제목")
+        String title;
+
+        //@ApiModelProperty(value="포스트 내용")
+        String contents;
+
+        //@ApiModelProperty(value="포스트 내용")
+        String displayLevel;
+
+        //@ApiModelProperty(value="포스트 가격")
+        int price;
+
+    }
+
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DeletePostDto{
+
+        int userId;
         int postId;
     }
 

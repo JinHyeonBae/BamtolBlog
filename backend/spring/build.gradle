@@ -49,8 +49,12 @@ dependencies {
 	
 	implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
 	
+	implementation 'org.mapstruct:mapstruct:1.4.1.Final'
+    compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.1.Final'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+

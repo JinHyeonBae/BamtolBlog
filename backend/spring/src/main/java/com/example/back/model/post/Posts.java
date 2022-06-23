@@ -57,4 +57,20 @@ public class Posts {
     @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
     Users user;
 
+    // public void add(PostInformation pi){
+    //     pi.setPost(this);
+    //     this.postInfo.
+    // }
+
+    public void add(PostPermission pp){
+        pp.setPost(this);
+        this.postPermit.add(pp);
+    }
+
+    public void add(PostInformation pp){
+        pp.setPost(this);
+        this.postInfo = pp;
+    }
+
+
 }

@@ -8,8 +8,11 @@ import com.example.back.repository.CustomRepository.InsertCustomRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
+// interface는 static인가?!
 public interface PostsRepository extends JpaRepository<Posts, Integer>, InsertCustomRepository{
 
     public void savePosts(Posts post);
+    public Posts findById(int id);
+    public Posts findByUserId(int userId);
 
 }
