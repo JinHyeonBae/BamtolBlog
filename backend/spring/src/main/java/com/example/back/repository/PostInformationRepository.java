@@ -18,7 +18,7 @@ public interface PostInformationRepository extends JpaRepository<PostInformation
     public PostInformation findByPostId(int postId);
     public Optional<PostPermission> findByPostIdAndUserId(int postId, int userId);
 
-    public void savePostInformation(PostInformation postInfo);
+    public int savePostInformationAndReturnPostId(PostInformation postInfo);
 
 
 }
