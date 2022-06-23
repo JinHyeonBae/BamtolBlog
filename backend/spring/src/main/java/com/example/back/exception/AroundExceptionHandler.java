@@ -35,9 +35,14 @@ public class AroundExceptionHandler{
     @ExceptionHandler(value = {NullPointerException.class})
     public ResponseEntity<Object> NullPointerExceptionHandler(NullPointerException e){ // 400
         LOGGER.info("ERROR : "+ e.getMessage());
-        
-        if(e.getMessage().contains("HEADER")){
+        String ERROR_MESSAGE = e.getMessage();
+
+        if(ERROR_MESSAGE.contains("HEADER")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.HEADER_NULL_POINTER);
+            return ResponseEntity.ok().body(response);
+        }
+        else if(ERROR_MESSAGE.contains("NICKNAME")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.INPUT_NULL_POINTER);
             return ResponseEntity.ok().body(response);
         }
 

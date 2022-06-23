@@ -3,7 +3,6 @@ package com.example.back.service;
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Optional;
 
 import javax.naming.NoPermissionException;
 
@@ -13,12 +12,8 @@ import com.example.back.dto.PostDto.CreatePostDto;
 import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.dto.PostDto.UpdatePostDto;
-import com.example.back.model.SubscribePost;
-import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
-import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
-import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
 import com.example.back.repository.PermissionRepository;
 import com.example.back.repository.PostInformationRepository;
@@ -39,10 +34,6 @@ import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.PermissionDeniedDataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
@@ -94,17 +85,18 @@ public class PostService {
     @Transactional
     public CreateResponseDto createPost(CreatePostDto createPostInfo) throws SQLException{
 
-        //이건 데이터가 제대로 매핑이 안되었거나 안 온 경우니까 
+        // throw가 발생할 수 있는 경우는 두 가지.
+        // userId가 아예 안 왔거나, 매핑이 잘못 됐거나, 아예 존재하지 않는 ID거나
         Users users = urRepo.findById(createPostInfo.getUserId()).orElseThrow(()->
             new NullPointerException("NICKNAME NULL")
-        );  
+        );
 
-        // Role이 상시적으로 바뀌는데..음..
-
+        
         int publisherUserId = users.getId();
 
         CreateResponseDto createDto = new CreateResponseDto();
         
+        // user가 있는 경우는 즉, 멤버인 경우이므로 if를 안 써줘도 되네...
         if(publisherUserId == createPostInfo.getUserId()){
 
             LOGGER.info("생성 권한을 충족하였습니다.");
@@ -116,10 +108,12 @@ public class PostService {
             customModelMapper.strictMapper().map(createPostInfo, newPostInfo);
             
             newPostInfo.setId(null);
-            postInformationRepository.savePostInformation(newPostInfo);
+
+            int postId = postInformationRepository.savePostInformationAndReturnPostId(newPostInfo);
 
             createDto.setStatus(201);
             createDto.setMessage("포스트가 성공적으로 생성되었습니다.");
+            createDto.setPostId(postId);
         }
         else{
             new NoPermissionException("PERMISSION DENIED");
@@ -163,11 +157,12 @@ public class PostService {
 
         System.out.println(postId);
 
-        Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
-            new NullPointerException("NICKNAME NULL")
-        );  
+        // Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
+        //     new NullPointerException("NICKNAME NULL")
+        // );  
 
-        int publisherUserId = users.getId();
+        Posts post = postsRepository.findById(postId);
+        int publisherUserId = post.getUserId();
 
         UpdateResponseDto updateDto = new UpdateResponseDto();
         
@@ -203,17 +198,16 @@ public class PostService {
             new NullPointerException("NICKNAME NULL")
         );  
 
-        int publisherUserId = users.getId();
+        Posts post = postsRepository.findById(postId);
+        int publisherUserId = post.getUserId();
 
         DeleteResponseDto deleteDto = new DeleteResponseDto();
         
+        // 
         if(publisherUserId == userId){
 
-            LOGGER.info("삭제 권한을 충족하였습니다.");
-            Posts post = postsRepository.findById(postId);
-
             postsRepository.delete(post);
-            deleteDto.setStatus(204);
+            deleteDto.setStatus(200);
             deleteDto.setMessage("삭제 요청이 완료되었습니다.");
         }
         else{

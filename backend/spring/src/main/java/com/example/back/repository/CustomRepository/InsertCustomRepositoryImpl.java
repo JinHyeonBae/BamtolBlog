@@ -82,7 +82,8 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Override
     @Modifying
     @Transactional
-    public void savePostInformation(PostInformation postInfo) throws SQLException{
+    // 책임이 두 가지가 늘어난다.
+    public int savePostInformationAndReturnPostId(PostInformation postInfo) throws SQLException{
        
         Posts post = new Posts();
         post.setPostInfo(null); //이걸 해줘야하는 이유가 뭘까? 이걸 안 해주면 아직 저장이 되지 않은 걸 사용했다고 뜬다.
@@ -98,7 +99,11 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
         entityManager.persist(postInfo); // detached entity passed to persist
         
         entityManager.flush();
+
+        return postInfo.getPostId();
     }
+
+    
 
     @Override
     @Modifying

@@ -41,6 +41,7 @@ paths:
       tags:
       - post-controller
       operationId: CreatePostResponse
+      description : "포스트 쓰기 요청"
       requestBody:
         content:
           application/json:
@@ -59,6 +60,7 @@ paths:
       tags:
       - post-controller
       operationId: updatePost
+      description : "포스트 변경 요청"
       requestBody:
         content:
           application/json:
@@ -77,6 +79,7 @@ paths:
       tags:
       - post-controller
       operationId: deletePost
+      description : "포스트 삭제 요청"
       requestBody:
         content:
           application/json:
@@ -94,6 +97,7 @@ paths:
       tags:
       - post-controller
       operationId: patchPost
+      description : "포스트 일부 변경 요청"
       parameters:
       - name: postId
         in: path
@@ -204,15 +208,20 @@ components:
           type : string
         displayLevel:
           type : string
+        nickname:
+          type: string
         price :
           type : integer
         userId:
           type : integer
         
+        
     ReadPostDto:
       type : object
       properties:
         userId:
+          type : integer
+        postId:
           type : integer
     
     UpdatePostDto:
@@ -228,6 +237,8 @@ components:
           type : integer
         userId:
           type : integer
+        postId:
+          type : integer
 
     DeletePostDto:
       type: object
@@ -235,6 +246,9 @@ components:
         userId :
           type : integer
           example : 10
+        postId:
+          type : integer
+          example : 12
 
     LoginDto:
       type: object
@@ -298,7 +312,10 @@ components:
         content:
           type: string
           example : 글 내용입니다.
-        
+        postId:
+          type : integer
+          example : 12
+
     
     UpdatePostResponse:
       type: object
@@ -310,6 +327,10 @@ components:
         message:
           type: string
           example: 수정 요청이 완료되었습니다.
+        postId:
+          type : integer
+          example : 12
+
     
     DeletePostResponse:
       type: object
@@ -321,6 +342,10 @@ components:
         message:
           type: string
           example: 삭제 요청이 완료되었습니다.
+        postId:
+          type : integer
+          example : 12
+
     
 
 
@@ -363,6 +388,7 @@ components:
           example: 404
         message:
           type: string
+          example : "찾을 수 없는 페이지입니다."
         code:
           type: string
           example: "M004"

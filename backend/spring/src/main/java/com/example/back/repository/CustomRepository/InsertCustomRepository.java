@@ -23,7 +23,7 @@ public interface InsertCustomRepository {
     
     void savePostPermission(PostPermission permission, int userId);
 
-    void savePostInformation(PostInformation postInfo) throws SQLException;
+    int savePostInformationAndReturnPostId(PostInformation postInfo) throws SQLException;
     void savePosts(Posts postInfo) throws SQLException;
 
 
