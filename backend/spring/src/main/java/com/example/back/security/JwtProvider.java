@@ -37,45 +37,17 @@ public class JwtProvider {
 
     private CustomUserDetailService customUserDetailService;
 
-    //토큰을 생성하는 곳
-    public String createAccessToken(LoginDto loginDto, int userId){
+
+    public String generateToken(Authentication authentication, Integer userId) {
+
         Map<String, Object> headers = new HashMap<>();
-        headers.put("type", "jwt");
-
         Map<String, Object> payloads = new HashMap<>();
-        //발행자
-        payloads.put("iss", "admin");
-        // 토큰의 대상자
-        payloads.put("aud", loginDto.getEmail());
-        payloads.put("id", userId);
-
-        Date expiration = new Date();
-        System.out.println("현재 시간 :" + expiration.getTime());
-        System.out.println("토큰 유효 시간 :" + expiration.getTime() + accessExpireTime);
         
-        expiration.setTime(expiration.getTime() + accessExpireTime);
-
-        String jwt = Jwts
-                    .builder()
-                    .setHeader(headers)
-                    .setClaims(payloads)
-                    .setSubject("user")
-                    .setExpiration(expiration)
-                    .signWith(SignatureAlgorithm.HS256, secretKey)
-                    .compact();
-
-        return jwt;
-    }
-
-    public String generateToken(Authentication authentication) {
-
-        Map<String, Object> headers = new HashMap<>();
-        Map<String, Object> payloads = new HashMap<>();
 
         headers.put("type", "Bearer");
-
         payloads.put("iss", "admin");
-        payloads.put("aud", authentication.getPrincipal());
+        payloads.put("aud", authentication.getPrincipal()); //email
+        payloads.put("id", userId);
         
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + accessExpireTime);

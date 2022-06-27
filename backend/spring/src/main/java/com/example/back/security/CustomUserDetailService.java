@@ -5,10 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.example.back.exception.AroundExceptionHandler;
 import com.example.back.model.user.UserInformation;
 import com.example.back.repository.UserInformationRepository;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,6 +35,9 @@ public class CustomUserDetailService implements UserDetailsService{
     @Autowired
     UserInformationRepository userInfoRepo;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AroundExceptionHandler.class);
+
+
     private int id;
 	@JsonIgnore
 	private String email;
@@ -39,8 +45,6 @@ public class CustomUserDetailService implements UserDetailsService{
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
     
-
-
   
     @Transactional
     public UserDetails loadUserByUsername(Map<String, String> Data) 
@@ -50,7 +54,8 @@ public class CustomUserDetailService implements UserDetailsService{
 
         String email = Data.get("email");
         String password = Data.get("password");
-
+        
+        LOGGER.info("email : ", email);
         UserInformation userAuths = userInfoRepo.findByEmail(email).orElseThrow(() -> 
                                     new InternalAuthenticationServiceException("EMAIL_ERROR"));  
                 
@@ -68,6 +73,7 @@ public class CustomUserDetailService implements UserDetailsService{
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // TODO Auto-generated method stub
 
+        System.out.println(email);
         UserInformation userAuths = userInfoRepo.findByEmail(email).orElseThrow(() -> 
         new UsernameNotFoundException("User not found with email : " + email)); 
 

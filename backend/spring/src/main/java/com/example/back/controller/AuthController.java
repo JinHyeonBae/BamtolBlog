@@ -46,17 +46,8 @@ public class AuthController {
 	@Autowired
 	private JwtProvider jwtTokenProvider;
 
-
     int cookieExpiration = 60*60*24; //1일
 
-    // value 
-    // @Operation(summary = "회원가입", description = "회원가입하는 규격입니다.", responses = {
-    //     //@ApiResponse(responseCode = "201", description = "회원가입 성공"),
-    //     //@ApiResponse(responseCode = "40901", description = "이미 존재하는 이메일"),
-    //     //@ApiResponse(responseCode = "40902", description = "이미 존재하는 닉네임"),
-    //     //@ApiResponse(responseCode = "500", description = "서버 에러")
-    // })
-    // @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/auth/signup")
     public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
         
@@ -66,30 +57,24 @@ public class AuthController {
     }
 
 
-    // 쿠키에 토큰을 넣어서 보냄, 파싱
-    // //@ApiOperation(value="로그인", notes = "사용자 회원가입")
-    // //@ApiResponses({
-    //     //@ApiResponse(code = 200, message = "로그인 성공"),
-    //     ////@ApiResponse(code = 400, message = "유효하지 않은 토큰"),
-    //     //@ApiResponse(code = 40101, message = "존재하지 않는 아이디"),
-    //     //@ApiResponse(code = 40102, message = "비밀번호 오류"), // status가 겹치는 경우에는 어떤 경우가 있는 지를 봐야한다. ex) 40401, 40402
-    //     //@ApiResponse(code = 500, message = "서버 에러")
-    // })
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginDto loginData, 
                                                    HttpServletRequest request, HttpServletResponse response){     
         
+
+        System.out.println(loginData.getEmail());
         Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword()));
 		
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		String jwt = jwtTokenProvider.generateToken(authentication);
-        //nickname, userId;
-        
         Map<String, Object> loginResponseDto = auth.login(loginData.getEmail());
         String nickname = (String) loginResponseDto.get("nickname");
         Integer userId   = (Integer) loginResponseDto.get("userId"); 
+
+		String jwt = jwtTokenProvider.generateToken(authentication, userId);
+        //nickname, userId;
+        
         
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt).toString())
                                 .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     
