@@ -20,10 +20,7 @@ public class UserPrincipal implements UserDetails {
 
 	private int id;
 
-	@JsonIgnore
 	private String email;
-
-	@JsonIgnore
 	private String password;
 
 	private Collection<? extends GrantedAuthority> authorities;
@@ -47,17 +44,20 @@ public class UserPrincipal implements UserDetails {
 		this.password = password;
 	}
 
+	public UserPrincipal(String email, String password){
+		this.email = email;
+		this.password = password;
+	}
+
 	public static UserPrincipal create(UserInformation user) {
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-
-		System.out.println("Role valueOf , Return T :" + Role.valueOf(Role.class, "MEMBER"));
-
+	
 		if(user.getEmail().contains("admin"))
 			authorities.add(new SimpleGrantedAuthority((String)Role.ADMIN.name()));
 		else
 			authorities.add(new SimpleGrantedAuthority((String)Role.MEMBER.name()));
 
-		return new UserPrincipal(user.getId(), user.getEmail(), user.getPassword(), authorities);
+		return new UserPrincipal(user.getEmail(), user.getPassword());
 	}
 
 	public int getId() {

@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import com.example.back.dto.AuthDto.LoginDto;
+import com.example.back.response.ErrorCode;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -43,12 +46,12 @@ public class JwtProvider {
         Map<String, Object> headers = new HashMap<>();
         Map<String, Object> payloads = new HashMap<>();
         
-
         headers.put("type", "Bearer");
         payloads.put("iss", "admin");
         payloads.put("aud", authentication.getPrincipal()); //email
         payloads.put("id", userId);
-        
+
+    
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + accessExpireTime);
 
@@ -70,16 +73,23 @@ public class JwtProvider {
 
     //Request의 Header에서 token 값 추출
     public List<String> resolveToken(HttpHeaders request){
-        return request.get("token");
+        // httpHeaders에서 쿠키를 추출하는 방법
+        System.out.println(request);
+        System.out.println(request.get(HttpHeaders.SET_COOKIE).indexOf("="));
+        int idx = request.get(HttpHeaders.SET_COOKIE).indexOf("=");
+
+        
+
+        return request.getValuesAsList(HttpHeaders.SET_COOKIE);
     }
 
-    public Long getUserIdFromJWT(String token) { //userId 가져오기
+    public Integer getUserIdFromJWT(String token) { //userId 가져오기
 		Claims claims = Jwts.parser()
 				.setSigningKey(secretKey)
 				.parseClaimsJws(token)
 				.getBody();
-        
-		return Long.valueOf(claims.getSubject());
+        System.out.print("claims : " + claims.get("id"));
+		return (Integer) claims.get("id");
 	}
 
     
@@ -88,9 +98,17 @@ public class JwtProvider {
 				.setSigningKey(secretKey)
 				.parseClaimsJws(token)
 				.getBody();
-        
-		return claims.getAudience();
+        System.out.println("AUDIENCE :" + claims.getAudience());
+
+        System.out.println("AUDIENCE :" + claims.get("aud"));
+		return (String) claims.get("aud");
 	}
+
+    public String parseJwtInsideCookie(String tokenWithKey){
+
+        String[] parse = tokenWithKey.split("=");
+        return parse[1];
+    }
 
 
     // 토큰의 유효성 검사
@@ -109,6 +127,7 @@ public class JwtProvider {
 		} catch (IllegalArgumentException ex) {
 			LOGGER.error("JWT claims string is empty");
 		}
+        
 		return false;
 	}
     

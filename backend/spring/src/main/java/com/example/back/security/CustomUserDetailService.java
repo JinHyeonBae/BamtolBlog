@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -35,7 +37,7 @@ public class CustomUserDetailService implements UserDetailsService{
     @Autowired
     UserInformationRepository userInfoRepo;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AroundExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomUserDetailService.class);
 
 
     private int id;
@@ -45,22 +47,21 @@ public class CustomUserDetailService implements UserDetailsService{
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
     
-  
-    @Transactional
-    public UserDetails loadUserByUsername(Map<String, String> Data) 
+    
+    // 여기가 문제
+    //@Transactional
+    public UserPrincipal loadUserByUsername(JSONObject userDetailData) 
                 throws UsernameNotFoundException, DataAccessException, BadCredentialsException{
         
         // email로 db 조회
 
-        String email = Data.get("email");
-        String password = Data.get("password");
-        
-        LOGGER.info("email : ", email);
-        UserInformation userAuths = userInfoRepo.findByEmail(email).orElseThrow(() -> 
-                                    new InternalAuthenticationServiceException("EMAIL_ERROR"));  
-                
+        Object email = userDetailData.get("email");
+        Object password = userDetailData.get("password");
 
-        if(!userAuths.getPassword().equals(password)){
+        UserInformation userAuths = userInfoRepo.findByEmail(email.toString()).orElseThrow(() -> 
+            new InternalAuthenticationServiceException("EMAIL_ERROR"));  
+        
+        if(!userAuths.getPassword().equals(password.toString())){
             throw new BadCredentialsException("PASSWORD_ERROR");
         }
  
@@ -70,12 +71,11 @@ public class CustomUserDetailService implements UserDetailsService{
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserPrincipal loadUserByUsername(String email) throws UsernameNotFoundException {
         // TODO Auto-generated method stub
 
-        System.out.println(email);
         UserInformation userAuths = userInfoRepo.findByEmail(email).orElseThrow(() -> 
-        new UsernameNotFoundException("User not found with email : " + email)); 
+            new UsernameNotFoundException("User not found with email : " + email)); 
 
         return UserPrincipal.create(userAuths);
     }

@@ -9,6 +9,8 @@ import javax.naming.NoPermissionException;
 import com.example.back.response.ErrorCode;
 import com.example.back.response.ExceptionResponse;
 
+import io.jsonwebtoken.JwtException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
@@ -50,22 +52,28 @@ public class AroundExceptionHandler{
     }
 
     @ExceptionHandler(value = {UsernameNotFoundException.class, BadCredentialsException.class, 
-                                InternalAuthenticationServiceException.class })
+                                InternalAuthenticationServiceException.class, JwtException.class })
 
     // ExceptionResponse(String messages, String error, Integer status)
     public ResponseEntity<ExceptionResponse> UnauthorizeExceptionHandler(Exception e){ // 401
         LOGGER.info("Exeption Error :" + e.getMessage());
 
-        if(e.getMessage().contains("EMAIL")){
+        String errorMessage = e.getMessage();
+
+        if(errorMessage.contains("EMAIL")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_EMAIL);
             return ResponseEntity.ok().body(response);
         }
-        else if(e.getMessage().contains("Bad credentials")){
+        else if(errorMessage.contains("Bad credentials")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_PASSWORD);
             return ResponseEntity.ok().body(response);
         }
-        else if(e.getMessage().contains("INTERNAL")){
+        else if(errorMessage.contains("INTERNAL")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INTERNAL_ERROR);
+            return ResponseEntity.ok().body(response);
+        }
+        else if(errorMessage.contains("TOKEN")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_TOKEN);
             return ResponseEntity.ok().body(response);
         }
         
