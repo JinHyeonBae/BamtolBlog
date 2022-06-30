@@ -25,10 +25,8 @@ import com.example.back.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 @Component
 public class ManageAllAboutRole{
@@ -68,8 +66,8 @@ public class ManageAllAboutRole{
     //@Override
     public void addRole() {
         
+        // create 시 role 추가
         
-
 
     }
 
@@ -77,18 +75,18 @@ public class ManageAllAboutRole{
     // 읽기 요청이 들어왔을 경우, 포스트가 어떤 레벨인지를 알아야 한다.
     // unAuth여도 가능
     //@Override
-    public HashMap<String, String> readRole(ReadPostDto postDto) {
+    public HashMap<String, String> readRole(int postId, int userId) {
         
         LOGGER.info("ENTER IN READROLE!");
         Map<String, String> postAndUsersPermissions = new HashMap<String, String>();
         
         // postInfo가 null인 경우 서버 에러로 처리하자
-        PostInformation postInfo = postInformationRepository.findByPostId(postDto.getPostId()); //optional로 날려줘야겠네
+        PostInformation postInfo = postInformationRepository.findByPostId(postId); //optional로 날려줘야겠네
         
         LOGGER.info("postInfo role입니다 :" + postInfo.getDisplayLevel());
 
         postAndUsersPermissions.put("postPermissionLevel", postInfo.getDisplayLevel());
-        postAndUsersPermissions.put("userPermissionLevel" , readUserRoleRegardingPost(postDto.getPostId(), postDto.getUserId()));
+        postAndUsersPermissions.put("userPermissionLevel" , readUserRoleRegardingPost(postId, userId));
         
         return (HashMap<String, String>) postAndUsersPermissions;
     }
@@ -136,13 +134,15 @@ public class ManageAllAboutRole{
     // join으로 findUserRoles랑 합칠 수 있을 것 같다.
     private String readUserRoleRegardingPost(int postId, int userId){
         // 근데 권한이 없을수도 있는게 public이면 없을 수 있음
+
+        // post 권한
         Optional<PostPermission> Permission = postPermissionRepository.findByUserIdAndPostId(userId, postId);
+        System.out.println(Permission.get().getPermissionId());
 
         if(Permission.isPresent())
             return Role.valueOf(Permission.get().getPermissionId()).name();
         else
             return null;
-
     }
 
     // post 권한을 확인할 수 없을 경우에 subscribe 관련 테이블을 찾는 함수
@@ -183,18 +183,19 @@ public class ManageAllAboutRole{
 
     
     // foreign key
-    private void saveUserRole(String userPermission, int userId, int postId){
+    public void saveUserRole(String userPermission, int userId, int postId){
 
         // Posts post = postsRepository.findById(postId);
         // Users user = userRepository.findById(userId).get();
-        // postPermission.setUser(user); -> save 는 위반성 에러 남    
+        // postPermission.setUser(user); -> save 는 위반성 에러 남   
+        System.out.println("------------"+userPermission+"--------------"); 
         PostPermission postPermission = new PostPermission();
         
         postPermission.setPostId(postId);
         postPermission.setUserId(userId);
         
         postPermission.setPermissionId(Role.valueOf(userPermission).getValue());
-        postPermissionRepository.save(postPermission);
+        postPermissionRepository.saveAndFlush(postPermission);
 
     }
 

@@ -3,11 +3,13 @@ package com.example.back.service;
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.naming.NoPermissionException;
 
 import com.example.back.config.CustomModelMapper;
 import com.example.back.config.GenericMapper;
+import com.example.back.config.PostInfoMapper;
 import com.example.back.dto.PostDto.CreatePostDto;
 import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.ReadPostDto;
@@ -29,11 +31,14 @@ import com.example.back.response.ResponseDto.CreateResponseDto;
 import com.example.back.response.ResponseDto.DeleteResponseDto;
 import com.example.back.response.ResponseDto.ReadResponseDto;
 import com.example.back.response.ResponseDto.UpdateResponseDto;
+import com.example.back.security.JwtProvider;
 
+import org.mapstruct.ap.internal.model.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
@@ -78,24 +83,28 @@ public class PostService {
     @Autowired
     ManageAllAboutRole roleProcessor;
 
+    @Autowired
+    JwtProvider jwtProvider;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
 
-    private GenericMapper<?, ?> mapper = Mappers.getMapper(GenericMapper.class);
+    private PostInfoMapper postInfoMapper;
 
     @Transactional
     public CreateResponseDto createPost(CreatePostDto createPostInfo) throws SQLException{
 
         // throw가 발생할 수 있는 경우는 두 가지.
-        // userId가 아예 안 왔거나, 매핑이 잘못 됐거나, 아예 존재하지 않는 ID거나
+        // userId가 아예 안 왔거나, 매핑이 잘못 됐거나, 아예 존재하지 않는 ID거나, 아니라면 로그인하지 않은 사람
         Users users = urRepo.findById(createPostInfo.getUserId()).orElseThrow(()->
             new NullPointerException("NICKNAME NULL")
-        );
-
+        ); 
         
         int publisherUserId = users.getId();
 
+        // member인지를 확인해야한다.
         CreateResponseDto createDto = new CreateResponseDto();
-        
+
+        // 현재 로그인한 게 중요한 거다...
         // user가 있는 경우는 즉, 멤버인 경우이므로 if를 안 써줘도 되네...
         if(publisherUserId == createPostInfo.getUserId()){
 
@@ -104,12 +113,12 @@ public class PostService {
             PostInformation newPostInfo = new PostInformation();
         
             newPostInfo.setUserId(users.getId());
-            
             customModelMapper.strictMapper().map(createPostInfo, newPostInfo);
-            
+        
             newPostInfo.setId(null);
 
             int postId = postInformationRepository.savePostInformationAndReturnPostId(newPostInfo);
+            roleProcessor.saveUserRole("PUBLISHER", users.getId(), postId);
 
             createDto.setStatus(201);
             createDto.setMessage("포스트가 성공적으로 생성되었습니다.");
@@ -122,16 +131,19 @@ public class PostService {
         return createDto;
     }
 
+    // token에서 id를 뽑아내는 식으로 하는 게 좋을듯
+    public ReadResponseDto readPost(HttpHeaders header, int postId) throws NoPermissionException, InternalServerError, AccessDeniedException{
 
-    public ReadResponseDto readPost(ReadPostDto body) throws NoPermissionException, InternalServerError, AccessDeniedException{
+        
+        System.out.println("header at Service :" + header);
+        List<String> extractToken = jwtProvider.resolveToken(header);
 
-        //userId, postId로 
-        Integer userId = body.getUserId();
-        Integer postId = body.getPostId();
+        String token = jwtProvider.parseJwtInsideCookie(extractToken.get(0));
 
-        // 1차로 getAuthority 확인
-        HashMap<String,String> roleMap = roleProcessor.readRole(body);
+        int userId = jwtProvider.getUserIdFromJWT(token);
 
+        HashMap<String,String> roleMap = roleProcessor.readRole(postId, userId);
+        
         if(roleMap.get("userPermissionLevel") == null){
             String userRole = roleProcessor.findUserRole(userId, postId);
             // userRole이 비로그인인 경우 null일 수 있다.
@@ -149,6 +161,7 @@ public class PostService {
             //false 일 경우는 권한이 없는 경우
             throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
+    
     }
 
     public UpdateResponseDto updatePost(UpdatePostDto body, int postId) throws NoPermissionException{
@@ -172,7 +185,7 @@ public class PostService {
 
             PostInformation postInfo = postInformationRepository.findByPostId(postId);
             
-            mapper.updateCustomerFromDto(body, postInfo);
+            postInfo = postInfoMapper.updateDtoToPostInfoEntity(body);
             postInformationRepository.save(postInfo);
 
             updateDto.setStatus(200);

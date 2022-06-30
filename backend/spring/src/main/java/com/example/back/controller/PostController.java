@@ -19,6 +19,7 @@ import com.example.back.service.AuthService;
 import com.example.back.service.PostService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +61,21 @@ public class PostController {
 
     //읽기 요청
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody ReadPostDto body) throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException{
+    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @PathVariable(value="postId") String postId) 
+        throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException{
         // 먼저 온 토큰으로 userId를 받는다.
-        ReadResponseDto readDto = postService.readPost(body);
+        Integer IntpostId = Integer.valueOf(postId);
+        System.out.println("header :" + headers);
+        ReadResponseDto readDto = postService.readPost(headers, IntpostId);
         return ResponseEntity.ok().body(readDto);
     }
+
+    // @PostMapping("/posts/{postId}")
+    // public ResponseEntity<ReadResponseDto> readPost_post(@RequestHeader HttpHeaders headers, @RequestBody ReadPostDto body) throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException{
+    //     // 먼저 온 토큰으로 userId를 받는다.
+    //     ReadResponseDto readDto = postService.readPost(body);
+    //     return ResponseEntity.ok().body(readDto);
+    // }
 
 
     //수정 요청

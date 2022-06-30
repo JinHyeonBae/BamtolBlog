@@ -48,6 +48,8 @@ public class RoleTest {
     public void findRoleTestWithoutPublisher(){
 
         // DOMAIN_SUBSCRIBER
+
+        // DOMAIN_SUB
         String role = manageAllAboutRole.findUserRole(116, 40);
         if(role.equals("DOMAIN_SUBSCRIBER")){
             System.out.println("\nSUCCESS");
@@ -73,7 +75,7 @@ public class RoleTest {
     @Test
     public void readUserRoleTest(){
         System.out.println(this.readPostDto.getPostId());
-        HashMap<String, String> map = manageAllAboutRole.readRole(this.readPostDto);
+        HashMap<String, String> map = manageAllAboutRole.readRole(this.readPostDto.getPostId(), this.readPostDto.getUserId());
         // null
         System.out.println(map.get("postPermissionLevel"));
         Assertions.assertThat(map.get("postPermissionLevel")).isNotNull();
