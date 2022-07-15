@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostInformationRepository extends JpaRepository<PostInformation, Integer>, InsertCustomRepository {
     
-    public PostInformation findByPostId(int postId);
+    public Optional<PostInformation> findByPostId(int postId);
     public Optional<PostPermission> findByPostIdAndUserId(int postId, int userId);
 
     public int savePostInformationAndReturnPostId(PostInformation postInfo);

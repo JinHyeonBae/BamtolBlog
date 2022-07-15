@@ -3,7 +3,9 @@ package com.example.back.service;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.transaction.Transactional;
 
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class ManageAllAboutRole{
@@ -80,13 +83,15 @@ public class ManageAllAboutRole{
         LOGGER.info("ENTER IN READROLE!");
         Map<String, String> postAndUsersPermissions = new HashMap<String, String>();
         
-        // postInfo가 null인 경우 서버 에러로 처리하자
-        PostInformation postInfo = postInformationRepository.findByPostId(postId); //optional로 날려줘야겠네
+        // postInfo가 null인 경우 : 500
+        PostInformation postInfo = postInformationRepository.findByPostId(postId).orElseThrow(()->{
+            throw new NoSuchElementException("POST NOT FOUND");
+        });
         
         LOGGER.info("postInfo role입니다 :" + postInfo.getDisplayLevel());
 
         postAndUsersPermissions.put("postPermissionLevel", postInfo.getDisplayLevel());
-        postAndUsersPermissions.put("userPermissionLevel" , readUserRoleRegardingPost(postId, userId));
+        postAndUsersPermissions.put("userPermissionLevel" , findUserRoleBySpecificPost(postInfo, userId));
         
         return (HashMap<String, String>) postAndUsersPermissions;
     }
@@ -132,35 +137,46 @@ public class ManageAllAboutRole{
 
     // post에 대한 권한을 확인하는 함수
     // join으로 findUserRoles랑 합칠 수 있을 것 같다.
-    private String readUserRoleRegardingPost(int postId, int userId){
-        // 근데 권한이 없을수도 있는게 public이면 없을 수 있음
+    /**
+     * @param postId
+     * @param userId
+     * @return
+     */
 
-        // post 권한
-        Optional<PostPermission> Permission = postPermissionRepository.findByUserIdAndPostId(userId, postId);
-        System.out.println(Permission.get().getPermissionId());
+    // 특정 포스트에 대한 유저 권한 찾기
+    private String findUserRoleBySpecificPost(PostInformation postInfo, int userId){
+        
+        int postId = postInfo.getPostId();
+        int hostId = postInfo.getUserId();
+        
+        String displayLevel = postInfo.getDisplayLevel().toUpperCase();
+        int postPermissionLevelInt = Role.valueOf(displayLevel).getValue();
 
-        if(Permission.isPresent())
-            return Role.valueOf(Permission.get().getPermissionId()).name();
-        else
-            return null;
+        // publicd이면 userId의 값에 상관없이 user Level은 Member
+        if(postPermissionLevelInt == Role.PUBLIC.getValue())
+            return Role.MEMBER.getKey();
+        
+        if(postPermissionLevelInt == Role.PUBLISHER.getValue() && userId == hostId)
+            return Role.PUBLISHER.getKey();
+        
+        return findUserRole(userId, postId);
     }
 
-    // post 권한을 확인할 수 없을 경우에 subscribe 관련 테이블을 찾는 함수
+    // post에 대한 정확한 유저의 권한을 찾기 위함
     @Transactional
     public String findUserRole(int userId, int postId){
         
+        // user에 대한 구독자인 경우
         Optional<SubscribeUser> subUser = subscribeUserRepository.findBySubscriber_Id(userId);
-
-        //domain subscriber인 경우
-    
+       
         subUser.ifPresent((action)->{   
             //userRole은 subscriberUser이다.
             this.saveUserRole("DOMAIN_SUBSCRIBER", userId, postId);
             this.userRole = Role.DOMAIN_SUBSCRIBER.getKey();
         });
 
-        //post subscriber인 경우
-        Optional<SubscribePost> subPost =  subscribePostRepository.findById(userId);
+        // 한 포스트에 대한 구독자인 경우
+        Optional<SubscribePost> subPost = subscribePostRepository.findById(userId);
 
         subPost.ifPresent((action)->{
             saveUserRole("POST_SUBSCRIBER", userId, postId);
@@ -173,6 +189,7 @@ public class ManageAllAboutRole{
         
         Optional<Users> users = userRepository.findById(userId);
         System.out.println("users status:" + users);
+
         if(!users.isEmpty()){
             this.userRole = Role.MEMBER.name();
             return this.userRole;

@@ -8,7 +8,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.example.back.dto.AuthDto.LoginDto;
-import com.example.back.response.ErrorCode;
+import com.example.back.exception.ErrorCode;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -75,10 +75,7 @@ public class JwtProvider {
     public List<String> resolveToken(HttpHeaders request){
         // httpHeaders에서 쿠키를 추출하는 방법
         System.out.println(request);
-        System.out.println(request.get(HttpHeaders.SET_COOKIE).indexOf("="));
-        int idx = request.get(HttpHeaders.SET_COOKIE).indexOf("=");
-
-        
+        //System.out.println(request.get(HttpHeaders.SET_COOKIE).indexOf("="));
 
         return request.getValuesAsList(HttpHeaders.SET_COOKIE);
     }

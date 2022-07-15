@@ -13,6 +13,7 @@ public interface PostPermissionRepository extends JpaRepository<PostPermission, 
     
     public Optional<PostPermission> findByUserIdAndPostId(int userId, int postId);
 
+    public Optional<PostPermission> findByPostId(int postId);
     public void savePostPermission(PostPermission permission, int userId);
     public PostPermission findById(int id);
 }
