@@ -1,5 +1,7 @@
 package com.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import javax.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,33 +31,50 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.example.back.MainApplication;
+import com.example.back.config.PostInfoMapper;
+import com.example.back.dto.PostDto;
+import com.example.back.dto.PostDto.UpdatePostDto;
+import com.example.back.model.post.PostInformation;
+import com.example.back.model.post.Posts;
+import com.example.back.model.user.Users;
 import com.example.back.security.JwtProvider;
 import com.example.back.service.PostService;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
 @SpringBootTest
 @ContextConfiguration(classes = MainApplication.class)
-public class SecurityTest {
+public class ModuleTest {
     
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtProvider.class);
 
     @MockBean
     WithMockCustomUser withUsers;
-
-    private MockMvc mockMvc;
-
-    @Autowired
-    private WebApplicationContext context;
-
-    private String token;
-    private int testUserId;
-
+    
     @Autowired
     private JwtProvider jwtProvider;
+    
+    @Autowired
+    private WebApplicationContext context;
+    
+    private MockMvc mockMvc;
+
+    int testUserId;
+
+    // token 실험
+    private String token;
+
+    //mapper
+    //PostInfoMapper pInfoMapper;
+
+    // post update
+    UpdatePostDto updatePostDto = new UpdatePostDto();
+    Gson gson = new Gson();
 
 
     @BeforeEach
@@ -67,6 +87,13 @@ public class SecurityTest {
 
         // 필드 값을 내가 정할 수 있다.
         //ReflectionTestUtils.setField(postService, "headers", new HttpHeaders());
+
+        ReflectionTestUtils.setField(updatePostDto, "title", "updateTest");
+        ReflectionTestUtils.setField(updatePostDto, "contents", "updateTesting~~");
+        ReflectionTestUtils.setField(updatePostDto, "displayLevel", "public");
+        ReflectionTestUtils.setField(updatePostDto, "price", 0);
+        ReflectionTestUtils.setField(updatePostDto, "userId", 2);
+        
     }
 
 
@@ -139,26 +166,6 @@ public class SecurityTest {
 
     }
 
-    // subuser 테이블 publisher_id를 찾을 수 없어서 에러가 난다 -> flyway가 적용이 안됨...
-    @Test
-    void readPostTest() throws Exception{
-        this.extractUserIdFromJwt();
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        
-        httpHeaders.add(HttpHeaders.SET_COOKIE, "access_Token=" + this.token);
-        LOGGER.info("token 확인 : "+ this.token);
-        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
-                                            .get("/posts/3")
-                                            .headers(httpHeaders)
-                                            );
-
-        result
-            .andDo(MockMvcResultHandlers.print())
-            .andReturn().getResponse().getContentAsString();
-
-    }
-
     @Test
     void loginTest() throws Exception{
 
@@ -180,6 +187,84 @@ public class SecurityTest {
             .andDo(MockMvcResultHandlers.print());
             
     }
+
+
+    // subuser 테이블 publisher_id를 찾을 수 없어서 에러가 난다 -> flyway가 적용이 안됨...
+    @Test
+    void readPostTest() throws Exception{
+        this.extractUserIdFromJwt();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        
+        httpHeaders.add(HttpHeaders.SET_COOKIE, "access_Token=" + this.token);
+        LOGGER.info("token 확인 : "+ this.token);
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+                                            .get("/posts/3")
+                                            .headers(httpHeaders)
+                                            );
+
+        result
+            .andDo(MockMvcResultHandlers.print())
+            .andReturn().getResponse().getContentAsString();
+
+    }
+
+    @Test
+    void updatePostTest() throws Exception{
+        this.extractUserIdFromJwt();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        
+        httpHeaders.add(HttpHeaders.SET_COOKIE, "access_Token=" + this.token);
+        LOGGER.info("token 확인 : "+ this.token);
+        LOGGER.info("update Data toString" + updatePostDto.toString());
+
+        String updateJson = gson.toJson(updatePostDto);
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+                                            .put("/posts/3")
+                                            .headers(httpHeaders)
+                                            
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(updateJson)
+                                            );
+                
+        // 어차피 200이라 여기선 에러가 안 나는구나
+        result
+            .andDo(MockMvcResultHandlers.print())
+            .andReturn().getResponse().getContentAsString();
+
+
+    }
+
+    @Test
+    void mapperTest(){
+        
+        try{
+            PostInformation postInfo = PostInfoMapper.INSTANCE.updateDtoToPostInfoEntity(this.updatePostDto);
+            //assertEquals(postInfo.getContents(), "updateTesting~~");
+        }
+        catch(Exception e){
+            LOGGER.debug(e.getMessage());
+        }
+        
+
+    }
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Test
+    public void contextLoads() throws Exception {
+        if (applicationContext != null) {
+            String[] beans = applicationContext.getBeanDefinitionNames();
+
+            for (String bean : beans) {
+                System.out.println("bean : " + bean);
+            }
+        }
+    }
+
 
 
 }

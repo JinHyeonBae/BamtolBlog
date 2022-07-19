@@ -4,6 +4,7 @@ import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.naming.NoPermissionException;
 
@@ -14,6 +15,7 @@ import com.example.back.dto.PostDto.CreatePostDto;
 import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.dto.PostDto.UpdatePostDto;
+import com.example.back.exception.ErrorCode;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.Posts;
 import com.example.back.model.user.Users;
@@ -26,7 +28,6 @@ import com.example.back.repository.SubscribeUserRepository;
 import com.example.back.repository.UserInformationRepository;
 import com.example.back.repository.UserPermissionReposotiry;
 import com.example.back.repository.UserRepository;
-import com.example.back.response.ErrorCode;
 import com.example.back.response.ResponseDto.CreateResponseDto;
 import com.example.back.response.ResponseDto.DeleteResponseDto;
 import com.example.back.response.ResponseDto.ReadResponseDto;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 import org.springframework.web.server.ServerErrorException;
 
@@ -88,7 +90,8 @@ public class PostService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
 
-    private PostInfoMapper postInfoMapper;
+    //private PostInfoMapper postInfoMapper
+
 
     @Transactional
     public CreateResponseDto createPost(CreatePostDto createPostInfo) throws SQLException{
@@ -132,27 +135,29 @@ public class PostService {
     }
 
     // token에서 id를 뽑아내는 식으로 하는 게 좋을듯
+    // Unknown column 'subscribeu0_.publisher_id' in 'field list'
     public ReadResponseDto readPost(HttpHeaders header, int postId) throws NoPermissionException, InternalServerError, AccessDeniedException{
 
         
         System.out.println("header at Service :" + header);
         List<String> extractToken = jwtProvider.resolveToken(header);
+        System.out.println(extractToken);
+        String token;
+        int userId = -1;
 
-        String token = jwtProvider.parseJwtInsideCookie(extractToken.get(0));
-
-        int userId = jwtProvider.getUserIdFromJWT(token);
-
-        HashMap<String,String> roleMap = roleProcessor.readRole(postId, userId);
-        
-        if(roleMap.get("userPermissionLevel") == null){
-            String userRole = roleProcessor.findUserRole(userId, postId);
-            // userRole이 비로그인인 경우 null일 수 있다.
-            System.out.println("user :" + userRole);
-            roleMap.put("userPermissionLevel", userRole);
+        if(extractToken.isEmpty())
+            LOGGER.info("비회원입니다.");
+        else{
+            token = jwtProvider.parseJwtInsideCookie(extractToken.get(0));
+            userId = jwtProvider.getUserIdFromJWT(token);
         }
         
+        HashMap<String,String> roleMap = roleProcessor.readRole(postId, userId);
+                
         boolean isProperAccess = roleProcessor.isProperAccessRequest(roleMap.get("userPermissionLevel"), roleMap.get("postPermissionLevel"));
-        PostInformation postInfo = postInformationRepository.findByPostId(postId);
+        PostInformation postInfo = postInformationRepository.findByPostId(postId).orElseThrow(()->{
+            throw new NoSuchElementException("POST NOT FOUND");
+        });
 
         if(isProperAccess){
             return new ReadResponseDto(200, "읽기 요청이 완료되었습니다.", postInfo.getContents(), postInfo.getTitle());
@@ -174,7 +179,11 @@ public class PostService {
         //     new NullPointerException("NICKNAME NULL")
         // );  
 
-        Posts post = postsRepository.findById(postId);
+        Posts post = postsRepository.findById(postId).orElseThrow(()->
+            new ResourceAccessException("POST NOT FOUND")
+        );
+
+
         int publisherUserId = post.getUserId();
 
         UpdateResponseDto updateDto = new UpdateResponseDto();
@@ -183,9 +192,15 @@ public class PostService {
 
             LOGGER.info("수정 권한을 충족하였습니다.");
 
-            PostInformation postInfo = postInformationRepository.findByPostId(postId);
+            PostInformation postInfo = postInformationRepository.findByPostId(postId).get();
             
-            postInfo = postInfoMapper.updateDtoToPostInfoEntity(body);
+            postInfo.setTitle(body.getTitle());
+            postInfo.setContents(body.getContents());
+            postInfo.setDisplayLevel(body.getDisplayLevel());
+            postInfo.setPrice(body.getPrice());
+
+            //customModelMapper.strictMapper().map(body, postInfo);
+            //postInfo = PostInfoMapper.INSTANCE.updateDtoToPostInfoEntity(body);
             postInformationRepository.save(postInfo);
 
             updateDto.setStatus(200);
@@ -197,9 +212,7 @@ public class PostService {
         }
 
         return updateDto;
-
     }
-    
     
 
     public DeleteResponseDto deletePost(DeletePostDto body) throws NoPermissionException{
@@ -211,14 +224,17 @@ public class PostService {
             new NullPointerException("NICKNAME NULL")
         );  
 
-        Posts post = postsRepository.findById(postId);
+        //  내부 문제여야 하나, 아니면 그냥 NULL인가?
+        Posts post = postsRepository.findById(postId).orElseThrow(()->
+            new NullPointerException("POST NOT FOUND")
+        );
+
         int publisherUserId = post.getUserId();
 
         DeleteResponseDto deleteDto = new DeleteResponseDto();
         
         // 
         if(publisherUserId == userId){
-
             postsRepository.delete(post);
             deleteDto.setStatus(200);
             deleteDto.setMessage("삭제 요청이 완료되었습니다.");
