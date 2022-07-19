@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.example.back.dto.AuthDto.SignUpDto;
+import com.example.back.exception.ErrorCode;
 import com.example.back.repository.UserAuthRepository;
 import com.example.back.repository.UserInformationRepository;
 import com.example.back.repository.UserPermissionReposotiry;
 import com.example.back.repository.UserRepository;
-import com.example.back.response.ErrorCode;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
 import com.example.back.security.JwtProvider;
 

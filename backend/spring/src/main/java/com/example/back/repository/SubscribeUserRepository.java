@@ -3,7 +3,6 @@ package com.example.back.repository;
 import java.util.Optional;
 
 import com.example.back.model.SubscribeUser;
-import com.example.back.model.user.Users;
 
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.jpa.repository.JpaRepository;

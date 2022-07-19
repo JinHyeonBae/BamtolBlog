@@ -15,6 +15,8 @@ import com.example.back.response.ResponseDto.LoginResponseDto.Auth;
 import com.example.back.security.JwtProvider;
 import com.example.back.service.AuthService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -46,6 +48,8 @@ public class AuthController {
 	@Autowired
 	private JwtProvider jwtTokenProvider;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
+
     int cookieExpiration = 60*60*24; //1일
 
     @PostMapping("/auth/signup")
@@ -62,19 +66,19 @@ public class AuthController {
                                                    HttpServletRequest request, HttpServletResponse response){     
         
 
-        System.out.println(loginData.getEmail());
-        Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword()));
-		
+        //인증 주체의 정보를 담는 목적
+        UsernamePasswordAuthenticationToken userDetailsToken = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
+        Authentication authentication = authenticationManager.authenticate(userDetailsToken);
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         Map<String, Object> loginResponseDto = auth.login(loginData.getEmail());
+
+    
         String nickname = (String) loginResponseDto.get("nickname");
         Integer userId   = (Integer) loginResponseDto.get("userId"); 
 
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
-        
         
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt).toString())
                                 .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     

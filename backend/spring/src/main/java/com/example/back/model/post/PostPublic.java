@@ -1,6 +1,5 @@
 package com.example.back.model.post;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;

@@ -1,20 +1,16 @@
 package com.example.back.service;
 
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import javax.transaction.Transactional;
 
-import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
-import com.example.back.model.post.Posts;
 import com.example.back.model.user.Users;
 import com.example.back.repository.PostInformationRepository;
 import com.example.back.repository.PostPermissionRepository;
@@ -29,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class ManageAllAboutRole{

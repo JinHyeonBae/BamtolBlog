@@ -5,13 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.back.response.ErrorCode;
+import com.example.back.exception.ErrorCode;
 
 import io.jsonwebtoken.JwtException;
 
@@ -23,6 +22,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 	@Autowired
 	private JwtProvider tokenProvider;
@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			//System.out.println("request header : " + request.getCookies());
 			String jwt = getJwtFromRequest(request); //리퀘스트 헤더에서 토큰 분리
-			
+			LOGGER.info("jwt 출력 :" + jwt);
 			if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) { //null 검사 & valid 토큰 검사
 				String email = tokenProvider.getUserEmailFromJWT(jwt);
 

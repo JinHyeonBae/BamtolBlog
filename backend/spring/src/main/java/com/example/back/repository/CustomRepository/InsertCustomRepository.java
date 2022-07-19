@@ -10,7 +10,6 @@ import com.example.back.model.post.Posts;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
 
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
