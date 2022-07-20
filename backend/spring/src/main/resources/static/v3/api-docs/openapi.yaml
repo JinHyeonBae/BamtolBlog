@@ -165,11 +165,15 @@ components:
       oneOf:
         - $ref: '#/components/schemas/InvalidEmailError'
         - $ref: '#/components/schemas/InvalidPasswordError'
+        - $ref: '#/components/schemas/InputNullPointerError'
+        - $ref: '#/components/schemas/TokenNullPointerError'
+    
     SignUpErrorResponse:
       type: object
       oneOf:
         - $ref: '#/components/schemas/DuplicateEmailError'
         - $ref: '#/components/schemas/DuplicateNicknameError'
+        - $ref: '#/components/schemas/InputNullPointerError'
 
     SignUpArrayErrorResponse:
       type: array
@@ -183,10 +187,13 @@ components:
       properties:
         email:
           type: string
+          example : test@test.test
         password:
           type: string
+          example : I don't know
         nickname:
           type: string
+          example : test
 
     SignUpResponseDto:
       type: object
@@ -204,68 +211,88 @@ components:
       properties:
         title:
           type : string
+          example : title
         contents:
           type : string
+          example : contents 입니다
         displayLevel:
           type : string
+          example : public
         nickname:
           type: string
+          example : spring good
         price :
           type : integer
+          example : 0
         userId:
           type : integer
+          example : 2
         
         
     ReadPostDto:
       type : object
+      description : 100번은 2번이 쓴 포스트. public 성공 테스트 시 postId 101번, 실패 테스트 시 97번
       properties:
         userId:
           type : integer
+          example : 2
         postId:
           type : integer
+          example : 100
     
     UpdatePostDto:
       type: object
+      description : 100번은 2번이 쓴 포스트. public 성공 테스트 시 postId 101번, 실패 테스트 시 97번
       properties:
         title:
           type : string
+          example : update title
         contents:
           type : string
+          example : update 테스트
         displayLevel:
           type : string
+          example : protected
         price :
           type : integer
+          example : 500
         userId:
           type : integer
+          example : 2
         postId:
           type : integer
+          example : 100
 
     DeletePostDto:
       type: object
+      description : 100번은 2번이 쓴 포스트. public 성공 테스트 시 postId 101번, 실패 테스트 시 97번
       properties:
         userId :
           type : integer
-          example : 10
+          example : 2
         postId:
           type : integer
-          example : 12
+          example : 100
 
     LoginDto:
       type: object
       properties:
         email:
           type: string
+          example : test@test.test
         password:
           type: string
+          example : i don't know
     Auth:
       type: object
       properties:
         nickname:
           type: string
+          example : test
         userId:
           type: integer
           format: int32
-          example: 20
+          example: 2
     
     LoginResponseDto:
       type: object
@@ -329,7 +356,7 @@ components:
           example: 수정 요청이 완료되었습니다.
         postId:
           type : integer
-          example : 12
+          example : 100
 
     
     DeletePostResponse:
@@ -344,9 +371,49 @@ components:
           example: 삭제 요청이 완료되었습니다.
         postId:
           type : integer
-          example : 12
+          example : 100
 
-    
+    HeaderNullPointerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40001
+        message:
+          type: string
+          example: 헤더가 NULL입니다.
+        code:
+          type: string
+          example: "M001"
+
+    InputNullPointerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40002
+        message:
+          type: string
+          example: 입력값이 NULL입니다.
+        code:
+          type: string
+          example: "M003"
+
+    TokenNullPointerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40003
+        message:
+          type: string
+          example: 토큰 값이 전달되지 않았습니다.
+        code:
+          type: string
+          example: "M001"
 
 
     InvalidEmailError:
@@ -378,6 +445,20 @@ components:
           type: string
           example : "M002"
 
+    PermissionDeniedError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40301
+        message:
+          type: string
+          example: 접근이 거부되었습니다.
+        code:
+          type: string
+          example : "C006"
+
 
     NotFoundError:
       type: object
@@ -392,7 +473,7 @@ components:
         code:
           type: string
           example: "M004"
-
+    
 
     DuplicateEmailError:
       type: object
@@ -437,3 +518,18 @@ components:
         code:
           type: string
           example: "M011"
+
+    
+    NoSuchElementError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 50002
+        message:
+          type: string
+          example: 요청한 정보를 찾을 수 없습니다.
+        code:
+          type: string
+          example: "S002"
