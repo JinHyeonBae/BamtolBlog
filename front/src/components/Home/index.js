@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout, selectLoginStatus } from './../../_slices/userSlice';
+import { logout, selectLoginStatus, selectUser } from './../../_slices/userSlice';
 
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const loginStatus = useSelector(selectLoginStatus);
+  const nickname = useSelector(selectUser)?.nickname;
 
   const goLogin = () => {
     navigate(`/login`);
@@ -18,6 +19,10 @@ const Home = () => {
 
   const goSignup = () => {
     navigate(`/signup`);
+  }
+
+  const goWrite = () => {
+    navigate(`/${nickname}/posts/write`);
   }
 
   useEffect(()=>{
@@ -32,6 +37,7 @@ const Home = () => {
     <button onClick={goLogin}>Login</button>
     <button onClick={logOut}>Logout</button>
     <button onClick={goSignup}>SignUp</button>
+    <button onClick={goWrite}>Write</button>
     </>
   )
 }

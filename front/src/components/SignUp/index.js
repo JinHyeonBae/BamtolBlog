@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from 'react-hook-form';
-import CryptoJS from 'crypto-js';
-import { signup, setSignupStatusIdle, initEmailDuplicate, initNicknameDuplicate,
-  selectSignupStatus, selectEmailDuplication, selectNicknameDuplication } from "../../_slices/userSlice";
+//import CryptoJS from 'crypto-js';
+import { signup, setSignupStatusIdle,
+  selectSignupStatus, selectStatusCode } from "../../_slices/userSlice";
 
 const SignUp = () => {
   const dispatch = useDispatch();
@@ -13,37 +13,53 @@ const SignUp = () => {
   const { register, watch, trigger, getValues, handleSubmit, formState: { errors } } = useForm();
   
   const signupStatus = useSelector(selectSignupStatus);
-  const emailDuplication = useSelector(selectEmailDuplication);
-  const nicknameDuplication = useSelector(selectNicknameDuplication);
+  const statusCode = useSelector(selectStatusCode);
+  let emailDuplication = statusCode === '40901' || statusCode === '40903'; 
+  let nicknameDuplication = statusCode === '40902' || statusCode === '40903'; 
   
   const EmailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const PasswordRegex = /^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+])(?!.*[^a-zA-z0-9$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
-  
+
   const watchEmail = watch('email');
   const watchNickname = watch('nickname');
 
   useEffect(()=>{
-    dispatch(initEmailDuplicate());
+    console.log(`emailDup: ${emailDuplication}, nicknameDup: ${nicknameDuplication}`);
+  },[emailDuplication, nicknameDuplication])
+
+  useEffect(() => {
+    emailDuplication = false;
+    console.log(watchEmail, emailDuplication);
+    trigger('email');
   },[watchEmail]);
-  
-  useEffect(()=>{
-    dispatch(initNicknameDuplicate());
-  },[watchNickname]);
 
   useEffect(()=>{
     if(signupStatus === 'success'){
+      nicknameDuplication = false;
+      trigger('nickname');
+      console.log(watchNickname, nicknameDuplication);
+    }
+  },[watchNickname]);
+
+  useEffect(() => {
+    console.log(`update! emailDup: ${emailDuplication}, nicknameDup: ${nicknameDuplication}`);
+    dispatch(setSignupStatusIdle());
+  },[]);
+
+  useEffect(()=>{
+    if(signupStatus === 'success' && !emailDuplication && !nicknameDuplication){
       alert("회원가입 성공");
       dispatch(setSignupStatusIdle());
       navigate(`/`);
     } else if(signupStatus === 'failed'){
-      trigger('email');
-      trigger('nickname');
+      alert("회원가입 실패. 다시 시도해주세요.");
+      dispatch(setSignupStatusIdle());
     }
-  },[signupStatus]);
+  },[signupStatus, emailDuplication, nicknameDuplication]);
   
   const onSubmit = (data) => {
     let body = data;
-    body.password = CryptoJS.AES.encrypt(body.password, process.env.REACT_APP_SECRET_KEY).toString();
+    //body.password = CryptoJS.AES.encrypt(body.password, process.env.REACT_APP_SECRET_KEY).toString();
     dispatch(signup(body));
   }
 
