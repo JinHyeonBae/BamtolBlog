@@ -1,13 +1,13 @@
 package com.example.back.exception;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.naming.NoPermissionException;
 
-import com.example.back.response.ErrorCode;
 import com.example.back.response.ExceptionResponse;
+
+import io.jsonwebtoken.JwtException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice //이거라구..?
@@ -45,27 +44,37 @@ public class AroundExceptionHandler{
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INPUT_NULL_POINTER);
             return ResponseEntity.ok().body(response);
         }
+        else if(ERROR_MESSAGE.contains("POST")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.POST_RESOUCE_NOT_FOUND);
+            return ResponseEntity.ok().body(response);
+        }
 
         return null;
     }
 
     @ExceptionHandler(value = {UsernameNotFoundException.class, BadCredentialsException.class, 
-                                InternalAuthenticationServiceException.class })
+                                InternalAuthenticationServiceException.class, JwtException.class })
 
     // ExceptionResponse(String messages, String error, Integer status)
     public ResponseEntity<ExceptionResponse> UnauthorizeExceptionHandler(Exception e){ // 401
         LOGGER.info("Exeption Error :" + e.getMessage());
 
-        if(e.getMessage().contains("EMAIL")){
+        String ERROR_MESSAGE = e.getMessage();
+
+        if(ERROR_MESSAGE.contains("EMAIL")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_EMAIL);
             return ResponseEntity.ok().body(response);
         }
-        else if(e.getMessage().contains("Bad credentials")){
+        else if(ERROR_MESSAGE.contains("Bad credentials")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_INPUT_PASSWORD);
             return ResponseEntity.ok().body(response);
         }
-        else if(e.getMessage().contains("INTERNAL")){
+        else if(ERROR_MESSAGE.contains("INTERNAL")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.INTERNAL_ERROR);
+            return ResponseEntity.ok().body(response);
+        }
+        else if(ERROR_MESSAGE.contains("TOKEN")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.INVALID_TOKEN);
             return ResponseEntity.ok().body(response);
         }
         
@@ -75,38 +84,53 @@ public class AroundExceptionHandler{
     @ExceptionHandler(value = {NoPermissionException.class, AccessDeniedException.class})
     public ResponseEntity<ExceptionResponse> ForbiddenExceptionHandler(Exception e){
         LOGGER.info("Exeption Error :" + e.getMessage());
+        String ERROR_MESSAGE = e.getMessage();
 
-        if(e.getMessage().contains("PERMISSION")){ 
+        if(ERROR_MESSAGE.contains("PERMISSION")){ 
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.PERMISSION_DENIED);
             return ResponseEntity.ok().body(response);
+        }
+        else if(ERROR_MESSAGE.contains("TOKEN")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.TOKEN_NULL_POINTER);
+            return ResponseEntity.ok().body(response);
+
         }
 
         return null;
     }
 
 
+    // 클라이언트가 잘못 접근했을 때
     @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<ExceptionResponse> NotFoundExceptionHandler(NotFoundException e){ //404
         LOGGER.info("ERROR :" + e.getMessage());
+        String errorMsg = e.getMessage();
+
+        if(errorMsg.contains("POST")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.POST_RESOUCE_NOT_FOUND);
+            return ResponseEntity.ok().body(response);
+        }
+
         return null;
     }
-
 
 
     @ExceptionHandler(value = {IllegalStateException.class})
     public ResponseEntity IllegalStateExceptionHandler(IllegalStateException e){ //409
         LOGGER.info("ERROR : "+e.getMessage());
 
-        if(e.getMessage().contains("AND")){
+        String ERROR_MESSAGE = e.getMessage();
+
+        if(ERROR_MESSAGE.contains("AND")){
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.DUPLICATE_EMAIN_AND_NICKNAME);
             return ResponseEntity.ok().body(response);
         }
         else{
-            if(e.getMessage().contains("EMAIL")){
+            if(ERROR_MESSAGE.contains("EMAIL")){
                 ExceptionResponse response = ExceptionResponse.of(ErrorCode.DUPLICATE_EMAIL);
                 return ResponseEntity.ok().body(response);
             }
-            else if(e.getMessage().contains("NICKNAME")){
+            else if(ERROR_MESSAGE.contains("NICKNAME")){
                 ExceptionResponse response = ExceptionResponse.of(ErrorCode.DUPLICATE_NICKNAME);
                 return ResponseEntity.ok().body(response);
             }
@@ -115,8 +139,21 @@ public class AroundExceptionHandler{
         return null;
     }
 
+    
+    // Runtime
+    @ExceptionHandler(value = {NoSuchElementException.class})
+    public ResponseEntity RuntimeExceptionHandler(Exception e){
+        LOGGER.info("ERROR : "+e.getMessage());
 
+        String ERROR_MESSAGE = e.getMessage();
 
+        if(ERROR_MESSAGE.contains("POST")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.NO_SUCH_ELEMENT);
+            return ResponseEntity.ok().body(response);
+        }
+    
+        return null;
+    }
 
 }
 

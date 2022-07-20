@@ -5,11 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.example.back.exception.ErrorCode;
+
+import io.jsonwebtoken.JwtException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -19,6 +22,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 	@Autowired
 	private JwtProvider tokenProvider;
@@ -32,20 +36,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			//System.out.println("request header : " + request.getCookies());
 			String jwt = getJwtFromRequest(request); //리퀘스트 헤더에서 토큰 분리
-			
+			LOGGER.info("jwt 출력 :" + jwt);
 			if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) { //null 검사 & valid 토큰 검사
 				String email = tokenProvider.getUserEmailFromJWT(jwt);
 
-				UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+				UserPrincipal userDetails = customUserDetailsService.loadUserByUsername(email);
 				
-				UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
-						userDetails.getAuthorities());
+				UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.getEmail(), userDetails.getPassword(), userDetails.getAuthorities());
 				authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
 				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 			}
 		} catch (Exception ex) {
 			LOGGER.error("Could not set user authentication in security context", ex);
+			LOGGER.info("exception 에러 내용 :"+ ex.getMessage());
+			throw new JwtException(ErrorCode.INVALID_TOKEN.name());
 		}
 
 		filterChain.doFilter(request, response); // invoke the rest of the application
@@ -55,7 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		
 		if(request.getCookies() != null){
 			String bearerToken = request.getCookies()[0].getValue();
-			//System.out.println("Bearer token :" + bearerToken);
+			
+			System.out.println("Bearer token :" + bearerToken);
 
 			if (StringUtils.hasText(bearerToken.toString())) {
 				return bearerToken.toString();

@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
@@ -15,9 +14,6 @@ import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
-import com.example.back.repository.UserRepository;
-
-import org.hibernate.boot.spi.InFlightMetadataCollector.EntityTableXref;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;

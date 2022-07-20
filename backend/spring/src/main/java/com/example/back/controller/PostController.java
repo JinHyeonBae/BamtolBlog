@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.example.back.dto.PostDto.CreatePostDto;
 import com.example.back.dto.PostDto.DeletePostDto;
-import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.dto.PostDto.UpdatePostDto;
 import com.example.back.response.ResponseDto.CreateResponseDto;
 import com.example.back.response.ResponseDto.DeleteResponseDto;
@@ -18,6 +17,8 @@ import com.example.back.security.JwtProvider;
 import com.example.back.service.AuthService;
 import com.example.back.service.PostService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,10 @@ public class PostController {
 
     @Autowired
     PostService postService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostController.class);
+
+
     
     //쓰기 요청
     @PostMapping("/posts/write")
@@ -60,9 +65,12 @@ public class PostController {
 
     //읽기 요청
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @RequestBody ReadPostDto body) throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException{
+    public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @PathVariable(value="postId") String postId) 
+        throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException{
         // 먼저 온 토큰으로 userId를 받는다.
-        ReadResponseDto readDto = postService.readPost(body);
+        Integer IntpostId = Integer.valueOf(postId);
+        System.out.println("header :" + headers);
+        ReadResponseDto readDto = postService.readPost(headers, IntpostId);
         return ResponseEntity.ok().body(readDto);
     }
 

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import com.example.back.model.post.Posts;
 import com.example.back.repository.CustomRepository.InsertCustomRepository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
@@ -12,7 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PostsRepository extends JpaRepository<Posts, Integer>, InsertCustomRepository{
 
     public void savePosts(Posts post);
-    public Posts findById(int id);
+    public Optional<Posts> findById(int id);
     public Posts findByUserId(int userId);
 
 }

@@ -1,18 +1,16 @@
 package com.example.back.service;
 
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import com.example.back.dto.PostDto.ReadPostDto;
 import com.example.back.model.SubscribePost;
 import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
-import com.example.back.model.post.Posts;
 import com.example.back.model.user.Users;
 import com.example.back.repository.PostInformationRepository;
 import com.example.back.repository.PostPermissionRepository;
@@ -25,10 +23,8 @@ import com.example.back.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 @Component
 public class ManageAllAboutRole{
@@ -68,8 +64,8 @@ public class ManageAllAboutRole{
     //@Override
     public void addRole() {
         
+        // create 시 role 추가
         
-
 
     }
 
@@ -77,18 +73,20 @@ public class ManageAllAboutRole{
     // 읽기 요청이 들어왔을 경우, 포스트가 어떤 레벨인지를 알아야 한다.
     // unAuth여도 가능
     //@Override
-    public HashMap<String, String> readRole(ReadPostDto postDto) {
+    public HashMap<String, String> readRole(int postId, int userId) {
         
         LOGGER.info("ENTER IN READROLE!");
         Map<String, String> postAndUsersPermissions = new HashMap<String, String>();
         
-        // postInfo가 null인 경우 서버 에러로 처리하자
-        PostInformation postInfo = postInformationRepository.findByPostId(postDto.getPostId()); //optional로 날려줘야겠네
+        // postInfo가 null인 경우 : 500
+        PostInformation postInfo = postInformationRepository.findByPostId(postId).orElseThrow(()->{
+            throw new NoSuchElementException("POST NOT FOUND");
+        });
         
         LOGGER.info("postInfo role입니다 :" + postInfo.getDisplayLevel());
 
         postAndUsersPermissions.put("postPermissionLevel", postInfo.getDisplayLevel());
-        postAndUsersPermissions.put("userPermissionLevel" , readUserRoleRegardingPost(postDto.getPostId(), postDto.getUserId()));
+        postAndUsersPermissions.put("userPermissionLevel" , findUserRoleBySpecificPost(postInfo, userId));
         
         return (HashMap<String, String>) postAndUsersPermissions;
     }
@@ -134,33 +132,46 @@ public class ManageAllAboutRole{
 
     // post에 대한 권한을 확인하는 함수
     // join으로 findUserRoles랑 합칠 수 있을 것 같다.
-    private String readUserRoleRegardingPost(int postId, int userId){
-        // 근데 권한이 없을수도 있는게 public이면 없을 수 있음
-        Optional<PostPermission> Permission = postPermissionRepository.findByUserIdAndPostId(userId, postId);
+    /**
+     * @param postId
+     * @param userId
+     * @return
+     */
 
-        if(Permission.isPresent())
-            return Role.valueOf(Permission.get().getPermissionId()).name();
-        else
-            return null;
+    // 특정 포스트에 대한 유저 권한 찾기
+    private String findUserRoleBySpecificPost(PostInformation postInfo, int userId){
+        
+        int postId = postInfo.getPostId();
+        int hostId = postInfo.getUserId();
+        
+        String displayLevel = postInfo.getDisplayLevel().toUpperCase();
+        int postPermissionLevelInt = Role.valueOf(displayLevel).getValue();
 
+        // publicd이면 userId의 값에 상관없이 user Level은 Member
+        if(postPermissionLevelInt == Role.PUBLIC.getValue())
+            return Role.MEMBER.getKey();
+        
+        if(postPermissionLevelInt == Role.PUBLISHER.getValue() && userId == hostId)
+            return Role.PUBLISHER.getKey();
+        
+        return findUserRole(userId, postId);
     }
 
-    // post 권한을 확인할 수 없을 경우에 subscribe 관련 테이블을 찾는 함수
+    // post에 대한 정확한 유저의 권한을 찾기 위함
     @Transactional
     public String findUserRole(int userId, int postId){
         
+        // user에 대한 구독자인 경우
         Optional<SubscribeUser> subUser = subscribeUserRepository.findBySubscriber_Id(userId);
-
-        //domain subscriber인 경우
-    
+       
         subUser.ifPresent((action)->{   
             //userRole은 subscriberUser이다.
             this.saveUserRole("DOMAIN_SUBSCRIBER", userId, postId);
             this.userRole = Role.DOMAIN_SUBSCRIBER.getKey();
         });
 
-        //post subscriber인 경우
-        Optional<SubscribePost> subPost =  subscribePostRepository.findById(userId);
+        // 한 포스트에 대한 구독자인 경우
+        Optional<SubscribePost> subPost = subscribePostRepository.findById(userId);
 
         subPost.ifPresent((action)->{
             saveUserRole("POST_SUBSCRIBER", userId, postId);
@@ -173,6 +184,7 @@ public class ManageAllAboutRole{
         
         Optional<Users> users = userRepository.findById(userId);
         System.out.println("users status:" + users);
+
         if(!users.isEmpty()){
             this.userRole = Role.MEMBER.name();
             return this.userRole;
@@ -183,18 +195,19 @@ public class ManageAllAboutRole{
 
     
     // foreign key
-    private void saveUserRole(String userPermission, int userId, int postId){
+    public void saveUserRole(String userPermission, int userId, int postId){
 
         // Posts post = postsRepository.findById(postId);
         // Users user = userRepository.findById(userId).get();
-        // postPermission.setUser(user); -> save 는 위반성 에러 남    
+        // postPermission.setUser(user); -> save 는 위반성 에러 남   
+        System.out.println("------------"+userPermission+"--------------"); 
         PostPermission postPermission = new PostPermission();
         
         postPermission.setPostId(postId);
         postPermission.setUserId(userId);
         
         postPermission.setPermissionId(Role.valueOf(userPermission).getValue());
-        postPermissionRepository.save(postPermission);
+        postPermissionRepository.saveAndFlush(postPermission);
 
     }
 

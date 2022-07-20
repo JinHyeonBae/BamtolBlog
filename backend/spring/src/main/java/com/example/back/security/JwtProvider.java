@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import com.example.back.dto.AuthDto.LoginDto;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -18,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -37,46 +35,18 @@ public class JwtProvider {
 
     private CustomUserDetailService customUserDetailService;
 
-    //토큰을 생성하는 곳
-    public String createAccessToken(LoginDto loginDto, int userId){
-        Map<String, Object> headers = new HashMap<>();
-        headers.put("type", "jwt");
 
+    public String generateToken(Authentication authentication, Integer userId) {
+
+        Map<String, Object> headers = new HashMap<>();
         Map<String, Object> payloads = new HashMap<>();
-        //발행자
+        
+        headers.put("type", "Bearer");
         payloads.put("iss", "admin");
-        // 토큰의 대상자
-        payloads.put("aud", loginDto.getEmail());
+        payloads.put("aud", authentication.getPrincipal()); //email
         payloads.put("id", userId);
 
-        Date expiration = new Date();
-        System.out.println("현재 시간 :" + expiration.getTime());
-        System.out.println("토큰 유효 시간 :" + expiration.getTime() + accessExpireTime);
-        
-        expiration.setTime(expiration.getTime() + accessExpireTime);
-
-        String jwt = Jwts
-                    .builder()
-                    .setHeader(headers)
-                    .setClaims(payloads)
-                    .setSubject("user")
-                    .setExpiration(expiration)
-                    .signWith(SignatureAlgorithm.HS256, secretKey)
-                    .compact();
-
-        return jwt;
-    }
-
-    public String generateToken(Authentication authentication) {
-
-        Map<String, Object> headers = new HashMap<>();
-        Map<String, Object> payloads = new HashMap<>();
-
-        headers.put("type", "Bearer");
-
-        payloads.put("iss", "admin");
-        payloads.put("aud", authentication.getPrincipal());
-        
+    
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + accessExpireTime);
 
@@ -98,16 +68,20 @@ public class JwtProvider {
 
     //Request의 Header에서 token 값 추출
     public List<String> resolveToken(HttpHeaders request){
-        return request.get("token");
+        // httpHeaders에서 쿠키를 추출하는 방법
+        System.out.println(request);
+        //System.out.println(request.get(HttpHeaders.SET_COOKIE).indexOf("="));
+
+        return request.getValuesAsList(HttpHeaders.SET_COOKIE);
     }
 
-    public Long getUserIdFromJWT(String token) { //userId 가져오기
+    public Integer getUserIdFromJWT(String token) { //userId 가져오기
 		Claims claims = Jwts.parser()
 				.setSigningKey(secretKey)
 				.parseClaimsJws(token)
 				.getBody();
-        
-		return Long.valueOf(claims.getSubject());
+        System.out.print("claims : " + claims.get("id"));
+		return (Integer) claims.get("id");
 	}
 
     
@@ -116,9 +90,17 @@ public class JwtProvider {
 				.setSigningKey(secretKey)
 				.parseClaimsJws(token)
 				.getBody();
-        
-		return claims.getAudience();
+        System.out.println("AUDIENCE :" + claims.getAudience());
+
+        System.out.println("AUDIENCE :" + claims.get("aud"));
+		return (String) claims.get("aud");
 	}
+
+    public String parseJwtInsideCookie(String tokenWithKey){
+
+        String[] parse = tokenWithKey.split("=");
+        return parse[1];
+    }
 
 
     // 토큰의 유효성 검사
@@ -137,6 +119,7 @@ public class JwtProvider {
 		} catch (IllegalArgumentException ex) {
 			LOGGER.error("JWT claims string is empty");
 		}
+        
 		return false;
 	}
     

@@ -309,7 +309,7 @@ components:
         title:
           type: string
           example : 글 제목입니다.
-        content:
+        contents:
           type: string
           example : 글 내용입니다.
         postId:

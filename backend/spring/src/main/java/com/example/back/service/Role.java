@@ -32,28 +32,31 @@ public enum Role {
 
     public static Role valueOf(int roleNum){
         Role role = null;
-        switch (roleNum) {
-            case 11:
+
+        int q = roleNum / 10;
+        int r = roleNum % 10;
+
+        if(q == 1){
+            if(r == 1)
                 role = Role.GUEST;
-                break;
-            case 12:
+            else if(r == 2)
                 role = Role.MEMBER;
-                break;
-            case 13:
+            else if(r == 3)
                 role = Role.POST_SUBSCRIBER;
-                break;
-            case 14:
+            else if(r == 4)
                 role = Role.DOMAIN_SUBSCRIBER;
-                break;
-            case 21:
-                role = Role.PUBLIC;
-                break;
-            case 22:
-                role = Role.PROTECT;
-                break;
-            default:
-                role=Role.PRIVATE;
+            else
+                role = Role.PUBLISHER;
         }
+        else{
+            if(r == 1)
+                role = Role.PUBLIC;
+            else if(r == 2)
+                role = Role.PROTECT;
+            else
+                role = Role.PRIVATE;
+        }
+        
         return role;
     }
 }
