@@ -33,7 +33,7 @@ public enum ErrorCode {
     DUPLICATE_EMAIN_AND_NICKNAME(40903, "M012", "이메일, 닉네임 중복입니다."),
 
     INTERNAL_ERROR(50001, "S001", "내부 서버 에러입니다."),
-    NO_SUCH_ELEMENT(50002, "S002", "정보를 찾을 수 없습니다.");
+    NO_SUCH_ELEMENT(50002, "S002", "요청한 정보를 찾을 수 없습니다.");
     //admin
 
 
