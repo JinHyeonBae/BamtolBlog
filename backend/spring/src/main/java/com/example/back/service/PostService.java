@@ -10,7 +10,6 @@ import javax.naming.NoPermissionException;
 
 import com.example.back.config.CustomModelMapper;
 import com.example.back.dto.PostDto.CreatePostDto;
-import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.UpdatePostDto;
 import com.example.back.exception.ErrorCode;
 import com.example.back.model.post.PostInformation;
@@ -85,12 +84,42 @@ public class PostService {
     //private PostInfoMapper postInfoMapper
 
 
+    // TODO : DTO에서 userId를 추출, 
+
+    private int getUserIdFromJWT(String token){
+
+        return jwtProvider.getUserIdFromJWT(token);
+    }
+
+    private String getTokenFronCookie(HttpHeaders headers){
+        
+        List<String> extractToken = jwtProvider.resolveToken(headers);
+        
+        if(extractToken.isEmpty())
+            return null;
+
+        String token = jwtProvider.parseJwtInsideCookie(extractToken.get(0));
+        return token;
+    }
+
+
     @Transactional
-    public CreateResponseDto createPost(CreatePostDto createPostInfo) throws SQLException{
+    public CreateResponseDto createPost(HttpHeaders header, CreatePostDto createPostInfo) throws SQLException, NoPermissionException{
 
         // throw가 발생할 수 있는 경우는 두 가지.
         // userId가 아예 안 왔거나, 매핑이 잘못 됐거나, 아예 존재하지 않는 ID거나, 아니라면 로그인하지 않은 사람
-        Users users = urRepo.findById(createPostInfo.getUserId()).orElseThrow(()->
+
+        String token = getTokenFronCookie(header);
+        int userId = -1;
+        
+        if(token == null) {
+            LOGGER.info("비회원입니다.");
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.getMessage());
+        }
+        else userId = getUserIdFromJWT(token);
+
+       
+        Users users = urRepo.findById(userId).orElseThrow(()->
             new NullPointerException("NICKNAME NULL")
         ); 
         
@@ -101,7 +130,7 @@ public class PostService {
 
         // 현재 로그인한 게 중요한 거다...
         // user가 있는 경우는 즉, 멤버인 경우이므로 if를 안 써줘도 되네...
-        if(publisherUserId == createPostInfo.getUserId()){
+        if(publisherUserId == userId){
 
             LOGGER.info("생성 권한을 충족하였습니다.");
 
@@ -128,23 +157,18 @@ public class PostService {
 
     // token에서 id를 뽑아내는 식으로 하는 게 좋을듯
     // Unknown column 'subscribeu0_.publisher_id' in 'field list'
-    public ReadResponseDto readPost(HttpHeaders header, int postId) throws NoPermissionException, InternalServerError, AccessDeniedException{
+    public ReadResponseDto readPost(HttpHeaders header, int postId) throws NoPermissionException, InternalServerError, AccessDeniedException, NoSuchElementException{
 
-        
-        System.out.println("header at Service :" + header);
-        List<String> extractToken = jwtProvider.resolveToken(header);
-        System.out.println(extractToken);
-        String token;
+
+        String token = getTokenFronCookie(header);
         int userId = -1;
-
-        if(extractToken.isEmpty())
-            LOGGER.info("비회원입니다.");
-        else{
-            token = jwtProvider.parseJwtInsideCookie(extractToken.get(0));
-            userId = jwtProvider.getUserIdFromJWT(token);
-        }
         
+        if(token == null) LOGGER.info("비회원입니다.");
+        else userId = getUserIdFromJWT(token);
+
+       
         HashMap<String,String> roleMap = roleProcessor.readRole(postId, userId);
+
                 
         boolean isProperAccess = roleProcessor.isProperAccessRequest(roleMap.get("userPermissionLevel"), roleMap.get("postPermissionLevel"));
         PostInformation postInfo = postInformationRepository.findByPostId(postId).orElseThrow(()->{
@@ -161,18 +185,21 @@ public class PostService {
     
     }
 
-    public UpdateResponseDto updatePost(UpdatePostDto body, int postId) throws NoPermissionException{
+    public UpdateResponseDto updatePost(HttpHeaders header, UpdatePostDto body, int postId) throws NoPermissionException, NoSuchElementException{
 
-        int userId = body.getUserId();
+        String token = getTokenFronCookie(header);
+        int userId = -1;
+        
+        if(token == null) {
+            LOGGER.info("비회원입니다.");
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.getMessage());
+        }
+        else userId = getUserIdFromJWT(token);
 
-        System.out.println(postId);
-
-        // Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
-        //     new NullPointerException("NICKNAME NULL")
-        // );  
+        System.out.println("p :" + postId);
 
         Posts post = postsRepository.findById(postId).orElseThrow(()->
-            new ResourceAccessException("POST NOT FOUND")
+            new NoSuchElementException("POST NOT FOUND")
         );
 
 
@@ -207,25 +234,27 @@ public class PostService {
     }
     
 
-    public DeleteResponseDto deletePost(DeletePostDto body) throws NoPermissionException{
+    public DeleteResponseDto deletePost(HttpHeaders header, int postId) throws NoPermissionException, NullPointerException, NoSuchElementException{
 
-        int userId = body.getUserId();
-        int postId = body.getPostId();
-
-        Users users = urRepo.findById(body.getUserId()).orElseThrow(()->
-            new NullPointerException("NICKNAME NULL")
-        );  
+        String token = getTokenFronCookie(header);
+        int userId = -1;
+        
+        if(token == null) {
+            LOGGER.info("비회원입니다.");
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.getMessage());
+        }
+        else userId = getUserIdFromJWT(token);
 
         //  내부 문제여야 하나, 아니면 그냥 NULL인가?
+        LOGGER.info("postID :" + postId);
         Posts post = postsRepository.findById(postId).orElseThrow(()->
-            new NullPointerException("POST NOT FOUND")
+            new NoSuchElementException("POST NOT FOUND")
         );
 
         int publisherUserId = post.getUserId();
 
         DeleteResponseDto deleteDto = new DeleteResponseDto();
         
-        // 
         if(publisherUserId == userId){
             postsRepository.delete(post);
             deleteDto.setStatus(200);
