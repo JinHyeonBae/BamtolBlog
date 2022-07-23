@@ -76,17 +76,26 @@ public class AuthController {
 
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
+        String domain = request.getOrigin();
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt).toString())
+        String[] domainArr = domain.split(":");
+        String cookieDomain = domainArr[1].substring(2);
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt, cookieDomain).toString())
                                 .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     
         
     }
 
-    private ResponseCookie makeResponseCookie(String jwt){
+    private ResponseCookie makeResponseCookie(String jwt, String domain){
+        
+        System.out.println("sub domain :" + domain);
+
         return ResponseCookie.from("access_Token", jwt)
+                            .domain(domain)
                             .httpOnly(true)
                             .maxAge(cookieExpiration) //1일
-                            // secure 설정을 해도 http 연결이면 안되는듯
+                            .sameSite("None")
+                            .secure(true)
                             .path("/")
                             .build();
     }
