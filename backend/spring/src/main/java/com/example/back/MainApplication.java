@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableConfigurationProperties
 
 @EntityScan(basePackages = {"com.example.back.model"})
-@ComponentScan(basePackages = {"com.example.back", "com.example.back.response"})
+@ComponentScan(basePackages = {"com.example.back"})
 @ConfigurationPropertiesScan(basePackages = {"com.example.back.config"})
 @EnableJpaRepositories(basePackages = {"com.example.back.repository"})
 @EnableJpaAuditing
@@ -27,7 +27,4 @@ public class MainApplication {
 			System.out.println(e.getMessage());
 		}
 	}
-
-	
-
 }

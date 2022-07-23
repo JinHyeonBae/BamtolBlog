@@ -1,10 +1,6 @@
 package com.example.back.controller;
 
-
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.example.back.dto.AuthDto.LoginDto;
 import com.example.back.dto.AuthDto.SignUpDto;
@@ -32,8 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-////@Api("/auth")
-//@Tag(name = "user", description = "사용자 API")
 public class AuthController {
     
     @Autowired
@@ -62,11 +56,13 @@ public class AuthController {
 
 
     @PostMapping("/auth/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginDto loginData, 
-                                                   HttpServletRequest request, HttpServletResponse response){     
+    public ResponseEntity<LoginResponseDto> login(@RequestHeader HttpHeaders request, @RequestBody LoginDto loginData){     
         
 
         //인증 주체의 정보를 담는 목적
+        LOGGER.info("HEADER :" + request);
+        LOGGER.info("password :" + loginData.getPassword());
+
         UsernamePasswordAuthenticationToken userDetailsToken = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
         Authentication authentication = authenticationManager.authenticate(userDetailsToken);
         
@@ -76,10 +72,11 @@ public class AuthController {
     
         String nickname = (String) loginResponseDto.get("nickname");
         Integer userId   = (Integer) loginResponseDto.get("userId"); 
+        LOGGER.info("userId :" + userId);
 
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
-        
+
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt).toString())
                                 .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     
         
@@ -88,9 +85,8 @@ public class AuthController {
     private ResponseCookie makeResponseCookie(String jwt){
         return ResponseCookie.from("access_Token", jwt)
                             .httpOnly(true)
-                            .sameSite("None")
-                            .secure(true)
                             .maxAge(cookieExpiration) //1일
+                            // secure 설정을 해도 http 연결이면 안되는듯
                             .path("/")
                             .build();
     }

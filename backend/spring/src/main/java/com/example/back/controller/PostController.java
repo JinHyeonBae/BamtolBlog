@@ -2,12 +2,11 @@ package com.example.back.controller;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 
 import javax.naming.NoPermissionException;
-import javax.servlet.http.HttpServletRequest;
 
 import com.example.back.dto.PostDto.CreatePostDto;
-import com.example.back.dto.PostDto.DeletePostDto;
 import com.example.back.dto.PostDto.UpdatePostDto;
 import com.example.back.response.ResponseDto.CreateResponseDto;
 import com.example.back.response.ResponseDto.DeleteResponseDto;
@@ -34,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 
 
@@ -56,9 +56,9 @@ public class PostController {
     //쓰기 요청
     @PostMapping("/posts/write")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<CreateResponseDto> createPost(HttpServletRequest request, @RequestBody CreatePostDto body) throws SQLException{
+    public ResponseEntity<CreateResponseDto> createPost(@RequestHeader HttpHeaders headers, @RequestBody CreatePostDto body) throws SQLException, NoPermissionException, ResourceAccessException{
 
-        CreateResponseDto result = postService.createPost(body);
+        CreateResponseDto result = postService.createPost(headers, body);
         
         return ResponseEntity.ok().body(result);
     }
@@ -66,8 +66,9 @@ public class PostController {
     //읽기 요청
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @PathVariable(value="postId") String postId) 
-        throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException{
+        throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException, NoSuchElementException{
         // 먼저 온 토큰으로 userId를 받는다.
+        System.out.println("HEADER :" + headers);
         Integer IntpostId = Integer.valueOf(postId);
         System.out.println("header :" + headers);
         ReadResponseDto readDto = postService.readPost(headers, IntpostId);
@@ -77,8 +78,11 @@ public class PostController {
 
     //수정 요청
     @PutMapping("posts/{postId}")
-    public ResponseEntity<UpdateResponseDto> updatePost(@RequestHeader HttpHeaders headers, @RequestBody UpdatePostDto body, @PathVariable int postId) throws NoPermissionException{
-        UpdateResponseDto result = postService.updatePost(body, postId);
+    public ResponseEntity<UpdateResponseDto> updatePost(@RequestHeader HttpHeaders headers, @RequestBody UpdatePostDto body,  @PathVariable(value="postId") String postId) 
+        throws NoPermissionException, ResourceAccessException, NoSuchElementException{
+
+        Integer IntpostId = Integer.valueOf(postId);
+        UpdateResponseDto result = postService.updatePost(headers, body, IntpostId);
         
         return ResponseEntity.ok().body(result);
     }
@@ -91,9 +95,11 @@ public class PostController {
 
     // 삭제 요청
     @DeleteMapping("posts/{postId}")
-    public ResponseEntity<DeleteResponseDto> deletePost(@RequestHeader HttpHeaders headers, @RequestBody DeletePostDto body) throws NoPermissionException{
+    public ResponseEntity<DeleteResponseDto> deletePost(@RequestHeader HttpHeaders headers, @PathVariable(value="postId") String postId) 
+        throws NoPermissionException, ResourceAccessException, NoSuchElementException{
         System.out.println("삭제 요청 컨트롤러 확인");
-        DeleteResponseDto result = postService.deletePost(body);
+        Integer IntPostId = Integer.valueOf(postId);
+        DeleteResponseDto result = postService.deletePost(headers, IntPostId);
         
         return ResponseEntity.ok().body(result);
         

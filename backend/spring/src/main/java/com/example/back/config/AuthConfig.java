@@ -3,7 +3,6 @@ package com.example.back.config;
 import java.util.Arrays;
 
 import com.example.back.repository.UserInformationRepository;
-import com.example.back.repository.UserRepository;
 import com.example.back.security.AuthProvider;
 import com.example.back.security.CustomUserDetailService;
 import com.example.back.security.JwtAuthenticationEntryPoint;
@@ -13,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -25,7 +22,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -74,6 +70,8 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
     //cors setting, 인증, 허가 에러 시 공통적으로 처리하는 부분
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOriginPattern("*");
@@ -82,7 +80,6 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
@@ -94,25 +91,11 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
     protected void configure(HttpSecurity http) throws Exception{
         System.out.println("http Configure");
 
-        // http
-        //     .cors().configurationSource(corsConfigurationSource())
-        // .and()
-        //     .csrf()
-        //     .disable()
-        //     .exceptionHandling()
-        //     .authenticationEntryPoint(this.unauthorizedHandler)
-        //     .and()
-        //     .sessionManagement()
-        //     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        //     .and()
-        //     .authorizeRequests()
-        //     .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
-        //     .antMatchers(HttpMethod.GET, "/api/users/checkUsernameAvailability", "/api/users/checkEmailAvailability").permitAll()
-        //     .anyRequest().authenticated();
-
-        // http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        //http.authenticationProvider(authProvider);
-        http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable()
+        http
+            .cors()
+            .configurationSource(corsConfigurationSource())
+            .and()
+            .csrf().disable()
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()

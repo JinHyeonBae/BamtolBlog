@@ -69,12 +69,12 @@ public class ModuleTest {
     // token 실험
     private String token;
 
-    //mapper
-    //PostInfoMapper pInfoMapper;
-
     // post update
     UpdatePostDto updatePostDto = new UpdatePostDto();
     Gson gson = new Gson();
+
+    String deletedPost = "97";
+    String ExistedPost = "102";
 
 
     @BeforeEach
@@ -92,7 +92,6 @@ public class ModuleTest {
         ReflectionTestUtils.setField(updatePostDto, "contents", "updateTesting~~");
         ReflectionTestUtils.setField(updatePostDto, "displayLevel", "public");
         ReflectionTestUtils.setField(updatePostDto, "price", 0);
-        ReflectionTestUtils.setField(updatePostDto, "userId", 2);
         
     }
 
@@ -199,7 +198,7 @@ public class ModuleTest {
         httpHeaders.add(HttpHeaders.SET_COOKIE, "access_Token=" + this.token);
         LOGGER.info("token 확인 : "+ this.token);
         ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
-                                            .get("/posts/3")
+                                            .get("/posts/101")
                                             .headers(httpHeaders)
                                             );
 
@@ -221,8 +220,58 @@ public class ModuleTest {
 
         String updateJson = gson.toJson(updatePostDto);
 
+        // TODOS : 어떤 오류에 대한 응답이 ExceptionRespose가 아니라 Exception으로 날라온다. 
         ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
-                                            .put("/posts/3")
+                                            .put("/posts/" + deletedPost)
+                                            .headers(httpHeaders)
+                                            
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(updateJson)
+                                            );
+                
+        // 어차피 200이라 여기선 에러가 안 나는구나
+        result
+            .andDo(MockMvcResultHandlers.print())
+            .andReturn().getResponse().getContentAsString();
+
+    }
+
+    @Test
+    void DeletePostTest() throws Exception{
+        this.extractUserIdFromJwt();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        
+        httpHeaders.add(HttpHeaders.SET_COOKIE, "access_Token=" + this.token);
+        LOGGER.info("token 확인 : "+ this.token);
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+                                            .delete("/posts/" + ExistedPost)
+                                            .headers(httpHeaders)
+                                            );
+                
+        // 어차피 200이라 여기선 에러가 안 나는구나
+        result
+            .andDo(MockMvcResultHandlers.print())
+            .andReturn().getResponse().getContentAsString();
+
+    }
+
+
+    @Test
+    void createPostTest() throws Exception{
+        this.extractUserIdFromJwt();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        
+        httpHeaders.add(HttpHeaders.SET_COOKIE, "access_Token=" + this.token);
+        LOGGER.info("token 확인 : "+ this.token);
+        //LOGGER.info("update Data toString" + updatePostDto.toString());
+
+        String updateJson = gson.toJson(updatePostDto);
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+                                            .post("/posts/write")
                                             .headers(httpHeaders)
                                             
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -247,7 +296,6 @@ public class ModuleTest {
         catch(Exception e){
             LOGGER.debug(e.getMessage());
         }
-        
 
     }
 
@@ -264,6 +312,8 @@ public class ModuleTest {
             }
         }
     }
+
+
 
 
 

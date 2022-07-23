@@ -39,7 +39,6 @@ public class AuthDto{
 
         String email;
         String password;
-        String name;
         String nickname;
 
         //dto -> entity
@@ -47,7 +46,6 @@ public class AuthDto{
             return UserInformation.builder()
                     .email(this.email)
                     .password(this.password)
-                    .name(this.name)
                     .nickname(this.nickname)
                     .build();
         }
