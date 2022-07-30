@@ -76,22 +76,23 @@ public class AuthController {
 
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
-        String domain = request.getOrigin();
 
-        String[] domainArr = domain.split(":");
-        String cookieDomain = domainArr[1].substring(2);
-
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseCookie(jwt, cookieDomain).toString())
-                                .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     
-        
+        return ResponseEntity.ok().body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(jwt, null, nickname, userId)));     
     }
 
-    private ResponseCookie makeResponseCookie(String jwt, String domain){
-        
-        System.out.println("sub domain :" + domain);
-
+    private ResponseCookie makeResponseCookie(String jwt){
         return ResponseCookie.from("access_Token", jwt)
-                            .domain(domain)
+                            .maxAge(cookieExpiration) //1일
+                            .sameSite("None")
+                            .path("/")
+                            .build();
+
+    }
+
+
+    private ResponseCookie makeResponseSetCookie(String jwt){
+        
+        return ResponseCookie.from("access_Token", jwt)
                             .httpOnly(true)
                             .maxAge(cookieExpiration) //1일
                             .sameSite("None")

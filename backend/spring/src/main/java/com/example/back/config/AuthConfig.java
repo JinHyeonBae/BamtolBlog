@@ -77,6 +77,7 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
         configuration.addAllowedOriginPattern("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.addExposedHeader("Set-Cookie");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
