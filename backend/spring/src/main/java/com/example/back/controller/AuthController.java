@@ -30,17 +30,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
     
-    @Autowired
     private AuthService auth;
 
-    @Autowired 
-    private UserInformationRepository userInformationRepository;
-
-	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	@Autowired
 	private JwtProvider jwtTokenProvider;
+
+    public AuthController(AuthService auth, AuthenticationManager authenticationManager, JwtProvider jwtTokenProvider){
+        this.auth = auth;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 

@@ -40,17 +40,17 @@ import org.springframework.web.client.HttpServerErrorException.InternalServerErr
 @RestController
 public class PostController {
 
-    @Autowired
     JwtProvider jwtProvider;
-
-    @Autowired
     AuthService authService;
-
-    @Autowired
-    PostService postService;
+    PostService postService;    
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostController.class);
-
+    
+    public PostController(JwtProvider provider, AuthService authService, PostService postService){
+        this.jwtProvider = provider;
+        this.authService = authService;
+        this.postService = postService;
+    }
 
     
     //쓰기 요청
