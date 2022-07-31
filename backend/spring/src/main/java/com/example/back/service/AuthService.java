@@ -20,25 +20,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    @Autowired  
     private JwtProvider jwtProvider;
   
-    @Autowired
     UserRepository urRepo;
 
-    @Autowired
     UserInformationRepository urInfoRepo;
 
-    @Autowired
     UserPermissionReposotiry urPermitRepo;
 
-    @Autowired
     UserAuthRepository urAuthRepo;
 
-    @Autowired
     PasswordEncoder passwordEncoder;
 
     ErrorCode errorcode;
+
+    public AuthService(JwtProvider jwtProvider, UserRepository urRepo, UserInformationRepository urInfoRepo, UserAuthRepository urAuthRepo, PasswordEncoder passwordEncoder){
+        this.jwtProvider = jwtProvider;
+        this.urRepo = urRepo;
+        this.urInfoRepo = urInfoRepo;
+        this.urAuthRepo = urAuthRepo;
+        this.passwordEncoder = passwordEncoder;
+
+    }
+
 
     public SignUpResponseDto SignUp(SignUpDto signUpDto){
 

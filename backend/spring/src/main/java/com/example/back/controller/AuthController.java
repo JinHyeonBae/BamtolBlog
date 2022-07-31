@@ -30,17 +30,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
     
-    @Autowired
     private AuthService auth;
 
-    @Autowired 
-    private UserInformationRepository userInformationRepository;
-
-	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	@Autowired
 	private JwtProvider jwtTokenProvider;
+
+    public AuthController(AuthService auth, AuthenticationManager authenticationManager, JwtProvider jwtTokenProvider){
+        this.auth = auth;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
@@ -78,6 +79,14 @@ public class AuthController {
         //nickname, userId;
 
         return ResponseEntity.ok().body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(jwt, null, nickname, userId)));     
+    }
+
+    private ResponseCookie makeResponseCookie(String jwt){
+        return ResponseCookie.from("access_Token", jwt)
+                            .maxAge(cookieExpiration) //1일
+                            .sameSite("None")
+                            .path("/")
+                            .build();
     }
 
     private ResponseCookie makeResponseSetCookie(String jwt){
