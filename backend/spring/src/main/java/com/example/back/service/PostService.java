@@ -42,41 +42,47 @@ import com.example.back.security.JwtProvider;
 @Service
 public class PostService {
 
-    @Autowired  
     PostInformationRepository postInformationRepository;
 
-    @Autowired
     PostsRepository postsRepository;
 
-    @Autowired
     UserRepository urRepo;
 
-    @Autowired
     UserInformationRepository urInfoRepo;
 
-    @Autowired
     UserPermissionReposotiry urPermitRepo;
 
-    @Autowired
     PostPermissionRepository postPermissionRepo;
 
-    @Autowired
     SubscribeUserRepository subscribeUserRepository;
 
-    @Autowired
     SubscribePostRepository subscribePostRepository;
 
-    @Autowired
     CustomModelMapper customModelMapper;
 
-    @Autowired
     PermissionRepository permissionRepository;
 
-    @Autowired
     ManageAllAboutRole roleProcessor;
 
-    @Autowired
     JwtProvider jwtProvider;
+
+    public PostService(PostInformationRepository pRepository,  PostsRepository postsRepository,  UserRepository urRepo,  UserInformationRepository urInfoRepo, UserPermissionReposotiry urPermitRepo, PostPermissionRepository postPermissionRepo, SubscribeUserRepository subscribeUserRepository,  SubscribePostRepository subscribePostRepository,
+        CustomModelMapper customModelMapper, PermissionRepository permissionRepository, ManageAllAboutRole roleProcessor, JwtProvider jwtProvider){
+
+            this.customModelMapper = customModelMapper;
+            this.jwtProvider = jwtProvider;
+            this.permissionRepository = permissionRepository;
+            this.postInformationRepository = pRepository;
+            this.postsRepository = postsRepository;
+            this.roleProcessor = roleProcessor;
+            this.subscribePostRepository = subscribePostRepository;
+            this.subscribeUserRepository = subscribeUserRepository;
+            this.urInfoRepo = urInfoRepo;
+            this.urPermitRepo = urPermitRepo;
+            this.urRepo = urRepo;
+
+    }
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
 
