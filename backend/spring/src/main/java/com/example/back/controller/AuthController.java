@@ -77,7 +77,6 @@ public class AuthController {
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
 
-
         return ResponseEntity.ok().body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(jwt, null, nickname, userId)));     
     }
 
@@ -87,7 +86,6 @@ public class AuthController {
                             .sameSite("None")
                             .path("/")
                             .build();
-
     }
 
     private ResponseCookie makeResponseSetCookie(String jwt){
