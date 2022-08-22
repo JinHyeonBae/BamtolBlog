@@ -10,6 +10,7 @@ import Login from './components/Login';
 import SignUp from './components/SignUp/index';
 import PostRead from './components/PostRead';
 import PostWrite from './components/PostWrite';
+import '../node_modules/antd/dist/antd.min.css';
 
 const App = () => {
   return (

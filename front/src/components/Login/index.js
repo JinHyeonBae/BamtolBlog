@@ -1,34 +1,42 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useForm } from 'react-hook-form';
+import { Form, Input, Button, Space } from 'antd';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
 //import CryptoJS from 'crypto-js';
 import { login, selectLoginStatus, selectStatusCode, selectError } from './../../_slices/userSlice';
+import Layout from '../../utils/layout';
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [form] = Form.useForm();
+
   const loginStatus = useSelector(selectLoginStatus);
   const statusCode = useSelector(selectStatusCode);
   const error = useSelector(selectError);
-  let emailNotFound = statusCode === '40101';
-  let passwordNotFound = statusCode === '40102';
-  
-  const { register, watch, handleSubmit, formState: { errors } } = useForm();
 
-  const EmailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  useEffect(() => {
+    if(statusCode === '40101'){
+      form.setFields([{
+          name: 'email',
+          errors: ['존재하지 않는 이메일입니다.'],
+      }]);
+    } else if(statusCode === '40102'){
+      form.setFields([{
+          name: 'password',
+          errors: ['잘못된 비밀번호입니다.'],
+      }]);
+    } else if(statusCode !== '' && statusCode !== '200'){
+      form.setFields([{
+          name: 'buttons',
+          errors: ['다시 시도해주세요.'],
+      }]);
+    }
+  }, [statusCode]);
 
-  const watchEmail = watch('email');
-  const watchPassword = watch('password'); 
-
-  useEffect(()=>{
-    console.log(emailNotFound, passwordNotFound);
-  },[])
-
-  useEffect(()=>{
-    emailNotFound = false;
-    passwordNotFound = false; 
-  },[watchEmail, watchPassword]);
+  // const EmailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   useEffect(()=>{
     if(loginStatus === 'success' && statusCode === '200'){
@@ -42,37 +50,62 @@ const Login = () => {
     dispatch(login(body));
   }
 
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 6 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 14 },
+    },
+  };
+
   return (
-    <form onSubmit={handleSubmit(logIn)}>
-      <div>
-          <label htmlFor='email'>Email :</label>
-          <input id='email' placeholder='Email' 
-            {...register('email', {
-              required: '이메일을 입력해주세요.',
-              pattern: {
-                value: EmailRegex,
-                message: '올바른 이메일 형식을 입력해주세요.',
-              },
-              validate: () => !emailNotFound || '존재하지 않는 이메일입니다.',
-            })} />
-          <div className='ErrorMessage'>
-            {errors.email && <span>{errors.email.message}</span>}
-          </div>
-        </div>
-        <div>
-          <label htmlFor='password'>Password :</label>
-          <input id='password' type='password' placeholder='Password' autoComplete='off' 
-            {...register('password', {
-              required: '비밀번호를 입력해주세요.',
-              validate: () => !passwordNotFound || '잘못된 비밀번호입니다.',
-            })} />
-          <div className='ErrorMessage'>
-            {errors.password && <span>{errors.password.message}</span>}
-          </div>
-        </div>
-      <button>login</button>
-      {loginStatus === 'failed' && <div className="ErrorMessage">{error}</div>}
-    </form>
+    <Layout>
+      <Form
+        form={form}
+        {...formItemLayout}
+        onFinish={logIn}
+        autoComplete='off'
+      >
+        <Form.Item
+          label='Email'
+          name='email'
+          validateTrigger='onBlur'
+          rules={[
+            {required: true, message: '이메일을 입력해주세요.' },
+            {type: 'email', message: '올바른 이메일 형식을 입력해주세요.' },
+          ]}
+        >
+          <Input prefix={<MailOutlined id='email' placeholder='Email'/>}/>
+        </Form.Item>
+        
+        <Form.Item
+          label='Password'
+          name='password'
+          validateTrigger='onBlur'
+          rules={[
+            {required: true, message: '비밀번호를 입력해주세요.' },
+          ]}
+        >
+          <Input type='password' prefix={<LockOutlined id='password' placeholder='Password'/>}/>
+        </Form.Item>
+
+        <Form.Item
+          name='buttons'
+          wrapperCol={{ ...formItemLayout.wrapperCol, offset: 6 }}
+        >
+          <Space >
+          <Button type='primary' htmlType='submit'>
+            로그인
+          </Button>
+          <Button type='link' onClick={()=>{navigate(`/signup`)}}>회원가입</Button>
+          </Space>
+        </Form.Item>
+        {loginStatus === 'failed' && <div className='ErrorMessage'>{error}</div>}
+      </Form>
+    </Layout>
   )
 }
 

@@ -1,61 +1,50 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
-import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { Form, Input, Button, Checkbox } from 'antd';
+import { MailOutlined, LockOutlined, LockFilled, UserOutlined } from '@ant-design/icons';
 //import CryptoJS from 'crypto-js';
 import { signup, setSignupStatusIdle,
-  selectSignupStatus, selectStatusCode } from "../../_slices/userSlice";
+  selectSignupStatus, selectStatusCode } from '../../_slices/userSlice';
+import Layout from '../../utils/layout';
 
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { register, watch, trigger, getValues, handleSubmit, formState: { errors } } = useForm();
+  const [form] = Form.useForm();
   
   const signupStatus = useSelector(selectSignupStatus);
   const statusCode = useSelector(selectStatusCode);
-  let emailDuplication = statusCode === '40901' || statusCode === '40903'; 
-  let nicknameDuplication = statusCode === '40902' || statusCode === '40903'; 
   
-  const EmailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  // const EmailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const PasswordRegex = /^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+])(?!.*[^a-zA-z0-9$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
 
-  const watchEmail = watch('email');
-  const watchNickname = watch('nickname');
-
-  useEffect(()=>{
-    console.log(`emailDup: ${emailDuplication}, nicknameDup: ${nicknameDuplication}`);
-  },[emailDuplication, nicknameDuplication])
-
   useEffect(() => {
-    emailDuplication = false;
-    console.log(watchEmail, emailDuplication);
-    trigger('email');
-  },[watchEmail]);
-
-  useEffect(()=>{
-    if(signupStatus === 'success'){
-      nicknameDuplication = false;
-      trigger('nickname');
-      console.log(watchNickname, nicknameDuplication);
+    if(statusCode === '40901' || statusCode === '40903'){
+      form.setFields([{
+          name: 'email',
+          errors: ['이미 사용 중인 이메일입니다.'],
+      }]);
     }
-  },[watchNickname]);
-
-  useEffect(() => {
-    console.log(`update! emailDup: ${emailDuplication}, nicknameDup: ${nicknameDuplication}`);
-    dispatch(setSignupStatusIdle());
-  },[]);
+    if(statusCode === '40902' || statusCode === '40903'){
+      form.setFields([{
+          name: 'nickname',
+          errors: ['이미 사용 중인 닉네임 입니다.'],
+      }]);
+    }
+  }, [statusCode]);
 
   useEffect(()=>{
-    if(signupStatus === 'success' && !emailDuplication && !nicknameDuplication){
-      alert("회원가입 성공");
+    if(signupStatus === 'success' && statusCode === '201'){
+      alert('회원가입 성공');
       dispatch(setSignupStatusIdle());
       navigate(`/`);
     } else if(signupStatus === 'failed'){
-      alert("회원가입 실패. 다시 시도해주세요.");
+      alert('회원가입 실패. 다시 시도해주세요.');
       dispatch(setSignupStatusIdle());
     }
-  },[signupStatus, emailDuplication, nicknameDuplication]);
+  },[signupStatus, statusCode]);
   
   const onSubmit = (data) => {
     let body = data;
@@ -63,73 +52,100 @@ const SignUp = () => {
     dispatch(signup(body));
   }
 
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 6 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 14 },
+    },
+  };
+
   return(
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label htmlFor='email'>Email</label>
-          <input id='email' placeholder='Email' 
-            {...register('email', {
-              required: '이메일을 입력해주세요.',
-              pattern: {
-                value: EmailRegex,
-                message: '올바른 이메일 형식을 입력해주세요.',
+    <Layout>
+      <Form
+        form={form}
+        {...formItemLayout}
+        onFinish={onSubmit}
+        autoComplete='off'
+      >
+        <Form.Item
+          label='Email'
+          name='email'
+          validateTrigger='onBlur'
+          rules={[
+            {required: true, message: '이메일을 입력해주세요.' },
+            {type: 'email', message: '올바른 이메일 형식을 입력해주세요.' },
+          ]}
+        >
+          <Input prefix={<MailOutlined id='email' placeholder='Email'/>}/>
+        </Form.Item>
+        
+        <Form.Item
+          label='Password'
+          name='password'
+          validateTrigger='onBlur'
+          rules={[
+            {required: true, message: '비밀번호를 입력해주세요.' },
+            {pattern: PasswordRegex, message: '비밀번호는 숫자, 영어, 특수문자를 포함하여 8~16자리로 설정해주세요.' },
+          ]}
+        >
+          <Input type='password' prefix={<LockOutlined id='password' placeholder='Password'/>}/>
+        </Form.Item>
+        
+        <Form.Item
+          label='Password Confirm'
+          name='passwordConfirm'
+          dependencies={['password']}
+          rules={[
+            {required: true, message: '확인용 비밀번호를 입력해주세요.' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
               },
-              validate: () => !emailDuplication || '이미 사용 중인 이메일입니다.',
-            })} />
-          <div className='ErrorMessage'>
-            {errors.email && <span>{errors.email.message}</span>}
-          </div>
-        </div>
-        <div>
-          <label htmlFor='password'>Password</label>
-          <input id='password' type='password' placeholder='Password' autoComplete='off' 
-            {...register('password', {
-              required: '비밀번호를 입력해주세요.',
-              pattern: {
-                value: PasswordRegex,
-                message: '비밀번호는 숫자, 영어, 특수문자를 포함하여 8~16자리로 설정해주세요.',
-              } 
-            })} />
-          <div className='ErrorMessage'>
-            {errors.password && <span>{errors.password.message}</span>}
-          </div>
-        </div>
-        <div>
-          <label htmlFor='passwordConfirm'>Password Confirm</label>
-          <input id='passwordConfirm' type='password' placeholder='Password Confirm' autoComplete='off'
-            {...register('passwordConfirm', {
-              required: '확인용 비밀번호 입력해주세요.',
-              validate: value => value === getValues("password") || '비밀번호가 일치하지 않습니다.'
-            })} />
-          <div className='ErrorMessage'>
-            {errors.passwordConfirm && <span>{errors.passwordConfirm.message}</span>}
-          </div>
-        </div>
-        <div>
-          <label htmlFor='nickname'>Nickname</label>
-          <input id='nickname' placeholder='Nickname' 
-            {...register('nickname', {
-              required: '닉네임을 입력해주세요.',
-              validate: () => !nicknameDuplication || '중복된 닉네임 입니다.',
-            })} />
-          <div className='ErrorMessage'>
-            {errors.nickname && <span>{errors.nickname.message}</span>}
-          </div>
-        </div>
-        <div>
-          <input id='privacyPolicy' type='checkbox' 
-            {...register('privacyPolicy', {
-              required: '개인정보 수집에 동의해주세요.',
-            })}/>
-          <label htmlFor='privacyPolicy'>개인정보 수집 동의</label>
-          <div className='ErrorMessage'>
-            {errors.privacyPolicy && <span>{errors.privacyPolicy.message}</span>}
-          </div>
-        </div>
-        <input type='submit' />
-      </form>
-    </div>
+            })
+          ]}
+        >
+          <Input type='password' prefix={<LockFilled id='passwordConfirm' placeholder='Password Confirm'/>}/>
+        </Form.Item>
+        
+        <Form.Item
+          label='Nickname'
+          name='nickname'
+          validateTrigger='onBlur'
+          rules={[
+            {required: true, message: '닉네임을 입력해주세요.' }
+          ]}
+        >
+          <Input prefix={<UserOutlined id='nickname' placeholder='Nickname'/>}/>
+        </Form.Item>
+
+        <Form.Item
+          name='privacyPolicy'
+          wrapperCol={{ ...formItemLayout.wrapperCol, offset: 6 }}
+          valuePropName='checked'
+          rules={[
+            {required: true, message: '개인정보 수집에 동의해주세요.' }
+          ]}
+        >
+          <Checkbox id='privacyPolicy'>개인정보 수집 동의</Checkbox>
+        </Form.Item>
+
+        <Form.Item
+          name='signUpButton'
+          wrapperCol={{ ...formItemLayout.wrapperCol, offset: 6 }}
+          >
+          <Button type='primary' htmlType='submit'>
+            회원 가입
+          </Button>
+        </Form.Item>
+      </Form>
+    </Layout>
   )
 }
 export default SignUp;

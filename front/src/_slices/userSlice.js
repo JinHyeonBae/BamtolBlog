@@ -23,6 +23,7 @@ const initialState = {
   user: {
     id: null,
     nickname: '',
+    accessToken: '',
   },
   statusCode: '',
   message: '',
@@ -51,6 +52,7 @@ export const postSlice = createSlice({
       state.message = payload?.message;
       state.user.id = payload.user?.userId;
       state.user.nickname = payload.user?.nickname;
+      state.user.accessToken = payload.user?.accessToken;
     })
     builder.addCase(login.rejected, (state, action)=> {
       state.loginStatus = 'failed';
@@ -60,6 +62,7 @@ export const postSlice = createSlice({
       state.signupStatus = 'loading';
     })
     builder.addCase(signup.fulfilled, (state, { payload })=> {
+      console.log(payload);
       state.signupStatus = 'success';
       state.statusCode = payload.status.toString();
       state.message = payload?.message;
