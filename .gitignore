@@ -3,3 +3,4 @@ backend/spring/class
 backend/spring/.gradle
 backend/spring/build/**
 !backend/spring/build/libs
+backend/spring/certbot/*
