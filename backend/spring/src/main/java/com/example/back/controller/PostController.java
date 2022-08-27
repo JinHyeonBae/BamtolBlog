@@ -53,8 +53,8 @@ public class PostController {
     }
 
     
-    //쓰기 요청
-    @PostMapping("/posts/write")
+    // //쓰기 요청
+    @PostMapping("/api/posts/write")
     @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<CreateResponseDto> createPost(@RequestHeader HttpHeaders headers, @RequestBody CreatePostDto body) throws SQLException, NoPermissionException, ResourceAccessException{
 
@@ -64,7 +64,7 @@ public class PostController {
     }
 
     //읽기 요청
-    @GetMapping("/posts/{postId}")
+    @GetMapping("/api/posts/{postId}")
     public ResponseEntity<ReadResponseDto> readPost(@RequestHeader HttpHeaders headers, @PathVariable(value="postId") String postId) 
         throws NoPermissionException, InternalServerError, AccessDeniedException, InternalAuthenticationServiceException, NoSuchElementException{
         // 먼저 온 토큰으로 userId를 받는다.
@@ -77,7 +77,7 @@ public class PostController {
 
 
     //수정 요청
-    @PutMapping("posts/{postId}")
+    @PutMapping("api/posts/{postId}")
     public ResponseEntity<UpdateResponseDto> updatePost(@RequestHeader HttpHeaders headers, @RequestBody UpdatePostDto body,  @PathVariable(value="postId") String postId) 
         throws NoPermissionException, ResourceAccessException, NoSuchElementException{
 
@@ -88,13 +88,13 @@ public class PostController {
     }
 
     //패치 요청
-    @PatchMapping("posts/{postId}")
+    @PatchMapping("/api/posts/{postId}")
     public void patchPost(@PathVariable int postId){
         
     }
 
     // 삭제 요청
-    @DeleteMapping("posts/{postId}")
+    @DeleteMapping("api/posts/{postId}")
     public ResponseEntity<DeleteResponseDto> deletePost(@RequestHeader HttpHeaders headers, @PathVariable(value="postId") String postId) 
         throws NoPermissionException, ResourceAccessException, NoSuchElementException{
         System.out.println("삭제 요청 컨트롤러 확인");

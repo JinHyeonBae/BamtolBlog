@@ -14,4 +14,11 @@ RUN sed -i "s/user nginx/user react/g" /etc/nginx/nginx.conf
 
 ADD docker/nginx/default.conf /etc/nginx/conf.d/
 
+RUN mkdir -p /etc/letsencrypt/live/bamb.shop
+
+COPY certbot/cert/conf/live/bamb.shop/fullchain.pem /etc/letsencrypt/live/bamb.shop/fullchain.pem
+COPY certbot/cert/conf/live/bamb.shop/privkey.pem /etc/letsencrypt/live/bamb.shop/privkey.pem
+
 RUN mkdir -p /var/www/html
+COPY docker/nginx/index.html /var/www/html/index.html
+RUN mkdir -p /var/www/certbot

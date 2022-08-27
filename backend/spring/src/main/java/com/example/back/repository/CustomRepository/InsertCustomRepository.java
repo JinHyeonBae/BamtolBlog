@@ -17,7 +17,7 @@ public interface InsertCustomRepository {
 
     void saveSignUpUserInfo(UserInformation userInfo);
     
-    //void saveLoginUserInfo(UserInformation dto);
+    //void saveSignInUserInfo(UserInformation dto);
     //void saveUserToken(UserAuth token);
     
     void savePostPermission(PostPermission permission, int userId);

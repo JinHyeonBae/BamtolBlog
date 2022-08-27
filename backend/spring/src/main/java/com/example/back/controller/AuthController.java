@@ -2,12 +2,12 @@ package com.example.back.controller;
 
 import java.util.Map;
 
-import com.example.back.dto.AuthDto.LoginDto;
+import com.example.back.dto.AuthDto.SignInDto;
 import com.example.back.dto.AuthDto.SignUpDto;
 import com.example.back.repository.UserInformationRepository;
-import com.example.back.response.ResponseDto.LoginResponseDto;
+import com.example.back.response.ResponseDto.SignInResponseDto;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
-import com.example.back.response.ResponseDto.LoginResponseDto.Auth;
+import com.example.back.response.ResponseDto.SignInResponseDto.Auth;
 import com.example.back.security.JwtProvider;
 import com.example.back.service.AuthService;
 
@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -47,7 +48,12 @@ public class AuthController {
 
     int cookieExpiration = 60*60*24; //1일
 
-    @PostMapping("/auth/signup")
+    @GetMapping("/api")
+    public String sslTest(){
+        return "Hello To DOCKER SPRING!";
+    }
+
+    @PostMapping("/api/auth/signUp")
     public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
         
         SignUpResponseDto signUpResult = auth.SignUp(signUpDto);
@@ -56,29 +62,29 @@ public class AuthController {
     }
 
 
-    @PostMapping("/auth/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestHeader HttpHeaders request, @RequestBody LoginDto loginData){     
+    @PostMapping("/api/auth/signIn")
+    public ResponseEntity<SignInResponseDto> SignIn(@RequestHeader HttpHeaders request, @RequestBody SignInDto signInData){     
         
 
         //인증 주체의 정보를 담는 목적
         LOGGER.info("HEADER :" + request);
-        LOGGER.info("password :" + loginData.getPassword());
+        LOGGER.info("password :" + signInData.getPassword());
 
-        UsernamePasswordAuthenticationToken userDetailsToken = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
+        UsernamePasswordAuthenticationToken userDetailsToken = new UsernamePasswordAuthenticationToken(signInData.getEmail(), signInData.getPassword());
         Authentication authentication = authenticationManager.authenticate(userDetailsToken);
         
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        Map<String, Object> loginResponseDto = auth.login(loginData.getEmail());
+        Map<String, Object> signInResponseDto = auth.SignIn(signInData.getEmail());
 
     
-        String nickname = (String) loginResponseDto.get("nickname");
-        Integer userId   = (Integer) loginResponseDto.get("userId"); 
+        String nickname = (String) signInResponseDto.get("nickname");
+        Integer userId   = (Integer) signInResponseDto.get("userId"); 
         LOGGER.info("userId :" + userId);
 
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
 
-        return ResponseEntity.ok().body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(jwt, null, nickname, userId)));     
+        return ResponseEntity.ok().body(new SignInResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(jwt, null, nickname, userId)));     
     }
 
     private ResponseCookie makeResponseCookie(String jwt){

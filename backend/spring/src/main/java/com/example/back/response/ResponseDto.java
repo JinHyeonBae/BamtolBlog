@@ -62,7 +62,7 @@ public class ResponseDto {
     @AllArgsConstructor
     @NoArgsConstructor
     ////@ApiModel(value="로그인 응답 DTO")
-    public static class LoginResponseDto{
+    public static class SignInResponseDto{
         
         // TODO: nickname 클라이언트에게 보내줘야함(링크 제작할 때 사용) 
 

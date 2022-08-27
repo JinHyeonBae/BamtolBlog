@@ -104,6 +104,7 @@ public class PostService {
             return null;
 
         String token = jwtProvider.parseJwtInsideCookie(extractToken.get(0));
+        System.out.print("TOKEN    :" + token);
         return token;
     }
 
@@ -136,7 +137,7 @@ public class PostService {
         
         if(token == null) {
             LOGGER.info("비회원입니다.");
-            throw new NoPermissionException("PERMISSION_DENIED");
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
         else userId = getUserIdFromJWT(token);
 
@@ -171,7 +172,7 @@ public class PostService {
             createDto.setPostId(postId);
         }
         else{
-            new NoPermissionException("PERMISSION DENIED");
+            new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
 
         return createDto;
@@ -215,7 +216,7 @@ public class PostService {
         
         if(token == null) {
             LOGGER.info("비회원입니다.");
-            throw new NoPermissionException("PERMISSION_DENIED");
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
         else userId = getUserIdFromJWT(token);
 
@@ -264,7 +265,7 @@ public class PostService {
         
         if(token == null) {
             LOGGER.info("비회원입니다.");
-            throw new NoPermissionException("PERMISSION_DENIED");
+            throw new NoPermissionException(ErrorCode.PERMISSION_DENIED.name());
         }
         else userId = getUserIdFromJWT(token);
 
