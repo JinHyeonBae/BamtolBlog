@@ -105,7 +105,7 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Modifying
     @Transactional
     public void savePosts(Posts postInfo) throws SQLException{
-        //posts -> id, post_id
+        //api/posts -> id, post_id
 
 
     }

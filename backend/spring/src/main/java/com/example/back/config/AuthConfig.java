@@ -105,8 +105,8 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
             .antMatchers("/auth/**").permitAll()
             .anyRequest().authenticated();
             //.and()
-            // formLogin을 하니까 authProvider가 작동함
-            // form login을 하면 UsernamePasswordAuthenticationFilter 활성화
+            // formSignIn을 하니까 authProvider가 작동함
+            // form signIn을 하면 UsernamePasswordAuthenticationFilter 활성화
          
 
 
@@ -117,16 +117,16 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
         // .and()
         //     .authorizeRequests()
         // //무료 포스트에서는 무조건 허용
-        //     .antMatchers("/posts/free").permitAll()
+        //     .antMatchers("/api/posts/free").permitAll()
         //     //유료 포스트는 게스트를 제외한 모두를 허용
-        //     .antMatchers("/posts/charge").access("hasRole('ADMIN') or hasRole('SUBSCRIBER') or hasRole('PUBLISHER')")
+        //     .antMatchers("/api/posts/charge").access("hasRole('ADMIN') or hasRole('SUBSCRIBER') or hasRole('PUBLISHER')")
         //     //어드민 페이지는 어드민만
         //     .antMatchers("/admin/**").hasRole("ADMIN")
         //     //인증된 사용자는 어떤 요청도 ok
         //     .anyRequest().authenticated()
         // .and()
-        // .formLogin()
-        //     .loginProcessingUrl("/login")
+        // .formSignIn()
+        //     .signInProcessingUrl("/signUp")
         //     .permitAll();
         // // .and()
         // //     .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);

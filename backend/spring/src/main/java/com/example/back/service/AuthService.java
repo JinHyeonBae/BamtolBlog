@@ -69,7 +69,7 @@ public class AuthService {
         return signUpResponseDto;
     }
 
-    public Map<String,Object> login(String email){
+    public Map<String,Object> SignIn(String email){
         
         Map<String,Object> map = new HashMap<String , Object>();
 
