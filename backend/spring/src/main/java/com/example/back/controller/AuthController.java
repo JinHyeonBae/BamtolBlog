@@ -2,12 +2,12 @@ package com.example.back.controller;
 
 import java.util.Map;
 
-import com.example.back.dto.AuthDto.LoginDto;
+import com.example.back.dto.AuthDto.SignInDto;
 import com.example.back.dto.AuthDto.SignUpDto;
 import com.example.back.repository.UserInformationRepository;
-import com.example.back.response.ResponseDto.LoginResponseDto;
+import com.example.back.response.ResponseDto.SignInResponseDto;
 import com.example.back.response.ResponseDto.SignUpResponseDto;
-import com.example.back.response.ResponseDto.LoginResponseDto.Auth;
+import com.example.back.response.ResponseDto.SignInResponseDto.Auth;
 import com.example.back.security.JwtProvider;
 import com.example.back.service.AuthService;
 
@@ -31,17 +31,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
     
-    @Autowired
     private AuthService auth;
 
-    @Autowired 
-    private UserInformationRepository userInformationRepository;
-
-	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	@Autowired
 	private JwtProvider jwtTokenProvider;
+
+    public AuthController(AuthService auth, AuthenticationManager authenticationManager, JwtProvider jwtTokenProvider){
+        this.auth = auth;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
@@ -62,44 +63,37 @@ public class AuthController {
 
 
     @PostMapping("/api/auth/signIn")
-    public ResponseEntity<LoginResponseDto> login(@RequestHeader HttpHeaders request, @RequestBody LoginDto loginData){     
+    public ResponseEntity<SignInResponseDto> SignIn(@RequestHeader HttpHeaders request, @RequestBody SignInDto signInData){     
         
 
         //인증 주체의 정보를 담는 목적
         LOGGER.info("HEADER :" + request);
-        LOGGER.info("password :" + loginData.getPassword());
+        LOGGER.info("password :" + signInData.getPassword());
 
-        UsernamePasswordAuthenticationToken userDetailsToken = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
+        UsernamePasswordAuthenticationToken userDetailsToken = new UsernamePasswordAuthenticationToken(signInData.getEmail(), signInData.getPassword());
         Authentication authentication = authenticationManager.authenticate(userDetailsToken);
         
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        Map<String, Object> loginResponseDto = auth.login(loginData.getEmail());
+        Map<String, Object> signInResponseDto = auth.SignIn(signInData.getEmail());
 
     
-        String nickname = (String) loginResponseDto.get("nickname");
-        Integer userId   = (Integer) loginResponseDto.get("userId"); 
+        String nickname = (String) signInResponseDto.get("nickname");
+        Integer userId   = (Integer) signInResponseDto.get("userId"); 
         LOGGER.info("userId :" + userId);
 
 		String jwt = jwtTokenProvider.generateToken(authentication, userId);
         //nickname, userId;
-        String domain = request.getOrigin();
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, makeResponseSetCookie(jwt).toString())
-                                .body(new LoginResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(nickname, userId)));     
-        
+        return ResponseEntity.ok().body(new SignInResponseDto(200, "정상적으로 로그인 되었습니다.", new Auth(jwt, null, nickname, userId)));     
     }
 
     private ResponseCookie makeResponseCookie(String jwt){
         return ResponseCookie.from("access_Token", jwt)
-                            .httpOnly(true)
                             .maxAge(cookieExpiration) //1일
                             .sameSite("None")
-                            .secure(true)
                             .path("/")
                             .build();
-
     }
-
 
     private ResponseCookie makeResponseSetCookie(String jwt){
         

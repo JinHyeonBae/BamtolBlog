@@ -8,6 +8,14 @@ import java.util.NoSuchElementException;
 
 import javax.naming.NoPermissionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
+
 import com.example.back.config.CustomModelMapper;
 import com.example.back.dto.PostDto.CreatePostDto;
 import com.example.back.dto.PostDto.UpdatePostDto;
@@ -30,54 +38,51 @@ import com.example.back.response.ResponseDto.ReadResponseDto;
 import com.example.back.response.ResponseDto.UpdateResponseDto;
 import com.example.back.security.JwtProvider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.HttpServerErrorException.InternalServerError;
-
 
 @Service
 public class PostService {
 
-    @Autowired  
     PostInformationRepository postInformationRepository;
 
-    @Autowired
     PostsRepository postsRepository;
 
-    @Autowired
     UserRepository urRepo;
 
-    @Autowired
     UserInformationRepository urInfoRepo;
 
-    @Autowired
     UserPermissionReposotiry urPermitRepo;
 
-    @Autowired
     PostPermissionRepository postPermissionRepo;
 
-    @Autowired
     SubscribeUserRepository subscribeUserRepository;
 
-    @Autowired
     SubscribePostRepository subscribePostRepository;
 
-    @Autowired
     CustomModelMapper customModelMapper;
 
-    @Autowired
     PermissionRepository permissionRepository;
 
-    @Autowired
     ManageAllAboutRole roleProcessor;
 
-    @Autowired
     JwtProvider jwtProvider;
+
+    public PostService(PostInformationRepository pRepository,  PostsRepository postsRepository,  UserRepository urRepo,  UserInformationRepository urInfoRepo, UserPermissionReposotiry urPermitRepo, PostPermissionRepository postPermissionRepo, SubscribeUserRepository subscribeUserRepository,  SubscribePostRepository subscribePostRepository,
+        CustomModelMapper customModelMapper, PermissionRepository permissionRepository, ManageAllAboutRole roleProcessor, JwtProvider jwtProvider){
+
+            this.customModelMapper = customModelMapper;
+            this.jwtProvider = jwtProvider;
+            this.permissionRepository = permissionRepository;
+            this.postInformationRepository = pRepository;
+            this.postsRepository = postsRepository;
+            this.roleProcessor = roleProcessor;
+            this.subscribePostRepository = subscribePostRepository;
+            this.subscribeUserRepository = subscribeUserRepository;
+            this.urInfoRepo = urInfoRepo;
+            this.urPermitRepo = urPermitRepo;
+            this.urRepo = urRepo;
+
+    }
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
 
@@ -91,7 +96,7 @@ public class PostService {
         return jwtProvider.getUserIdFromJWT(token);
     }
 
-    private String getTokenFronCookie(HttpHeaders headers){
+    private String getTokenFromCookie(HttpHeaders headers){
         
         List<String> extractToken = jwtProvider.resolveToken(headers);
         
@@ -103,14 +108,31 @@ public class PostService {
         return token;
     }
 
+    private String getTokenFromHeader(HttpHeaders headers){
+
+        if(!headers.containsKey("accessToken"))
+            return null;
+        
+        if(headers.get("accessToken").size() == 0)
+            return null;
+        
+        if(headers.get("accessToken").get(0) == "")
+            throw new NullPointerException("TOKEN NULL POINTER");
+
+        LOGGER.info("헤더의 토큰 확인");
+        LOGGER.info(headers.get("accessToken").get(0));
+
+        return headers.get("accessToken").get(0);
+    }
+
 
     @Transactional
-    public CreateResponseDto createPost(HttpHeaders header, CreatePostDto createPostInfo) throws SQLException, NoPermissionException{
+    public CreateResponseDto createPost(HttpHeaders header, CreatePostDto createPostInfo) throws SQLException, NoPermissionException, NullPointerException{
 
         // throw가 발생할 수 있는 경우는 두 가지.
         // userId가 아예 안 왔거나, 매핑이 잘못 됐거나, 아예 존재하지 않는 ID거나, 아니라면 로그인하지 않은 사람
 
-        String token = getTokenFronCookie(header);
+        String token = getTokenFromHeader(header);
         int userId = -1;
         
         if(token == null) {
@@ -158,10 +180,11 @@ public class PostService {
 
     // token에서 id를 뽑아내는 식으로 하는 게 좋을듯
     // Unknown column 'subscribeu0_.publisher_id' in 'field list'
-    public ReadResponseDto readPost(HttpHeaders header, int postId) throws NoPermissionException, InternalServerError, AccessDeniedException, NoSuchElementException{
+    public ReadResponseDto readPost(HttpHeaders header, int postId) throws NoPermissionException, 
+                                                                    InternalServerError, AccessDeniedException, NoSuchElementException, NullPointerException{
 
 
-        String token = getTokenFronCookie(header);
+        String token = getTokenFromHeader(header);
         int userId = -1;
         
         if(token == null) LOGGER.info("비회원입니다.");
@@ -186,9 +209,9 @@ public class PostService {
     
     }
 
-    public UpdateResponseDto updatePost(HttpHeaders header, UpdatePostDto body, int postId) throws NoPermissionException, NoSuchElementException{
+    public UpdateResponseDto updatePost(HttpHeaders header, UpdatePostDto body, int postId) throws NoPermissionException, NoSuchElementException, NullPointerException{
 
-        String token = getTokenFronCookie(header);
+        String token = getTokenFromHeader(header);
         int userId = -1;
         
         if(token == null) {
@@ -237,7 +260,7 @@ public class PostService {
 
     public DeleteResponseDto deletePost(HttpHeaders header, int postId) throws NoPermissionException, NullPointerException, NoSuchElementException{
 
-        String token = getTokenFronCookie(header);
+        String token = getTokenFromHeader(header);
         int userId = -1;
         
         if(token == null) {

@@ -48,6 +48,10 @@ public class AroundExceptionHandler{
             ExceptionResponse response = ExceptionResponse.of(ErrorCode.POST_RESOUCE_NOT_FOUND);
             return ResponseEntity.ok().body(response);
         }
+        else if(ERROR_MESSAGE.contains("TOKEN")){
+            ExceptionResponse response = ExceptionResponse.of(ErrorCode.TOKEN_NULL_POINTER);
+            return ResponseEntity.ok().body(response);
+        }
 
         return null;
     }

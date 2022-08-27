@@ -64,8 +64,8 @@ public class AuthProvider implements AuthenticationProvider{
         return true;
     }
 
-    private boolean matchPassword(String loginPwd, String pw){
-        return loginPwd.equals(pw);
+    private boolean matchPassword(String signInPwd, String pw){
+        return signInPwd.equals(pw);
     }
 
 }

@@ -105,8 +105,8 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
             .antMatchers("/auth/**").permitAll()
             .anyRequest().authenticated();
             //.and()
-            // formLogin을 하니까 authProvider가 작동함
-            // form login을 하면 UsernamePasswordAuthenticationFilter 활성화
+            // formSignIn을 하니까 authProvider가 작동함
+            // form signIn을 하면 UsernamePasswordAuthenticationFilter 활성화
          
 
 
@@ -125,8 +125,8 @@ public class AuthConfig extends WebSecurityConfigurerAdapter{
         //     //인증된 사용자는 어떤 요청도 ok
         //     .anyRequest().authenticated()
         // .and()
-        // .formLogin()
-        //     .loginProcessingUrl("/signUp")
+        // .formSignIn()
+        //     .signInProcessingUrl("/signUp")
         //     .permitAll();
         // // .and()
         // //     .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);

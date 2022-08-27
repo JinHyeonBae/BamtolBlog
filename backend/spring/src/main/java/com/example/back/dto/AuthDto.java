@@ -15,12 +15,12 @@ public class AuthDto{
     @NoArgsConstructor
     // 이메일과 패스워드가 맞는 지를 확인하는 용도
 
-    public static class LoginDto{
+    public static class SignInDto{
 
         String email;
         String password;
 
-        public LoginDto(String email, String password){
+        public SignInDto(String email, String password){
             this.email = email;
             this.password = password;
         }

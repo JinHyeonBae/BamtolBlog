@@ -44,10 +44,8 @@ public class ResponseDto {
     ////@ApiModel(value="포스트 읽기 응답 DTO")
     public static class ReadResponseDto{
         
-       // //@ApiModelProperty(value="요청에 따른 상태코드")
         Integer status;
         
-        ////@ApiModelProperty(value="상태코드 설명")
         String message;
         
         String contents;
@@ -64,27 +62,24 @@ public class ResponseDto {
     @AllArgsConstructor
     @NoArgsConstructor
     ////@ApiModel(value="로그인 응답 DTO")
-    public static class LoginResponseDto{
-
-        ////@ApiModelProperty(value="요청에 따른 상태코드")
-        Integer status;
-
-        ////@ApiModelProperty(value="상태코드 설명")
-        String message;
-
+    public static class SignInResponseDto{
+        
         // TODO: nickname 클라이언트에게 보내줘야함(링크 제작할 때 사용) 
-        ////@ApiModelProperty(value="유저")
+
+        Integer status;
+        String message;
         Auth user;
 
         @Setter
         @Getter
         @AllArgsConstructor
         public static class Auth{        
-            ////@ApiModelProperty(value="유저 닉네임")
+            String accessToken;
+            String refreshToken;
+
             String nickname;    
-            
-            ////@ApiModelProperty(value="유저 고유 넘버")
             Integer userId;
+
         }
 
     }
