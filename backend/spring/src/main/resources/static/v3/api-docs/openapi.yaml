@@ -8,7 +8,7 @@ servers:
   
 paths:
   
-  /posts/{postId}:
+  /api/posts/{postId}:
     parameters:
     - name: postId
       in: path
@@ -114,7 +114,7 @@ paths:
                 oneOf:
                 - $ref: '#/components/schemas/SignUpResponseDto'
         
-  /auth/signup:
+  /api/auth/signUp:
     post:
       tags:
       - auth-controller
@@ -135,16 +135,16 @@ paths:
                 - $ref: '#/components/schemas/SignUpResponseDto'
                 - $ref: '#/components/schemas/SignUpErrorResponse'
 
-  /auth/login:
+  /api/auth/signIn:
     post:
       tags:
       - auth-controller
-      operationId: login
+      operationId: signIn
       requestBody:
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/LoginDto'
+                $ref: '#/components/schemas/SignInDto'
         required: true
       responses:
         "200":
@@ -153,14 +153,14 @@ paths:
             '*/*':
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/LoginResponseDto'
-                - $ref: '#/components/schemas/LoginErrorResponse'
+                - $ref: '#/components/schemas/SignInResponseDto'
+                - $ref: '#/components/schemas/SignInErrorResponse'
                     
                   
 components:
 
   schemas:
-    LoginErrorResponse:
+    SignInErrorResponse:
       type: object
       oneOf:
         - $ref: '#/components/schemas/InvalidEmailError'
@@ -274,7 +274,7 @@ components:
           type : integer
           example : 100
 
-    LoginDto:
+    SignInDto:
       type: object
       properties:
         email:
@@ -294,7 +294,7 @@ components:
           format: int32
           example: 2
     
-    LoginResponseDto:
+    SignInResponseDto:
       type: object
       properties:
         status:
@@ -306,7 +306,7 @@ components:
           example: 정상적으로 로그인하였습니다.
 
         user:
-          $ref: '#/components/schemas/Auth'
+          $ref: '#/components/schemas/api/auth'
     
     CreatePostResponse:
       type: object

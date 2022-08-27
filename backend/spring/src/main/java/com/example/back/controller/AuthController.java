@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -46,7 +47,12 @@ public class AuthController {
 
     int cookieExpiration = 60*60*24; //1일
 
-    @PostMapping("/auth/signup")
+    @GetMapping("/api")
+    public String sslTest(){
+        return "Hello To DOCKER SPRING!";
+    }
+
+    @PostMapping("/api/auth/signUp")
     public ResponseEntity<SignUpResponseDto> signUp(@RequestHeader HttpHeaders headers, @RequestBody SignUpDto signUpDto){
         
         SignUpResponseDto signUpResult = auth.SignUp(signUpDto);
@@ -55,7 +61,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/auth/login")
+    @PostMapping("/api/auth/signIn")
     public ResponseEntity<LoginResponseDto> login(@RequestHeader HttpHeaders request, @RequestBody LoginDto loginData){     
         
 
