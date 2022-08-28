@@ -1,27 +1,31 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { savePostContents, changePostViewMode } from '../../_slices/postSlice';
-import shortid from 'shortid';
+import useInput from '../../hooks/useInput';
+import { savePostData, changePostViewMode } from '../../_slices/postSlice';
 
 const PostModify = () => {
   const dispatch = useDispatch();
-  const [postContents, setPostContents] = useState([]);  //object 형태
+  const [title, onChangeTitle] = useInput('');
+  const [contents, onChangeContents] = useInput('');
 
   const changeViewMode = useCallback((mode)=>{
     //await
-    dispatch(savePostContents(postContents));
+    dispatch(savePostData({
+      title: title,
+      contents: contents
+    }));
     dispatch(changePostViewMode(mode));
-  }, [])
+  }, [title, contents]);
 
-  const makeNewBlockObject = () => {
-    const newBlockObject = {
-      id: shortid.generate(),
-      type: "paragraph",
-      text: "",
-      children: []
-    }
-    setPostContents([...postContents, newBlockObject]);
-  }
+  // const makeNewBlockObject = () => {
+  //   const newBlockObject = {
+  //     id: shortid.generate(),
+  //     type: "paragraph",
+  //     text: "",
+  //     children: []
+  //   }
+  //   setPostContents([...postContents, newBlockObject]);
+  // }
 
   return (
   <div className='PostModify'>
@@ -29,15 +33,15 @@ const PostModify = () => {
       <button onClick={()=>changeViewMode('save')}>저장</button>
       <button onClick={()=>changeViewMode('preview')}>미리보기</button>
     </div>
-    <div className='postContentsBody' >
-      {postContents && postContents?.map( el => (
-        <div key={el.id} className="blockObject" type={el.type} contentEditable="true" suppressContentEditableWarning="true">
-          {el.text}
-        </div>
-        )
-      )}
-    </div>
-   <button onClick={makeNewBlockObject}>+</button>
+    <form>
+      <div>
+        <input id='title' value={title} onChange={onChangeTitle} />
+      </div>
+      <div>
+        <textarea id='contents' value={contents} onChange={onChangeContents} />
+      </div>
+    </form>
+   {/* <button onClick={makeNewBlockObject}>+</button> */}
   </div>
   )
 }

@@ -3,44 +3,31 @@ import Axios from '../axiosConfig';
 
 export const login = createAsyncThunk(
   "user/login",
-  async (loginData, { rejectWithValue }) =>{
-    try {
-      const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
-      return response.data;
-    } catch (err) {
-      let error = err;
-      if(!error.response){
-        throw err;
-      }
-      return rejectWithValue(error.response.data);
-    }
+  async (loginData) =>{
+    const response = await Axios.post(`auth/login`, loginData,  { withCredentials: true });
+    return response.data;
   }
 )
 export const signup = createAsyncThunk(
   "user/signup",
-  async (signupData, { rejectWithValue }) =>{
-    try {
-      const response = await Axios.post(`auth/signup`, signupData,  { withCredentials: true });
-      return response.data;
-    } catch (err) {
-      let error = err;
-      if(!error.response){
-        throw err;
-      }
-      return rejectWithValue(error.response.data);
-    }
+  async (signupData) =>{
+    console.log(signupData);
+    const response = await Axios.post(`auth/signup`, signupData,  { withCredentials: true });
+    return response.data;
   }
 )
 
 const initialState = {
   loginStatus: 'idle',
   signupStatus: 'idle',
-  emailDuplication: false,
-  nicknameDuplication: false,
   user: {
     id: null,
     nickname: '',
+    accessToken: '',
   },
+  statusCode: '',
+  message: '',
+  messageCode: '',
   error: null
 };
 
@@ -53,12 +40,6 @@ export const postSlice = createSlice({
     },
     setSignupStatusIdle: (state) => {
       state.signupStatus = 'idle';
-    },
-    initEmailDuplicate: (state) => {
-      state.emailDuplication = false;
-    },
-    initNicknameDuplicate: (state) => {
-      state.nicknameDuplication = false;
     }
   },
   extraReducers: builder => {
@@ -67,7 +48,11 @@ export const postSlice = createSlice({
     })
     builder.addCase(login.fulfilled, (state, {payload})=> {
       state.loginStatus = 'success';
-      state.user = payload.user;
+      state.statusCode = payload.status.toString();
+      state.message = payload?.message;
+      state.user.id = payload.user?.userId;
+      state.user.nickname = payload.user?.nickname;
+      state.user.accessToken = payload.user?.accessToken;
     })
     builder.addCase(login.rejected, (state, action)=> {
       state.loginStatus = 'failed';
@@ -76,14 +61,16 @@ export const postSlice = createSlice({
     builder.addCase(signup.pending, (state)=> {
       state.signupStatus = 'loading';
     })
-    builder.addCase(signup.fulfilled, (state)=> {
+    builder.addCase(signup.fulfilled, (state, { payload })=> {
+      console.log(payload);
       state.signupStatus = 'success';
+      state.statusCode = payload.status.toString();
+      state.message = payload?.message;
+      state.messageCode = payload?.code;
     })
     builder.addCase(signup.rejected, (state, action)=> {
       state.signupStatus = 'failed';
       state.error = action.payload;
-      state.emailDuplication = action.payload.emailDuplicated;
-      state.nicknameDuplication = action.payload.nicknameDuplicated;
     })
   }
 });
@@ -91,15 +78,12 @@ export const postSlice = createSlice({
 export const { 
   logout,
   setSignupStatusIdle,
-  initEmailDuplicate,
-  initNicknameDuplicate
 } = postSlice.actions;
 export default postSlice.reducer;
 
 export const selectUser = (state) => state.user.user;
 export const selectLoginStatus = (state) => state.user.loginStatus;
 export const selectSignupStatus = (state) => state.user.signupStatus;
-export const selectEmailDuplication = (state) => state.user.emailDuplication;
-export const selectNicknameDuplication = (state) => state.user.nicknameDuplication;
+export const selectStatusCode = (state) => state.user.statusCode;
 export const selectError = (state) => state.user.error;
 
