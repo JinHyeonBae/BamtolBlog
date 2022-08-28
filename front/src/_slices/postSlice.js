@@ -12,21 +12,28 @@ export const loadPost = createAsyncThunk(
 export const savePost = createAsyncThunk(
   "post/savePost",
   async (savePostData) =>{
-    const response = await Axios.post(`api/savePostData`, savePostData);
+    const response = await Axios.post(`posts/write`, savePostData);
     return response.data;
   }
 )
-
+export const deletePost = createAsyncThunk(
+  "post/deletePost",
+  async (postId) =>{
+    const response = await Axios.delete(`posts/${postId}`);
+    return response.data;
+  }
+)
 const initialState = {
   loadPostStatus: 'idle',
   savePostDataStatus: 'idle',
+  deletePostStatus: 'idle',
   currPostId: '',
   activeId : '',
   postViewMode: 'modify',
   modifyingPostContents: {
     postId: shortid.generate(),
     title: '',
-    contents: []
+    contents: ''
   },
   PostData: {
     postId: shortid.generate(),
@@ -35,10 +42,12 @@ const initialState = {
       id: shortid.generate(),
       nickname: ''
     },
-    contents: []
+    contents: ''
   },
   TOCData : [],
   error: null,
+  statusCode: '',
+  message: '',
 }
 
 export const postSlice = createSlice({
@@ -48,8 +57,9 @@ export const postSlice = createSlice({
     changePostViewMode:(state, action) => {
       state.postViewMode = action.payload;
     },
-    savePostContents:(state, action) => {
-      state.modifyingPostContents = action.payload;
+    savePostData:(state, action) => {
+      state.modifyingPostContents.title = action.payload.title;
+      state.modifyingPostContents.contents = action.payload.contents;
     },
     setActiveId: (state, action) => {
       state.activeId = action.payload;
@@ -100,7 +110,10 @@ export const postSlice = createSlice({
     })
     builder.addCase(loadPost.fulfilled, (state, {payload})=> {
       state.loadPostStatus = 'success';
-      state.PostData = payload;
+      state.statusCode = payload.status.toString();
+      state.message = payload?.message;
+      state.PostData.title = payload.title;
+      state.PostData.contents = payload.contents;
     })
     builder.addCase(loadPost.rejected, (state, action)=> {
       state.loadPostStatus = 'failed';
@@ -111,10 +124,25 @@ export const postSlice = createSlice({
     })
     builder.addCase(savePost.fulfilled, (state, {payload})=> {
       state.savePostDataStatus = 'success';
+      state.statusCode = payload.status.toString();
+      state.message = payload?.message;
       state.currPostId = payload.postId;
     })
     builder.addCase(savePost.rejected, (state, action)=> {
       state.savePostDataStatus = 'failed';
+      state.error = action.payload;
+    }),
+    builder.addCase(deletePost.pending, (state)=> {
+      state.deletePostStatus = 'loading';
+    })
+    builder.addCase(deletePost.fulfilled, (state, {payload})=> {
+      state.deletePostStatus = 'success';
+      state.statusCode = payload.status.toString();
+      state.message = payload?.message;
+      state.currPostId = payload.postId;
+    })
+    builder.addCase(deletePost.rejected, (state, action)=> {
+      state.deletePostStatus = 'failed';
       state.error = action.payload;
     })
   }
@@ -123,7 +151,7 @@ export const postSlice = createSlice({
 export const { 
   addValue, 
   changePostViewMode,
-  savePostContents,
+  savePostData,
   setActiveId, 
   loadTempPostContents,
   makeIndexChartObject, 
@@ -140,4 +168,6 @@ export const selectModifyingPostData = (state) => state.post.modifyingPostConten
 export const selectAuthorNickname = (state) => state.post.PostData.author.nickname;
 export const selectPostId = (state) => state.post.PostData.postId;
 export const selectCurrPostId = (state) => state.post.currPostId;
+export const selectStatusCode = (state) => state.user.statusCode;
 export const selectSavePostDataStatus = (state) => state.post.savePostDataStatus;
+export const selectDeletePostStatus = (state) => state.post.saveDeleteStatus;
