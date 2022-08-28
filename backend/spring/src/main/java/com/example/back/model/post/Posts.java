@@ -3,7 +3,6 @@ package com.example.back.model.post;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,15 +16,16 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.example.back.model.SubscribePost;
-import com.example.back.model.SubscribeUser;
 import com.example.back.model.user.Users;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="posts")
@@ -54,5 +54,21 @@ public class Posts {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
     Users user;
+
+    // public void add(PostInformation pi){
+    //     pi.setPost(this);
+    //     this.postInfo.
+    // }
+
+    public void add(PostPermission pp){
+        pp.setPost(this);
+        this.postPermit.add(pp);
+    }
+
+    public void add(PostInformation pp){
+        pp.setPost(this);
+        this.postInfo = pp;
+    }
+
 
 }

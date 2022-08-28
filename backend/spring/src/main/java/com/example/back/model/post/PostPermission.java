@@ -16,9 +16,11 @@ import com.example.back.model.user.Users;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @Table(name="post_permission")
 public class PostPermission {
@@ -45,11 +47,11 @@ public class PostPermission {
     }
 
 
-   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
     Users user;
 
-   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(referencedColumnName = "id", insertable = false, updatable = false)
     Posts post;
 

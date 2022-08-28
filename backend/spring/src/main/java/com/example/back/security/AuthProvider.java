@@ -1,69 +1,71 @@
-// package com.example.back.security;
+package com.example.back.security;
 
-// import java.util.ArrayList;
-
-
-// import com.example.back.dto.UserDto;
-// import com.example.back.repository.UserRepository;
-// import com.example.back.service.CustomUserDetailService;
-
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.security.authentication.AuthenticationProvider;
-// import org.springframework.security.authentication.BadCredentialsException;
-// import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.AuthenticationException;
-// import org.springframework.security.core.userdetails.UserDetails;
-// import org.springframework.security.core.userdetails.UserDetailsService;
-// import org.springframework.security.core.userdetails.UsernameNotFoundException;
-// import org.springframework.stereotype.Component;
-// import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.stereotype.Component;
 
 
 
-// //계정 잠금여부, 활성화 
-// @Component
-// public class AuthProvider implements AuthenticationProvider{
+//계정 잠금여부, 활성화 
+@Component
+public class AuthProvider implements AuthenticationProvider{
 
-//     @Autowired
-//     private CustomUserDetailService customUserDetailService;
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
 
-//     @Override
-//     public Authentication authenticate(Authentication authentication) throws AuthenticationException{
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthProvider.class);
+
+
+    //로그인
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException{
+       
+        String userEmail = "";
+        String userPassword= "";
+        userEmail = (String)authentication.getPrincipal();
+        userPassword = (String)authentication.getCredentials();   
+
+        LOGGER.info("USER EMAIL :" + userEmail);
+        LOGGER.info("USER PASSWORD :" + userPassword);
+
+        // userDetail 객체를 받아온다. 이를 provider에게 전달
+        // It is typically called by an AuthenticationProvider instance in order to authenticate a user. 
+        // when a username and password is submitted, a UserdetailsService is called to find the password for that user to see if it is correct. 
         
+        JSONObject json = new JSONObject();
+        try {
+            json.put("email", userEmail);
+            json.put("password", userPassword);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            LOGGER.error(e.getMessage());
+        }
         
-//         //사용자가 화면에서 입력한 아디
-//         String userId = (String)authentication.getPrincipal();
-//         // 패스워드
-//         String userPassword = (String)authentication.getCredentials();   
-
-
-//         //userDetail 객체를 받아온다. 이를 provider에게 전달
-//         UserDetails user = customUserDetailService.loadUserByUsername(userId);
-
-//         System.out.println("반환된 유저의 값 " + user);
-
-//         // if(!matchPassword(userPassword, user.getPassword())){
-//         //     throw new BadCredentialsException(userId);
-//         // }
-
-//         //계정 활성화 여부를 확인
-
-//         if(!user.isEnabled()){
-//             System.out.println("heyyy");
-//             throw new BadCredentialsException(userId);
-//         }
+        UserPrincipal user = customUserDetailService.loadUserByUsername(json); //user.getPassword() 출력 가능
         
-//         return new UsernamePasswordAuthenticationToken(user.getUsername(), userPassword, user.getAuthorities());
-//     }
+        if(!user.isEnabled()){
+            throw new BadCredentialsException(userEmail);
+        }
 
-//     @Override
-//     public boolean supports(Class<?> authentication){
-//         return true;
-//     }
+        return new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+    }
 
-//     private boolean matchPassword(String loginPwd, String pw){
-//         return loginPwd.equals(pw);
-//     }
+    @Override
+    public boolean supports(Class<?> authentication){
+        return true;
+    }
 
-// }
+    private boolean matchPassword(String signInPwd, String pw){
+        return signInPwd.equals(pw);
+    }
+
+}

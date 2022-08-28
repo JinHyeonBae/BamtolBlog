@@ -1,6 +1,5 @@
 package com.example.back.model.post;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.*;
@@ -85,5 +84,30 @@ public class PostInformation {
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(referencedColumnName="id", insertable = false, updatable = false)
     Posts post;
+
+
+    public void add(Posts post){
+        post.add(this);;
+        this.post = post;
+    }
+
+    public void setUsers(Users user){
+        if(user == null){
+            this.user = null;
+        }
+        else{
+            this.user = user;
+        }
+    }
+    
+    public void setPosts(Posts post){
+        if(post == null){
+            this.post = null;
+        }
+        else{
+            this.post = post;
+        }
+    }
+
 
 }

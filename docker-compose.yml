@@ -1,8 +1,12 @@
 version: "3.9"
 
 networks:
-  frontend:
-  backend:
+  # backend frontend:
+  default_bridge:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.0.0/16
 
 services:
   nginx:
@@ -15,14 +19,41 @@ services:
         - GID=${GID:-1000}
     volumes:
       - ./front/build:/var/www/html:delegated
+      #- ./certbot/cert/conf/live:/etc/letsencrypt/live
+      #- ./certbot/www:/var/www/certbot
     depends_on:
       - spring
       - npm
     ports:
       - 81:80
+      - 443:443
     networks:
-      - frontend
-      - backend
+      default_bridge:
+        ipv4_address: 172.26.0.13
+
+  certbot:
+    image : certbot/certbot
+    container_name : certbot
+    # volumes: 
+    #   - ./certbot/cert/conf/live:/etc/letsencrypt/live    #nginx컨테이너에 certbot컨테이너 연결
+    #   - ./certbot/www:/var/www/certbot
+    depends_on:
+      - nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    command:
+      - certonly
+      - --expand
+      - --email
+      - compuet33@gmail.com
+      - --non-interactive
+      - --agree-tos
+      - --standalone
+      - --preferred-challenges
+      - http-01
+      - --http-01-port
+      - '8080'
+      - -d
+      - 'bamb.shop'
 
   spring:
     container_name: spring
@@ -39,7 +70,8 @@ services:
     volumes:
       - ./backend/spring:/app:delegated
     networks:
-      - backend
+      default_bridge:
+        ipv4_address: 172.26.0.3
 
   npm:
     container_name: node
@@ -52,4 +84,7 @@ services:
     environment:
       - NODE_ENV=development
     networks:
-      - frontend
+      default_bridge:
+        ipv4_address: 172.26.0.2
+
+# docker run --interactive --tty --entrypoint /bin/sh nginx:latest

@@ -1,0 +1,1 @@
+ALTER table user_information CHANGE COLUMN name user_name varchar(40);

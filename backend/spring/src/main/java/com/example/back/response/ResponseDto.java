@@ -2,8 +2,6 @@ package com.example.back.response;
 
 import org.springframework.http.HttpStatus;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,37 +24,34 @@ public class ResponseDto {
     @AllArgsConstructor
     @NoArgsConstructor
 
-    @ApiModel(value="포스트 생성 응답 DTO")
+    ////@ApiModel(value="포스트 생성 응답 DTO")
     public static class CreateResponseDto{
 
-        @ApiModelProperty(value="요청에 따른 상태코드")
-        HttpStatus status;
+        ////@ApiModelProperty(value="요청에 따른 상태코드")
+        Integer status;
 
-        @ApiModelProperty(value="상태코드 설명")
+        ////@ApiModelProperty(value="상태코드 설명")
         String message;
 
-        @ApiModelProperty(value="포스트 고유 넘버")
+        ////@ApiModelProperty(value="포스트 고유 넘버")
         int postId;
-
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    @ApiModel(value="포스트 읽기 응답 DTO")
+    ////@ApiModel(value="포스트 읽기 응답 DTO")
     public static class ReadResponseDto{
         
-        @ApiModelProperty(value="요청에 따른 상태코드")
-        HttpStatus status;
+        Integer status;
         
-        @ApiModelProperty(value="상태코드 설명")
         String message;
         
         String contents;
-        String titles;
+        String title;
 
-        public void readErrorDto(HttpStatus status, String message){
+        public void readErrorDto(Integer status, String message){
             this.status = status;
             this.message = message;
         }
@@ -66,17 +61,26 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    @ApiModel(value="로그인 응답 DTO")
-    public static class LoginResponseDto{
+    ////@ApiModel(value="로그인 응답 DTO")
+    public static class SignInResponseDto{
+        
+        // TODO: nickname 클라이언트에게 보내줘야함(링크 제작할 때 사용) 
 
-        @ApiModelProperty(value="요청에 따른 상태코드")
-        HttpStatus status;
-
-        @ApiModelProperty(value="상태코드 설명")
+        Integer status;
         String message;
+        Auth user;
 
-        @ApiModelProperty(value="사용자 고유 넘버")
-        int userId;
+        @Setter
+        @Getter
+        @AllArgsConstructor
+        public static class Auth{        
+            String accessToken;
+            String refreshToken;
+
+            String nickname;    
+            Integer userId;
+
+        }
 
     }
     
@@ -84,29 +88,36 @@ public class ResponseDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    @ApiModel(value="회원가입 응답 DTO")
+    ////@ApiModel(value="회원가입 응답 DTO")
     public static class SignUpResponseDto{
 
-        @ApiModelProperty(value="요청에 따른 상태코드")
-        HttpStatus status;
+        ////@ApiModelProperty(value="요청에 따른 상태코드")
+        Integer status;
 
-        @ApiModelProperty(value="상태코드 설명")
+        ////@ApiModelProperty(value="상태코드 설명")
+        String message;
+    }
+
+
+    @Getter
+    @Setter
+    public static class UpdateResponseDto{
+
+        Integer status;
         String message;
 
-        @ApiModelProperty(value="이메일 중복 여부")
-        boolean emailDuplicated;
-
-        @ApiModelProperty(value="닉네임 중복 여부")
-        boolean nicknameDuplicated;
-        
     }
 
     @Getter
     @Setter
-    public static class TokenDto{
-        String accessToken;
-        String refreshToken;
-        
+    public static class DeleteResponseDto{
+
+        Integer status;
+        String message;
+
     }
+
+
+    
 
 }

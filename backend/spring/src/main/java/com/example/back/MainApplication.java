@@ -27,7 +27,4 @@ public class MainApplication {
 			System.out.println(e.getMessage());
 		}
 	}
-
-	
-
 }

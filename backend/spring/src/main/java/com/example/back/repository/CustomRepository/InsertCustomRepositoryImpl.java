@@ -3,18 +3,20 @@ package com.example.back.repository.CustomRepository;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import com.example.back.model.SubscribeUser;
 import com.example.back.model.post.PostInformation;
 import com.example.back.model.post.PostPermission;
 import com.example.back.model.post.Posts;
 import com.example.back.model.user.UserInformation;
 import com.example.back.model.user.Users;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     EntityManager entityManager;
 
 
+
     public String getCurrentTime(){
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
@@ -39,11 +42,13 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     public void saveSignUpUserInfo(UserInformation userInfo){
 
         //영속성 컨텍스트는 데이터베이스와 애플리케이션 사이에서 객체를 저장하는 기법
-        String nickname = userInfo.getNickname();
-
-        Users new_user = new Users(nickname);
+        
+        // 비영속
+        Users new_user = new Users();
         new_user.setUserAuth(null);
         new_user.setUserInfo(null);
+
+        // 영속
         entityManager.persist(new_user); 
 
         //UserInformation new_userInfo = userInfo;
@@ -65,63 +70,48 @@ public class InsertCustomRepositoryImpl implements InsertCustomRepository {
     @Override
     @Modifying
     @Transactional
-    public void savePostPermission(PostPermission permission){
+    public void savePostPermission(PostPermission permission, int userId){
 
-        String sql = "INSERT INTO post_permission(permission_id, post_id, user_id) VALUES(?,?,(SELECT id from posts WHERE user_id=?))";
-        entityManager.createNativeQuery(sql)
-                    .setParameter(1, permission.getPermissionId())
-                    .setParameter(2, permission.getUserId())
-                    .setParameter(3, permission.getUserId())
-                    .executeUpdate();
-
+    
     }
 
     @Override
     @Modifying
     @Transactional
-    public void savePostInformation(PostInformation postInfo) throws SQLException{
-        //entityManager.getTransaction().begin(); //Update
+    // 책임이 두 가지가 늘어난다.
+    public int savePostInformationAndReturnPostId(PostInformation postInfo) throws SQLException{
+       
+        Posts post = new Posts();
+        post.setPostInfo(null); //이걸 해줘야하는 이유가 뭘까? 이걸 안 해주면 아직 저장이 되지 않은 걸 사용했다고 뜬다.
+        int userId = postInfo.getUserId();
+        post.setUserId(userId);
+        // 처음 에러는, postInfo의 id가 설정되어있었다. id가 존재하는 것은 곧 이미 영속화되었다고 간주하여, detach 에러가 난다.
 
-        // Posts post = new Posts();
+        entityManager.persist(post);
+        entityManager.flush();
 
-        // post.setPostInfo(null);
-        // entityManager.persist(post);
-
-        // int postId = post.getId();
-        // postInfo.setPostId(postId);
-        // entityManager.persist(postInfo);
+        postInfo.setUserId(post.getUserId());
+        postInfo.setPostId(post.getId());
+        entityManager.persist(postInfo); // detached entity passed to persist
         
+        entityManager.flush();
+
+        return postInfo.getPostId();
     }
+
+    
 
     @Override
     @Modifying
     @Transactional
     public void savePosts(Posts postInfo) throws SQLException{
-        //posts -> id, post_id
-        entityManager.createNativeQuery("insert into posts(user_id) values(?)")
-                    .setParameter(1, postInfo.getUserId())
-                    .executeUpdate();
+        //api/posts -> id, post_id
 
-        // 1. 
 
-        // String postInformation_sql = "INSERT INTO post_information(title, contents, display_level, price, user_id, post_id) VALUES (?,?,?,?,?,?)";
-        // try{
-        //     entityManager.createNativeQuery(postInformation_sql)
-        //                 .setParameter(1, postInfo.getTitle())
-        //                 .setParameter(2, postInfo.getContents())
-        //                 .setParameter(3, postInfo.getDisplayLevel())
-        //                 .setParameter(4, postInfo.getPrice())
-        //                 .setParameter(5, postInfo.getUserId())
-        //                 .setParameter(6, postInfo.getPostId())
-        //                 .executeUpdate();
-        //     entityManager.flush();
-        // }
-        // catch(Exception e){
-        //     System.out.println(e.getMessage());
-        // }
-        //entityManager.flush();
-        
+    }
 
+    public Optional<SubscribeUser> findWithSubscriberObject(@Param(value = "paramUser") Users Subscriber){
+        return null;
     }
 
     

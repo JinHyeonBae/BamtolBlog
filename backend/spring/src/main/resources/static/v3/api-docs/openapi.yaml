@@ -1,0 +1,541 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v2
+servers: # 서버와의 연결 정보
+- url: http://125.134.138.184:8080/ # 변경
+  description: bamtol Blog에 대한 api 규격입니다.
+  
+paths:
+  
+  /api/posts/{postId}:
+    parameters:
+    - name: postId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+
+    get:
+      tags:
+      - post-controller
+      operationId: readPost
+      description : "포스트 읽기 요청"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadPostDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ReadPostResponse'
+    
+    post:
+      tags:
+      - post-controller
+      operationId: CreatePostResponse
+      description : "포스트 쓰기 요청"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDto'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/CreatePostResponse'
+    
+    put:
+      tags:
+      - post-controller
+      operationId: updatePost
+      description : "포스트 변경 요청"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostDto'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/UpdatePostResponse'
+          
+    delete:
+      tags:
+      - post-controller
+      operationId: deletePost
+      description : "포스트 삭제 요청"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletePostDto'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/DeletePostResponse'
+    patch:
+      tags:
+      - post-controller
+      operationId: patchPost
+      description : "포스트 일부 변경 요청"
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SignUpResponseDto'
+        
+  /api/auth/signUp:
+    post:
+      tags:
+      - auth-controller
+      operationId: signUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SignUpResponseDto'
+                - $ref: '#/components/schemas/SignUpErrorResponse'
+
+  /api/auth/signIn:
+    post:
+      tags:
+      - auth-controller
+      operationId: signIn
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/SignInDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SignInResponseDto'
+                - $ref: '#/components/schemas/SignInErrorResponse'
+                    
+                  
+components:
+
+  schemas:
+    SignInErrorResponse:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/InvalidEmailError'
+        - $ref: '#/components/schemas/InvalidPasswordError'
+        - $ref: '#/components/schemas/InputNullPointerError'
+        - $ref: '#/components/schemas/TokenNullPointerError'
+    
+    SignUpErrorResponse:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/DuplicateEmailError'
+        - $ref: '#/components/schemas/DuplicateNicknameError'
+        - $ref: '#/components/schemas/InputNullPointerError'
+
+    SignUpArrayErrorResponse:
+      type: array
+      items :
+        anyOf:
+          - $ref: '#/components/schemas/DuplicateEmailError'
+          - $ref: '#/components/schemas/DuplicateNicknameError'
+
+    SignUpDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example : test@test.test
+        password:
+          type: string
+          example : password
+        nickname:
+          type: string
+          example : test
+
+    SignUpResponseDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 201
+        message:
+          type: string
+          example: 정상적으로 로그인하였습니다.
+
+    CreatePostDto:
+      type: object
+      properties:
+        title:
+          type : string
+          example : title
+        contents:
+          type : string
+          example : contents 입니다
+        displayLevel:
+          type : string
+          example : public
+        nickname:
+          type: string
+          example : spring good
+        price :
+          type : integer
+          example : 0
+        userId:
+          type : integer
+          example : 2
+        
+        
+    ReadPostDto:
+      type : object
+      description : 100번은 2번이 쓴 포스트. public 성공 테스트 시 postId 101번, 실패 테스트 시 97번
+      properties:
+        userId:
+          type : integer
+          example : 2
+        postId:
+          type : integer
+          example : 100
+    
+    UpdatePostDto:
+      type: object
+      description : 100번은 2번이 쓴 포스트. public 성공 테스트 시 postId 101번, 실패 테스트 시 97번
+      properties:
+        title:
+          type : string
+          example : update title
+        contents:
+          type : string
+          example : update 테스트
+        displayLevel:
+          type : string
+          example : protected
+        price :
+          type : integer
+          example : 500
+        userId:
+          type : integer
+          example : 2
+        postId:
+          type : integer
+          example : 100
+
+    DeletePostDto:
+      type: object
+      description : 100번은 2번이 쓴 포스트. public 성공 테스트 시 postId 101번, 실패 테스트 시 97번
+      properties:
+        userId :
+          type : integer
+          example : 2
+        postId:
+          type : integer
+          example : 100
+
+    SignInDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example : test@test.test
+        password:
+          type: string
+          example : password
+        
+    Auth:
+      type: object
+      properties:
+        nickname:
+          type: string
+          example : test
+        userId:
+          type: integer
+          format: int32
+          example: 2
+        accessToken:
+          type : string
+        refreshToken:
+          type : string
+        
+    
+    SignInResponseDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 정상적으로 로그인하였습니다.
+
+        user:
+          $ref: '#/components/schemas/api/auth'
+    
+    CreatePostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 포스트가 성공적으로 생성되었습니다.
+        postId :
+          type: integer
+          format: int32
+          example: 10
+
+    ReadPostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 포스트가 성공적으로 요청되었습니다.
+        title:
+          type: string
+          example : 글 제목입니다.
+        contents:
+          type: string
+          example : 글 내용입니다.
+        postId:
+          type : integer
+          example : 12
+
+    
+    UpdatePostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 수정 요청이 완료되었습니다.
+        postId:
+          type : integer
+          example : 100
+
+    
+    DeletePostResponse:
+      type: object
+      properties:
+        status :
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: 삭제 요청이 완료되었습니다.
+        postId:
+          type : integer
+          example : 100
+
+    HeaderNullPointerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40001
+        message:
+          type: string
+          example: 헤더가 NULL입니다.
+        code:
+          type: string
+          example: "M001"
+
+    InputNullPointerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40002
+        message:
+          type: string
+          example: 입력값이 NULL입니다.
+        code:
+          type: string
+          example: "M003"
+
+    TokenNullPointerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40003
+        message:
+          type: string
+          example: 토큰 값이 전달되지 않았습니다.
+        code:
+          type: string
+          example: "M001"
+
+
+    InvalidEmailError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40101
+        message:
+          type: string
+          example: 존재하지 않는 이메일입니다.
+        code:
+          type: string
+          example: "M001"
+
+
+    InvalidPasswordError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40102
+        message:
+          type: string
+          example: 비밀번호가 틀렸습니다.
+        code:
+          type: string
+          example : "M002"
+
+    PermissionDeniedError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40301
+        message:
+          type: string
+          example: 접근이 거부되었습니다.
+        code:
+          type: string
+          example : "C006"
+
+
+    NotFoundError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 404
+        message:
+          type: string
+          example : "찾을 수 없는 페이지입니다."
+        code:
+          type: string
+          example: "M004"
+    
+
+    DuplicateEmailError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40901
+        message:
+          type: string
+          example: 중복된 이메일입니다.
+        code:
+          type: string
+          example: "M010"
+    
+
+    DuplicateNicknameError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40902
+        message:
+          type: string
+          example: 중복된 닉네임입니다.
+        code:
+          type: string
+          example: "M011"
+    
+
+    DuplicateNicknameAndEmailError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 40903
+        message:
+          type: string
+          example: 중복된 닉네임, 이메일입니다.
+        code:
+          type: string
+          example: "M011"
+
+    
+    NoSuchElementError:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 50002
+        message:
+          type: string
+          example: 요청한 정보를 찾을 수 없습니다.
+        code:
+          type: string
+          example: "S002"

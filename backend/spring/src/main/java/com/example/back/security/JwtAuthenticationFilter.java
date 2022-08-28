@@ -1,51 +1,73 @@
-// package com.example.back.security;
+package com.example.back.security;
 
-// import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-// import javax.servlet.FilterChain;
-// import javax.servlet.Servlet;
-// import javax.servlet.ServletException;
-// import javax.servlet.ServletRequest;
-// import javax.servlet.ServletResponse;
-// import javax.servlet.http.HttpServletRequest;
+import com.example.back.exception.ErrorCode;
 
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.context.SecurityContextHolder;
-// import org.springframework.util.StringUtils;
-// import org.springframework.web.filter.GenericFilterBean;
+import io.jsonwebtoken.JwtException;
 
-// import lombok.RequiredArgsConstructor;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-// @RequiredArgsConstructor
-// public class JwtAuthenticationFilter extends GenericFilterBean{
-   
-//     private JwtProvider jwtProvider;
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-//     public JwtAuthenticationFilter(JwtProvider jwtTokenProvider) {
-//         this.jwtProvider = jwtTokenProvider;
-//     }
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+	@Autowired
+	private JwtProvider tokenProvider;
+	@Autowired
+	private CustomUserDetailService customUserDetailsService;
 
-//     // jwt 토큰의 인증 정보를 현재 실행중인 security context에 저장하는 역할을 수행
-//     // 토큰이 유효하다면, 유효성 체크 후 context에 인증정보 저장한다.
-//     @Override
-//     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException{
-        
-//         String token = jwtProvider.resolveToken((HttpServletRequest) request);
-//         System.out.println("to " + token);
-//         if(token != null && jwtProvider.validateJwtToken(request, token)){
-//             System.out.println("provider Token");
-//             Authentication authentication = jwtProvider.getAuthontication(token);
-//             //  저장
-//             SecurityContextHolder.getContext().setAuthentication(authentication);
-//         }    
+	// jwt만을 검증하는 시스템
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		try {
+			//System.out.println("request header : " + request.getCookies());
+			String jwt = getJwtFromRequest(request); //리퀘스트 헤더에서 토큰 분리
+			LOGGER.info("jwt 출력 :" + jwt);
+			if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) { //null 검사 & valid 토큰 검사
+				String email = tokenProvider.getUserEmailFromJWT(jwt);
 
-//         System.out.println("Valid Token :" + token);
+				UserPrincipal userDetails = customUserDetailsService.loadUserByUsername(email);
+				
+				UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.getEmail(), userDetails.getPassword(), userDetails.getAuthorities());
+				authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-//         filterChain.doFilter(request, response);
-        
-//     }
+				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+			}
+		} catch (Exception ex) {
+			LOGGER.error("Could not set user authentication in security context", ex);
+			LOGGER.info("exception 에러 내용 :"+ ex.getMessage());
+			throw new JwtException(ErrorCode.INVALID_TOKEN.name());
+		}
 
+		filterChain.doFilter(request, response); // invoke the rest of the application
+	}
 
+	private String getJwtFromRequest(HttpServletRequest request) { //request에서 토큰 분리
+		
+		if(request.getCookies() != null){
+			String bearerToken = request.getCookies()[0].getValue();
+			
+			System.out.println("Bearer token :" + bearerToken);
 
-
-// }
+			if (StringUtils.hasText(bearerToken.toString())) {
+				return bearerToken.toString();
+			}
+			return null;
+		}
+		return null;
+	}
+}

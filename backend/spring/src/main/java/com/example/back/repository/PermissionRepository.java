@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
+// spring Data JPA
 public interface PermissionRepository extends JpaRepository<Permission, Integer>{
     
     public Permission findById(int pid);
