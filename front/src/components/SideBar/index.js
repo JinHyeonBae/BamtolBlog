@@ -3,13 +3,15 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { selectUser } from '../../_slices/userSlice';
 import { Layout as LayoutAntd, Menu, Input, Button } from 'antd';
-import { LaptopOutlined, UserOutlined, NotificationOutlined, PlusSquareFilled } from '@ant-design/icons';
+import { LaptopOutlined, UserOutlined, NotificationOutlined, PlusSquareFilled, PlusSquareOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 
 const { Sider } = LayoutAntd;
 
 const StyledInputSearch = styled(Input.Search)`
   vertical-align: middle;
+  padding: 10px 5px;
+  background: white;
 `;
 
 const onClickWriteButton = () => {
@@ -19,10 +21,6 @@ const onClickWriteButton = () => {
 }
 
 const items = [
-  {
-    key: `Search`,
-    label: (<StyledInputSearch placeholder="search" allowClear />)
-  },
   {
     key: `Web`,
     icon: React.createElement(LaptopOutlined),
@@ -35,6 +33,10 @@ const items = [
       {
         key: `React.js`,
         label: `React.js`
+      },
+      {
+        key: `Web-Plus`,
+        label: (<div style={{textAlign: 'center'}}><PlusSquareOutlined onClick={onClickWriteButton} style={{fontSize: "15px"}}/></div>)
       },
     ]
   },
@@ -74,12 +76,14 @@ const items = [
 const SideBar = () => {
   return (
       <Sider width={200} className="site-layout-background">
+        <div>
+          <StyledInputSearch placeholder="search" allowClear />
+        </div>
         <Menu
           mode="inline"
           defaultSelectedKeys={['Web']}
           defaultOpenKeys={['Web']}
           style={{
-            height: '100%',
             borderRight: 0,
           }}
           items={items}
