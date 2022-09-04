@@ -1,4 +1,4 @@
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nickname` varchar(40) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -7,7 +7,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `user_permission` (
+CREATE TABLE IF NOT EXISTS `user_permission` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `permission_id` int DEFAULT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE `user_permission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `user_information` (
+CREATE TABLE IF NOT EXISTS `user_information` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `password` text,
@@ -34,7 +34,7 @@ CREATE TABLE `user_information` (
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `user_auth` (
+CREATE TABLE IF NOT EXISTS `user_auth` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `token` longtext,
@@ -44,7 +44,7 @@ CREATE TABLE `user_auth` (
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `posts` (
+CREATE TABLE IF NOT EXISTS `posts` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -53,7 +53,7 @@ CREATE TABLE `posts` (
 ) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `subscribe_user` (
+CREATE TABLE IF NOT EXISTS `subscribe_user` (
   `id` int NOT NULL AUTO_INCREMENT,
   `subscriber` int,
   `publisher` int,
@@ -68,7 +68,7 @@ CREATE TABLE `subscribe_user` (
 );
 
 
-CREATE TABLE `subscribe_post` (
+CREATE TABLE IF NOT EXISTS `subscribe_post` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `post_id` int DEFAULT NULL,
@@ -81,14 +81,14 @@ CREATE TABLE `subscribe_post` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `permission` (
+CREATE TABLE IF NOT EXISTS `permission` (
   `id` int NOT NULL,
   `role_comment` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `post_information` (
+CREATE TABLE IF NOT EXISTS `post_information` (
   `id` int NOT NULL AUTO_INCREMENT,
   `post_id` int DEFAULT NULL,
   `user_id` int DEFAULT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE `post_information` (
 ) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `post_permission` (
+CREATE TABLE IF NOT EXISTS `post_permission` (
   `id` int NOT NULL,
   `user_id` int DEFAULT NULL,
   `post_id` int DEFAULT NULL,
@@ -121,7 +121,7 @@ CREATE TABLE `post_permission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-CREATE TABLE `post_public` (
+CREATE TABLE IF NOT EXISTS `post_public` (
   `id` int NOT NULL AUTO_INCREMENT,
   `type` text,
   `title` text,
