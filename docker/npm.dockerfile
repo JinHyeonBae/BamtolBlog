@@ -10,4 +10,6 @@ COPY front/yarn.lock ./
 RUN mkdir ./build
 COPY front/build ./build
 
-CMD ["npm", "start"]
+RUN npm install serve -g
+
+ENTRYPOINT ["serve", "-s", "build"]

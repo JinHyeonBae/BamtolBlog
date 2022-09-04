@@ -74,8 +74,6 @@ public class ResponseDto {
         @Getter
         @AllArgsConstructor
         public static class Auth{        
-            String accessToken;
-            String refreshToken;
 
             String nickname;    
             Integer userId;
