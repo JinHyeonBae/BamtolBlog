@@ -51,7 +51,7 @@ const Post = ({ temporary = false }) => {
           {/* <h3>{PostData?.subtitle}</h3> */}
           {/* <Contents contents={PostData?.contents} /> */}
           <div>{PostData?.contents}</div>
-          {PostData?.contents 
+          {postId 
             && <div>
               <button>수정</button>
               <button onClick={deletePostByPostId()}>삭제</button> 

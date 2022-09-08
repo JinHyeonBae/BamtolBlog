@@ -4,7 +4,8 @@ import Layout from '../../utils/layout';
 const Home = () => {
   return (
     <Layout>
-      Hello World!
+      <h2>Welcome To BotLine Blog!</h2>
+      <div>How to use ...</div>
     </Layout>
   )
 }

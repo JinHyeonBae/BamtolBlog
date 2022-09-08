@@ -9,6 +9,13 @@ export const loadPost = createAsyncThunk(
     return response.data;
   }
 )
+export const loadPostsList = createAsyncThunk(
+  "post/loadPostsList",
+  async (userId) =>{
+    const response = await Axios.get(`posts/list/${userId}`);
+    return response.data;
+  }
+)
 export const savePost = createAsyncThunk(
   "post/savePost",
   async (savePostData) =>{
@@ -25,15 +32,17 @@ export const deletePost = createAsyncThunk(
 )
 const initialState = {
   loadPostStatus: 'idle',
+  loadPostsListStatus: 'idle',
   savePostDataStatus: 'idle',
   deletePostStatus: 'idle',
   currPostId: '',
   activeId : '',
   postViewMode: 'modify',
-  modifyingPostContents: {
-    postId: shortid.generate(),
+  modifyingPost: {
     title: '',
-    contents: ''
+    contents: '',
+    displayLevel: 'public',
+    price: 0
   },
   PostData: {
     postId: shortid.generate(),
@@ -44,6 +53,19 @@ const initialState = {
     },
     contents: ''
   },
+  PostsList: [
+    {
+      id: '2',
+      title: 'wb',
+      children : [
+        {
+          id: '3',
+          postId: '56',
+          title: 'ad'
+        }
+      ]
+    }
+  ],
   TOCData : [],
   error: null,
   statusCode: '',
@@ -58,14 +80,16 @@ export const postSlice = createSlice({
       state.postViewMode = action.payload;
     },
     savePostData:(state, action) => {
-      state.modifyingPostContents.title = action.payload.title;
-      state.modifyingPostContents.contents = action.payload.contents;
+      state.modifyingPost.title = action.payload.title;
+      state.modifyingPost.contents = action.payload.contents;
+      state.modifyingPost.displayLevel = action.payload.displayLevel;
+      state.modifyingPost.price = action.payload.price;
     },
     setActiveId: (state, action) => {
       state.activeId = action.payload;
     },
     loadTempPostContents: (state) => {
-      const tempPostContents = state.modifyingPostContents;
+      const tempPostContents = state.modifyingPost;
       state.PostData = tempPostContents;
     },
     makeIndexChartObject: (state) => {
@@ -119,6 +143,19 @@ export const postSlice = createSlice({
       state.loadPostStatus = 'failed';
       state.error = action.payload;
     })
+    builder.addCase(loadPostsList.pending, (state)=> {
+      state.loadPostsListStatus = 'loading';
+    })
+    builder.addCase(loadPostsList.fulfilled, (state, {payload})=> {
+      state.loadPostsListStatus = 'success';
+      state.statusCode = payload.status.toString();
+      state.message = payload?.message;
+      state.PostsList = payload.PostsList;
+    })
+    builder.addCase(loadPostsList.rejected, (state, action)=> {
+      state.loadPostsListStatus = 'failed';
+      state.error = action.payload;
+    })
     builder.addCase(savePost.pending, (state)=> {
       state.savePostDataStatus = 'loading';
     })
@@ -163,8 +200,9 @@ export const selectLoadPostStatus = (state) => state.post.loadPostStatus;
 export const selectActiveId = (state) => state.post.activeId;
 export const selectPostData = (state) => state.post.PostData;
 export const selectPostTOC = (state) => state.post.TOCData;
+export const selectPostsList = (state) => state.post.PostsList;
 export const selectPostViewMode = (state) => state.post.postViewMode;
-export const selectModifyingPostData = (state) => state.post.modifyingPostContents;
+export const selectModifyingPostData = (state) => state.post.modifyingPost;
 export const selectAuthorNickname = (state) => state.post.PostData.author.nickname;
 export const selectPostId = (state) => state.post.PostData.postId;
 export const selectCurrPostId = (state) => state.post.currPostId;
