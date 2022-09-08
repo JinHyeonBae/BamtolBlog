@@ -1,23 +1,35 @@
 .PostWrite {
-  width: 1024px;
-  background-color: azure;
+  width: 100%;
+  padding: 0 5%;
+  min-width: 200px;
+  .topButtons{
+    position: relative;
+    margin-bottom: 30px;
+  }
+  .rightButton {
+    position: absolute;
+    right: 0;
+  }
 }
 
 .PostModify {
-  background-color: rgb(206, 245, 245);
   width: 100%;
   .blockObject {
     height: 20px;
   }
+  #PostModify-title {
+    margin-bottom: 10px;
+  }
   #title {
-    font-size: 40px;
+    font-size: 30px;
+    width: 100%;
   }
   #contents {
-    width: 80%;
-    
+    width: 100%;
+    min-height: 500px;
   }
 }
 
 .PostPreview {
-  background-color: rgb(211, 248, 231);
+  
 }

@@ -2,23 +2,22 @@ import React, { useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
-import { changePostViewMode, savePost, selectModifyingPostData, selectSavePostDataStatus, selectCurrPostId, selectStatusCode } from '../../_slices/postSlice';
+import { changePostViewMode, savePostData, savePost, selectModifyingPostData, selectSavePostDataStatus, selectCurrPostId, selectStatusCode } from '../../_slices/postSlice';
 import { selectUser } from '../../_slices/userSlice';
-import useInput from '../../hooks/useInput';
+import { Form, Button, Radio, InputNumber } from 'antd';
 
 const PostSave = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { userNickname } = useParams();
+  const { userNickname, categoryId } = useParams();
 
-  const postData = useSelector(selectModifyingPostData);
+  const ModifyingPost = useSelector(selectModifyingPostData);
   const savePostDataStatus = useSelector(selectSavePostDataStatus);
   const currPostId = useSelector(selectCurrPostId);
   const userId = useSelector(selectUser).id;
   const statusCode = useSelector(selectStatusCode);
-  
-  const [displayLevel, onChangeDisplayLevel] = useInput('public');
-  const [price, onChangePrice] = useInput(0);
+
+  const [form] = Form.useForm();
   
   useEffect(()=>{
     if (savePostDataStatus === 'success'){
@@ -34,37 +33,52 @@ const PostSave = () => {
   },[savePostDataStatus])
 
   const changeViewMode = useCallback((mode)=>{
+    dispatch(savePostData({
+      title: ModifyingPost.title,
+      contents: ModifyingPost.contents,
+      displayLevel: form.getFieldValue('displayLevel'),
+      price: form.getFieldValue('price')
+    }));
     dispatch(changePostViewMode(mode))
   }, [])
   
-  const onSubmitHandler = (e) => {
-    e.preventDefault();
+  const onSubmitHandler = (data) => {
     const body = {
-      title: postData.title,
-      displayLevel: displayLevel,
-      price: price,
+      categoryId: categoryId,
+      title: ModifyingPost.title,
+      displayLevel: data.displayLevel,
+      price: data.price,
       userId: userId,
-      contents: postData.contents
+      contents: ModifyingPost.contents
     }
     dispatch(savePost(body));
   }
-  
+
   return (
-    <div>
-      <button onClick={()=>changeViewMode('modify')}>X</button>
-      <form onSubmit={onSubmitHandler}>
-        <div onChange={onChangeDisplayLevel} >
-          <label htmlFor='displayLevel'>공개여부</label>
-          <input id="displayLevel" name='displayLevel' type='radio' value='public' defaultChecked/> public
-          <input id="displayLevel" name='displayLevel' type='radio' value='protect' /> protect
-          <input id="displayLevel" name='displayLevel' type='radio' value='private' /> private
+    <div className='PostSave'>
+      <Form 
+        form={form}
+        onFinish={onSubmitHandler}
+        initialValues={{
+          displayLevel: ModifyingPost.displayLevel,
+          price: ModifyingPost.price
+        }}
+      >
+        <div className='topButtons'>
+          <Button className='leftButton' type='primary' htmlType='submit'>등록</Button>
+          <Button className='rightButton' onClick={()=>changeViewMode('modify')}>다시 수정</Button>
         </div>
-        <div>
-          <label htmlFor='price'>가격</label>
-          <input id="price" name='price' type='number' value={price} onChange={onChangePrice} />
-        </div>
-        <button type='submit'>등록</button>
-      </form>
+        <Form.Item label='공개여부' name='displayLevel'>
+          <Radio.Group>
+            <Radio.Button value='public'>Public</Radio.Button>
+            <Radio.Button value='protect'>Protect</Radio.Button>
+            <Radio.Button value='private'>Private</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item label='구매 비용' name='price'>
+        <InputNumber prefix="￦" style={{ width: '100%'}} />
+        </Form.Item>
+      </Form>
     </div>
   )
 }

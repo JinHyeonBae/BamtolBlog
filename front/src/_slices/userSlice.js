@@ -21,9 +21,9 @@ const initialState = {
   loginStatus: 'idle',
   signupStatus: 'idle',
   user: {
-    id: null,
-    nickname: '',
-    accessToken: '',
+    id: 1,
+    nickname: '1234',
+    accessToken: 'abc',
   },
   statusCode: '',
   message: '',

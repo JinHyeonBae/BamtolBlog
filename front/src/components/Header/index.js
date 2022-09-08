@@ -14,20 +14,7 @@ const Header = () => {
       label: (<Button type='primary' onClick={()=>{navigate(`/login`)}}>LogIn</Button>),
       key: 'login',
       style: { position: 'absolute', right: 0 }
-    },
-    // { 
-    //   label: (<Button type='link' onClick={()=>{dispatch(logout())}}>LogOut</Button>),
-    //   key: 'logout'
-    // },
-    // { 
-    //   label: (<Button type='link' onClick={()=>{navigate(`/signup`)}}>SignUp</Button>),
-    //   key: 'signup'
-    // },
-    // { 
-    //   label: (<Button type='link' onClick={()=>{navigate(`/${nickname}/posts/write`)}}>Write</Button>),
-    //   key: 'write',
-    //   children: []
-    // }
+    }
   ];
 
   return (
