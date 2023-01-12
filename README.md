@@ -4,7 +4,8 @@
 일기, 공부, 하루의 일상을 적어올리는 블로그 홈페이지를 제작하는 목적으로 제작되었습니다.
 
 - Front : React
-- Backend : Spring Boot
+- Backend : Spring Boot, docker, nginx
+- API  : Swagger
 
 
 ## Installation
@@ -48,15 +49,4 @@ cd backend/spring
 ### 로그인 및 회원가입
 <img width="868" alt="스크린샷 2022-09-19 오후 9 37 56" src="https://user-images.githubusercontent.com/47708313/191035256-fd6668c3-8e42-4347-b0a1-aa7791d654ff.png">
 <img width="869" alt="스크린샷 2022-09-19 오후 9 38 22" src="https://user-images.githubusercontent.com/47708313/191035288-c22e2ba2-d3c3-4d82-a243-33b68419f72d.png">
-
-
-
-### POST CRUD
-
-
-
-
-
-
-
 
